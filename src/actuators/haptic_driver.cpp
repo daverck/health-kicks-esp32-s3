@@ -1,6 +1,20 @@
 #include "haptic_driver.h"
 #include <esp_arduino_version.h>
 
+#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
+#define HAPTIC_LEDC_ATTACH(pin, freq, res) ledcAttach(pin, freq, res)
+#define HAPTIC_LEDC_WRITE(pin, val)        ledcWrite(pin, val)
+#else
+#define HAPTIC_LEDC_ATTACH(pin, freq, res) do { \
+    ledcSetup(HAPTIC_LEDC_CHANNEL, freq, res); \
+    ledcAttachPin(pin, HAPTIC_LEDC_CHANNEL); \
+} while (0)
+#define HAPTIC_LEDC_WRITE(pin, val)        ledcWrite(HAPTIC_LEDC_CHANNEL, val)
+#endif
+
+static uint32_t s_stop_time = 0;
+static bool s_is_active = false;
+
 HapticDriver::HapticDriver()
     : _pin(PIN_HAPTIC_PWM),
       _pattern(HAPTIC_PATTERN_CONTINUOUS),
@@ -13,107 +27,58 @@ HapticDriver::HapticDriver()
 void HapticDriver::init(int pin) {
     _pin = pin;
 
-    // 1. Correctif Glitch au Boot : forcer la broche en sortie à l'état BAS avant LEDC
+    // Forcer la broche en sortie à l'état BAS avant LEDC (anti-glitch au boot)
     pinMode(_pin, OUTPUT);
     digitalWrite(_pin, LOW);
 
-    // 2. Attachement du canal PWM LEDC et valeur initiale à 0
-#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
-    ledcAttach(_pin, HAPTIC_LEDC_FREQ_HZ, HAPTIC_LEDC_RES_BITS);
-    ledcWrite(_pin, 0);
-#else
-    ledcSetup(HAPTIC_LEDC_CHANNEL, HAPTIC_LEDC_FREQ_HZ, HAPTIC_LEDC_RES_BITS);
-    ledcAttachPin(_pin, HAPTIC_LEDC_CHANNEL);
-    ledcWrite(HAPTIC_LEDC_CHANNEL, 0);
-#endif
+    HAPTIC_LEDC_ATTACH(_pin, 10000, 8); // GPIO 7, 10 kHz, 8 bits
+    HAPTIC_LEDC_WRITE(_pin, 0);
 
+    s_is_active = false;
     _isActive = false;
     _currentIntensity = 0;
     _stopTimestampMs = 0;
     _patternStep = 0;
 
-    Serial.printf("[HAPTIC] Driver haptique PWM initialisé sur GPIO %d (canal %d, anti-glitch LOW, Fréq: %d Hz)\n",
-                  _pin, HAPTIC_LEDC_CHANNEL, HAPTIC_LEDC_FREQ_HZ);
+    Serial.printf("[HAPTIC] INIT: GPIO %d configure (10 kHz, 8 bits, canal %d)\n",
+                  _pin, HAPTIC_LEDC_CHANNEL);
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
-#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
-    ledcWrite(_pin, intensity);
-#else
-    ledcWrite(HAPTIC_LEDC_CHANNEL, intensity);
-#endif
-    Serial.printf("[HAPTIC] LEDC write pin %d -> val %d\n", _pin, intensity);
+    HAPTIC_LEDC_WRITE(_pin, intensity);
 }
 
-void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
-    if (intensity == 0 || durationMs == 0) {
+void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t duration_ms) {
+    if (intensity == 0 || duration_ms == 0) {
         stop();
         return;
     }
 
+    s_is_active = true;
+    _isActive = true;
     _pattern = pattern;
     _currentIntensity = intensity;
-    _stopTimestampMs = millis() + durationMs;
-    _patternStep = 0;
-    _stepTime = millis();
-    _isActive = true;
+    s_stop_time = millis() + duration_ms;
+    _stopTimestampMs = s_stop_time;
 
-    Serial.printf("[HAPTIC] Play: pattern=%u, intensity=%u, duration=%u ms\n", pattern, intensity, durationMs);
-    setIntensity(_currentIntensity);
-}
-
-void HapticDriver::stop() {
-    setIntensity(0);
-    _isActive = false;
-    _currentIntensity = 0;
-    _patternStep = 0;
+    HAPTIC_LEDC_WRITE(_pin, intensity);
+    Serial.printf("[HAPTIC] START: intensity=%d, duration=%d ms (stop a %u)\n", intensity, duration_ms, s_stop_time);
 }
 
 void HapticDriver::update() {
-    if (!_isActive) {
-        return;
+    if (s_is_active) {
+        if ((long)(millis() - s_stop_time) >= 0) {
+            stop();
+            Serial.println("[HAPTIC] STOP: fin vibration");
+        }
     }
+}
 
-    // Arrêt strict dès que le délai est écoulé (sécurisé contre le rollover millis)
-    if ((long)(millis() - _stopTimestampMs) >= 0) {
-        stop();
-        return;
-    }
-
-    uint32_t now = millis();
-
-    // Gestion des motifs avancés
-    switch (_pattern) {
-        case HAPTIC_PATTERN_CONTINUOUS:
-            break;
-
-        case HAPTIC_PATTERN_DOUBLE_PULSE:
-            if (_patternStep == 0 && (now - _stepTime) >= 120) {
-                setIntensity(0);
-                _patternStep = 1;
-                _stepTime = now;
-            } else if (_patternStep == 1 && (now - _stepTime) >= 100) {
-                setIntensity(_currentIntensity);
-                _patternStep = 2;
-                _stepTime = now;
-            } else if (_patternStep == 2 && (now - _stepTime) >= 120) {
-                setIntensity(0);
-                _patternStep = 3;
-                _stepTime = now;
-            }
-            break;
-
-        case HAPTIC_PATTERN_ALERT_PULSE:
-            if (((now - _stepTime) / 80) % 2 == 0) {
-                setIntensity(_currentIntensity);
-            } else {
-                setIntensity(0);
-            }
-            break;
-
-        default:
-            break;
-    }
+void HapticDriver::stop() {
+    s_is_active = false;
+    _isActive = false;
+    _currentIntensity = 0;
+    HAPTIC_LEDC_WRITE(_pin, 0);
 }
 
 void HapticDriver::testRampUp() {

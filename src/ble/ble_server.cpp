@@ -156,13 +156,14 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
     if (length >= 4) {
         uint8_t pattern = data[0];
         uint8_t intensity = data[1];
-        uint16_t durationMs = (static_cast<uint16_t>(data[2]) << 8) | data[3];
+        uint16_t duration_ms = ((uint16_t)data[2] << 8) | (uint16_t)data[3];
+        if (duration_ms == 0) duration_ms = 400; // Fallback de sécurité
 
         Serial.printf("[BLE] Commande haptique reçue: Pattern=%u, Intensité=%u/255, Durée=%u ms\n",
-                      pattern, intensity, durationMs);
+                      pattern, intensity, duration_ms);
 
         if (_onHaptic) {
-            _onHaptic(pattern, intensity, durationMs);
+            _onHaptic(pattern, intensity, duration_ms);
         } else {
             Serial.println("[BLE] AVERTISSEMENT : Aucun callback haptique assigné (_onHaptic est nul) !");
         }

@@ -1,14 +1,18 @@
 #include "haptic_driver.h"
 #include <Arduino.h>
+#include <esp_timer.h>
+#include <rom/ets_sys.h>
 
-// Utilisation explicite du canal 4 sur Arduino core v2.x
 #define HAPTIC_CHANNEL 4
 #define HAPTIC_FREQ    10000
 #define HAPTIC_RES     8
 
-static uint32_t s_stop_time = 0;
-static bool s_is_active = false;
-static uint8_t s_pin = PIN_HAPTIC_PWM;
+static esp_timer_handle_t s_haptic_timer = nullptr;
+
+static void IRAM_ATTR haptic_timer_callback(void* arg) {
+    ledcWrite(HAPTIC_CHANNEL, 0);
+    ets_printf("[HAPTIC] Extinction materielle PWM via timer\n");
+}
 
 HapticDriver::HapticDriver()
     : _pin(PIN_HAPTIC_PWM),
@@ -20,19 +24,21 @@ HapticDriver::HapticDriver()
       _stepTime(0) {}
 
 void HapticDriver::init(int pin) {
-    s_pin = pin;
     _pin = pin;
-    s_is_active = false;
-    _isActive = false;
-
-    // 1. Initialiser le canal LEDC
     ledcSetup(HAPTIC_CHANNEL, HAPTIC_FREQ, HAPTIC_RES);
-    // 2. Attacher la broche physique au canal
-    ledcAttachPin(s_pin, HAPTIC_CHANNEL);
-    // 3. Forcer la valeur à 0
+    ledcAttachPin(_pin, HAPTIC_CHANNEL);
     ledcWrite(HAPTIC_CHANNEL, 0);
 
-    Serial.printf("[HAPTIC] INIT: GPIO %d attache au canal LEDC %d (10 kHz, 8 bits)\n", s_pin, HAPTIC_CHANNEL);
+    const esp_timer_create_args_t timer_args = {
+        .callback = &haptic_timer_callback,
+        .arg = nullptr,
+        .dispatch_method = ESP_TIMER_TASK,
+        .name = "haptic_stop_timer"
+    };
+    if (s_haptic_timer == nullptr) {
+        esp_timer_create(&timer_args, &s_haptic_timer);
+    }
+    Serial.printf("[HAPTIC] Initialise sur GPIO %d, canal LEDC %d avec timer dedie\n", _pin, HAPTIC_CHANNEL);
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
@@ -44,31 +50,27 @@ void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t duration_ms
         stop();
         return;
     }
-
-    s_is_active = true;
-    _isActive = true;
-    _currentIntensity = intensity;
-    s_stop_time = millis() + duration_ms;
+    if (s_haptic_timer) {
+        esp_timer_stop(s_haptic_timer);
+    }
 
     ledcWrite(HAPTIC_CHANNEL, intensity);
-    Serial.printf("[HAPTIC] START: val=%d sur canal %d, duree=%d ms (stop a %u)\n", 
-                  intensity, HAPTIC_CHANNEL, duration_ms, s_stop_time);
-}
+    Serial.printf("[HAPTIC] PLAY: int=%d, dur=%d ms\n", intensity, duration_ms);
 
-void HapticDriver::update() {
-    if (s_is_active) {
-        if ((long)(millis() - s_stop_time) >= 0) {
-            stop();
-            Serial.println("[HAPTIC] STOP: extinction");
-        }
+    if (s_haptic_timer) {
+        esp_timer_start_once(s_haptic_timer, (uint64_t)duration_ms * 1000ULL);
     }
 }
 
 void HapticDriver::stop() {
-    s_is_active = false;
-    _isActive = false;
-    _currentIntensity = 0;
+    if (s_haptic_timer) {
+        esp_timer_stop(s_haptic_timer);
+    }
     ledcWrite(HAPTIC_CHANNEL, 0);
+}
+
+void HapticDriver::update() {
+    // La gestion d'arret est desormais 100% asynchrone et confiee a l'esp_timer.
 }
 
 void HapticDriver::testRampUp() {

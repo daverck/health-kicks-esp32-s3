@@ -146,6 +146,13 @@ void HealthKicksBleServer::onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc) {
 
 void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length) {
     _lastActivityTime = millis();
+
+    Serial.printf("[BLE] Commande haptique brute reçue (taille %u): ", (unsigned int)length);
+    for (size_t i = 0; i < length; i++) {
+        Serial.printf("%02X ", data[i]);
+    }
+    Serial.println();
+
     if (length >= 4) {
         uint8_t pattern = data[0];
         uint8_t intensity = data[1];
@@ -156,9 +163,11 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
 
         if (_onHaptic) {
             _onHaptic(pattern, intensity, durationMs);
+        } else {
+            Serial.println("[BLE] AVERTISSEMENT : Aucun callback haptique assigné (_onHaptic est nul) !");
         }
     } else {
-        Serial.printf("[BLE] Commande haptique invalide (taille %u < 4)\n", length);
+        Serial.printf("[BLE] Commande haptique invalide (taille %u < 4)\n", (unsigned int)length);
     }
 }
 

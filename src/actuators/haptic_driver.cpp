@@ -32,7 +32,8 @@ void HapticDriver::init(int pin) {
     _stopTimestampMs = 0;
     _patternStep = 0;
 
-    log_i("Driver haptique PWM initialisé sur GPIO %d (anti-glitch LOW, Fréq: %d Hz)", _pin, HAPTIC_LEDC_FREQ_HZ);
+    Serial.printf("[HAPTIC] Driver haptique PWM initialisé sur GPIO %d (canal %d, anti-glitch LOW, Fréq: %d Hz)\n",
+                  _pin, HAPTIC_LEDC_CHANNEL, HAPTIC_LEDC_FREQ_HZ);
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
@@ -41,6 +42,7 @@ void HapticDriver::setIntensity(uint8_t intensity) {
 #else
     ledcWrite(HAPTIC_LEDC_CHANNEL, intensity);
 #endif
+    Serial.printf("[HAPTIC] LEDC write pin %d -> val %d\n", _pin, intensity);
 }
 
 void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
@@ -56,8 +58,8 @@ void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t durationMs)
     _stepTime = millis();
     _isActive = true;
 
+    Serial.printf("[HAPTIC] Play: pattern=%u, intensity=%u, duration=%u ms\n", pattern, intensity, durationMs);
     setIntensity(_currentIntensity);
-    Serial.printf("[HAPTIC] Play: intensity=%d, duration=%d ms\n", intensity, durationMs);
 }
 
 void HapticDriver::stop() {

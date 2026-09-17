@@ -1,19 +1,14 @@
 #include "haptic_driver.h"
-#include <esp_arduino_version.h>
+#include <Arduino.h>
 
-#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
-#define HAPTIC_LEDC_ATTACH(pin, freq, res) ledcAttach(pin, freq, res)
-#define HAPTIC_LEDC_WRITE(pin, val)        ledcWrite(pin, val)
-#else
-#define HAPTIC_LEDC_ATTACH(pin, freq, res) do { \
-    ledcSetup(HAPTIC_LEDC_CHANNEL, freq, res); \
-    ledcAttachPin(pin, HAPTIC_LEDC_CHANNEL); \
-} while (0)
-#define HAPTIC_LEDC_WRITE(pin, val)        ledcWrite(HAPTIC_LEDC_CHANNEL, val)
-#endif
+// Utilisation explicite du canal 4 sur Arduino core v2.x
+#define HAPTIC_CHANNEL 4
+#define HAPTIC_FREQ    10000
+#define HAPTIC_RES     8
 
 static uint32_t s_stop_time = 0;
 static bool s_is_active = false;
+static uint8_t s_pin = PIN_HAPTIC_PWM;
 
 HapticDriver::HapticDriver()
     : _pin(PIN_HAPTIC_PWM),
@@ -25,27 +20,23 @@ HapticDriver::HapticDriver()
       _stepTime(0) {}
 
 void HapticDriver::init(int pin) {
+    s_pin = pin;
     _pin = pin;
-
-    // Forcer la broche en sortie à l'état BAS avant LEDC (anti-glitch au boot)
-    pinMode(_pin, OUTPUT);
-    digitalWrite(_pin, LOW);
-
-    HAPTIC_LEDC_ATTACH(_pin, 10000, 8); // GPIO 7, 10 kHz, 8 bits
-    HAPTIC_LEDC_WRITE(_pin, 0);
-
     s_is_active = false;
     _isActive = false;
-    _currentIntensity = 0;
-    _stopTimestampMs = 0;
-    _patternStep = 0;
 
-    Serial.printf("[HAPTIC] INIT: GPIO %d configure (10 kHz, 8 bits, canal %d)\n",
-                  _pin, HAPTIC_LEDC_CHANNEL);
+    // 1. Initialiser le canal LEDC
+    ledcSetup(HAPTIC_CHANNEL, HAPTIC_FREQ, HAPTIC_RES);
+    // 2. Attacher la broche physique au canal
+    ledcAttachPin(s_pin, HAPTIC_CHANNEL);
+    // 3. Forcer la valeur à 0
+    ledcWrite(HAPTIC_CHANNEL, 0);
+
+    Serial.printf("[HAPTIC] INIT: GPIO %d attache au canal LEDC %d (10 kHz, 8 bits)\n", s_pin, HAPTIC_CHANNEL);
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
-    HAPTIC_LEDC_WRITE(_pin, intensity);
+    ledcWrite(HAPTIC_CHANNEL, intensity);
 }
 
 void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t duration_ms) {
@@ -56,20 +47,19 @@ void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t duration_ms
 
     s_is_active = true;
     _isActive = true;
-    _pattern = pattern;
     _currentIntensity = intensity;
     s_stop_time = millis() + duration_ms;
-    _stopTimestampMs = s_stop_time;
 
-    HAPTIC_LEDC_WRITE(_pin, intensity);
-    Serial.printf("[HAPTIC] START: intensity=%d, duration=%d ms (stop a %u)\n", intensity, duration_ms, s_stop_time);
+    ledcWrite(HAPTIC_CHANNEL, intensity);
+    Serial.printf("[HAPTIC] START: val=%d sur canal %d, duree=%d ms (stop a %u)\n", 
+                  intensity, HAPTIC_CHANNEL, duration_ms, s_stop_time);
 }
 
 void HapticDriver::update() {
     if (s_is_active) {
         if ((long)(millis() - s_stop_time) >= 0) {
             stop();
-            Serial.println("[HAPTIC] STOP: fin vibration");
+            Serial.println("[HAPTIC] STOP: extinction");
         }
     }
 }
@@ -78,7 +68,7 @@ void HapticDriver::stop() {
     s_is_active = false;
     _isActive = false;
     _currentIntensity = 0;
-    HAPTIC_LEDC_WRITE(_pin, 0);
+    ledcWrite(HAPTIC_CHANNEL, 0);
 }
 
 void HapticDriver::testRampUp() {

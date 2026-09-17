@@ -46,12 +46,6 @@ void StudioManager::handleCommand(const std::string& command) {
     Serial.printf("[STUDIO] Commande reçue : \"%s\"\n", command.c_str());
 
     if (command.rfind("START", 0) == 0) {
-        if (_state != StudioState::IDLE) {
-            Serial.println("[STUDIO] Rejet : session déjà en cours.");
-            _bleServer->notifyStudioControl("ERROR busy");
-            return;
-        }
-
         std::istringstream iss(command);
         std::string startWord, label, durStr, sessId;
         iss >> startWord >> label >> durStr >> sessId;
@@ -64,6 +58,16 @@ void StudioManager::handleCommand(const std::string& command) {
         if (dur > 30.0f) dur = 30.0f;
         if (label.empty()) label = "unlabeled";
         if (sessId.empty()) sessId = "default-session-id";
+
+        if (_state != StudioState::IDLE) {
+            if (sessId == _sessionId) {
+                Serial.println("[STUDIO] Commande START en doublon pour la même session : ignorée.");
+                return;
+            }
+            Serial.println("[STUDIO] Rejet : session déjà en cours.");
+            _bleServer->notifyStudioControl("ERROR busy");
+            return;
+        }
 
         _label = label;
         _durationSec = dur;
@@ -81,6 +85,7 @@ void StudioManager::startCountdown() {
 
     _state = StudioState::COUNTDOWN_PULSE_1;
     _stepTimestampMs = millis();
+    Serial.println("[STUDIO] Compte à rebours : 1/3");
     _bleServer->notifyStudioControl("COUNTDOWN 1/3");
     _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
 }
@@ -111,6 +116,7 @@ void StudioManager::update() {
             if (now - _stepTimestampMs >= 1000) {
                 _state = StudioState::COUNTDOWN_PULSE_2;
                 _stepTimestampMs = now;
+                Serial.println("[STUDIO] Compte à rebours : 2/3");
                 _bleServer->notifyStudioControl("COUNTDOWN 2/3");
                 _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
             }
@@ -120,6 +126,7 @@ void StudioManager::update() {
             if (now - _stepTimestampMs >= 1000) {
                 _state = StudioState::COUNTDOWN_PULSE_3;
                 _stepTimestampMs = now;
+                Serial.println("[STUDIO] Compte à rebours : 3/3");
                 _bleServer->notifyStudioControl("COUNTDOWN 3/3");
                 _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
             }
@@ -127,6 +134,7 @@ void StudioManager::update() {
 
         case StudioState::COUNTDOWN_PULSE_3:
             if (now - _stepTimestampMs >= 1000) {
+                Serial.println("[STUDIO] Compte à rebours terminé -> Démarrage RECORDING");
                 startRecording();
             }
             break;

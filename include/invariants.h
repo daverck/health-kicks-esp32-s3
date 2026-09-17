@@ -65,3 +65,4 @@ struct BurstPacketHeader {
     uint8_t payload_len;    // Nombre d'échantillons ou taille
 };
 #pragma pack(pop)
+

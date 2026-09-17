@@ -72,3 +72,4 @@ private:
     HapticCallback _onHaptic;
     StudioCommandCallback _onStudioCommand;
 };
+

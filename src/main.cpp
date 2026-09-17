@@ -57,10 +57,8 @@ static void runHardwareDiagnostics() {
 
     // 3. Diagnostic Actionneur Haptique (Vibreur PWM sur GPIO 7)
     Serial.printf("[HAPTIC] Initialisation PWM sur GPIO %d (Fréq: %d Hz)...\n", PIN_HAPTIC_PWM, HAPTIC_LEDC_FREQ_HZ);
-    haptic.begin(PIN_HAPTIC_PWM);
-    Serial.println("[HAPTIC] Exécution du test de montée en puissance (Ramp-up)...");
-    haptic.testRampUp();
-    Serial.println("[PASS] Test PWM haptique terminé.");
+    haptic.init(PIN_HAPTIC_PWM);
+    Serial.println("[PASS] Driver haptique initialisé (Anti-glitch LOW, prêt pour commandes).");
 
     Serial.println("========================================================\n");
 }
@@ -81,7 +79,7 @@ void setup() {
 
     // Configuration des callbacks d'interopérabilité BLE
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
-        haptic.trigger(pattern, intensity, durationMs);
+        haptic.play(pattern, intensity, durationMs);
     });
 
     bleServer.setStudioCommandCallback([](const String& command) {
@@ -160,3 +158,4 @@ void loop() {
         }
     }
 }
+

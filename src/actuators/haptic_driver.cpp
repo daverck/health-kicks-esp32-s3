@@ -4,17 +4,20 @@
 HapticDriver::HapticDriver()
     : _pin(PIN_HAPTIC_PWM),
       _pattern(HAPTIC_PATTERN_CONTINUOUS),
-      _intensity(0),
-      _durationMs(0),
-      _startTime(0),
-      _stopTime(0),
-      _isVibrating(false),
+      _currentIntensity(0),
+      _stopTimestampMs(0),
+      _isActive(false),
       _patternStep(0),
       _stepTime(0) {}
 
-void HapticDriver::begin(int pin) {
+void HapticDriver::init(int pin) {
     _pin = pin;
 
+    // 1. Correctif Glitch au Boot : forcer la broche en sortie à l'état BAS avant LEDC
+    pinMode(_pin, OUTPUT);
+    digitalWrite(_pin, LOW);
+
+    // 2. Attachement du canal PWM LEDC et valeur initiale à 0
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
     ledcAttach(_pin, HAPTIC_LEDC_FREQ_HZ, HAPTIC_LEDC_RES_BITS);
     ledcWrite(_pin, 0);
@@ -24,8 +27,12 @@ void HapticDriver::begin(int pin) {
     ledcWrite(HAPTIC_LEDC_CHANNEL, 0);
 #endif
 
-    _isVibrating = false;
-    log_i("Driver haptique PWM initialisé sur GPIO %d (Fréq: %d Hz, Rés: %d bits)", _pin, HAPTIC_LEDC_FREQ_HZ, HAPTIC_LEDC_RES_BITS);
+    _isActive = false;
+    _currentIntensity = 0;
+    _stopTimestampMs = 0;
+    _patternStep = 0;
+
+    log_i("Driver haptique PWM initialisé sur GPIO %d (anti-glitch LOW, Fréq: %d Hz)", _pin, HAPTIC_LEDC_FREQ_HZ);
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
@@ -36,58 +43,55 @@ void HapticDriver::setIntensity(uint8_t intensity) {
 #endif
 }
 
-void HapticDriver::trigger(uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
+void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
     if (intensity == 0 || durationMs == 0) {
         stop();
         return;
     }
 
     _pattern = pattern;
-    _intensity = intensity;
-    _durationMs = durationMs;
-    _startTime = millis();
-    _stopTime = _startTime + durationMs;
+    _currentIntensity = intensity;
+    _stopTimestampMs = millis() + durationMs;
     _patternStep = 0;
-    _stepTime = _startTime;
-    _isVibrating = true;
+    _stepTime = millis();
+    _isActive = true;
 
-    setIntensity(_intensity);
-    log_i("Déclenchement haptique: Pattern=%d, Intensité=%d/255, Durée=%d ms", pattern, intensity, durationMs);
+    setIntensity(_currentIntensity);
+    log_i("Haptic play: Pattern=%u, Intensité=%u/255, Durée=%u ms", pattern, intensity, durationMs);
 }
 
 void HapticDriver::stop() {
     setIntensity(0);
-    _isVibrating = false;
+    _isActive = false;
+    _currentIntensity = 0;
     _patternStep = 0;
 }
 
 void HapticDriver::update() {
-    if (!_isVibrating) {
+    if (!_isActive) {
         return;
     }
 
     uint32_t now = millis();
 
-    // Arrêt global si la durée est expirée
-    if (now >= _stopTime) {
+    // Arrêt strict dès que le délai est écoulé (anti-vibration infinie)
+    if (now >= _stopTimestampMs) {
         stop();
         return;
     }
 
-    // Gestion des motifs vibratoires avancés
+    // Gestion des motifs avancés
     switch (_pattern) {
         case HAPTIC_PATTERN_CONTINUOUS:
-            // Reste à _intensity jusqu'à expiration de _stopTime
             break;
 
         case HAPTIC_PATTERN_DOUBLE_PULSE:
-            // Cycle : Pulse (120ms) -> Pause (100ms) -> Pulse (120ms) -> Pause...
             if (_patternStep == 0 && (now - _stepTime) >= 120) {
                 setIntensity(0);
                 _patternStep = 1;
                 _stepTime = now;
             } else if (_patternStep == 1 && (now - _stepTime) >= 100) {
-                setIntensity(_intensity);
+                setIntensity(_currentIntensity);
                 _patternStep = 2;
                 _stepTime = now;
             } else if (_patternStep == 2 && (now - _stepTime) >= 120) {
@@ -98,9 +102,8 @@ void HapticDriver::update() {
             break;
 
         case HAPTIC_PATTERN_ALERT_PULSE:
-            // Pulsation rapide 80ms ON / 80ms OFF
-            if ((now / 80) % 2 == 0) {
-                setIntensity(_intensity);
+            if (((now - _stepTime) / 80) % 2 == 0) {
+                setIntensity(_currentIntensity);
             } else {
                 setIntensity(0);
             }
@@ -112,7 +115,7 @@ void HapticDriver::update() {
 }
 
 void HapticDriver::testRampUp() {
-    log_i("--- Démarrage Test Ramp-Up Vibreur Haptique (0 -> 255) ---");
+    Serial.println("--- Démarrage Test Ramp-Up Vibreur Haptique (0 -> 255) ---");
     for (int i = 0; i <= 255; i += 15) {
         setIntensity(i);
         delay(30);
@@ -123,5 +126,5 @@ void HapticDriver::testRampUp() {
         delay(30);
     }
     stop();
-    log_i("--- Fin Test Ramp-Up Vibreur Haptique ---");
+    Serial.println("--- Fin Test Ramp-Up Vibreur Haptique ---");
 }

@@ -9,23 +9,26 @@ public:
     HapticDriver();
 
     /**
-     * @brief Initialise le canal LEDC PWM sur la broche du vibreur (GPIO 7).
+     * @brief Initialise le GPIO à l'état BAS avant d'attacher le canal LEDC PWM (anti-glitch au boot).
      */
-    void begin(int pin = PIN_HAPTIC_PWM);
+    void init(int pin = PIN_HAPTIC_PWM);
+    void begin(int pin = PIN_HAPTIC_PWM) { init(pin); }
 
     /**
-     * @brief Applique directement une intensité PWM continue.
-     * @param intensity Valeur entre 0 (arrêt) et 255 (puissance max).
-     */
-    void setIntensity(uint8_t intensity);
-
-    /**
-     * @brief Déclenche un motif haptique conforme à contracts/ble_gatt_specs.md.
+     * @brief Déclenche un motif haptique.
      * @param pattern 0 = continu, 1 = double pulse, 2 = pulsation alerte.
      * @param intensity Intensité PWM (0-255).
      * @param durationMs Durée totale de la stimulation en millisecondes.
      */
-    void trigger(uint8_t pattern, uint8_t intensity, uint16_t durationMs);
+    void play(uint8_t pattern, uint8_t intensity, uint16_t durationMs);
+    void trigger(uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
+        play(pattern, intensity, durationMs);
+    }
+
+    /**
+     * @brief Applique directement une intensité PWM continue.
+     */
+    void setIntensity(uint8_t intensity);
 
     /**
      * @brief Coupe immédiatement le vibreur et réinitialise l'état.
@@ -33,26 +36,24 @@ public:
     void stop();
 
     /**
-     * @brief Boucle de mise à jour non-bloquante du timer et des patterns.
-     * À appeler périodiquement (ex: toutes les 10ms ou dans loop/task).
+     * @brief Boucle de mise à jour non-bloquante basée sur millis() pour extinction automatique.
      */
     void update();
 
     /**
-     * @brief Routine de test progressif (Ramp-up) pour validation matérielle.
+     * @brief Routine de test progressif (Ramp-up) sur demande.
      */
     void testRampUp();
 
-    bool isVibrating() const { return _isVibrating; }
+    bool isVibrating() const { return _isActive; }
 
 private:
     int _pin;
     uint8_t _pattern;
-    uint8_t _intensity;
-    uint16_t _durationMs;
-    uint32_t _startTime;
-    uint32_t _stopTime;
-    bool _isVibrating;
+    uint8_t _currentIntensity;
+    uint32_t _stopTimestampMs;
+    bool _isActive;
+
     uint8_t _patternStep;
     uint32_t _stepTime;
 };

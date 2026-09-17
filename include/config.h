@@ -73,3 +73,4 @@
  */
 #define CONFIGURE_EXT1_WAKEUP() \
     esp_sleep_enable_ext1_wakeup(1ULL << PIN_BTN_PAIRING, ESP_EXT1_WAKEUP_ANY_LOW)
+

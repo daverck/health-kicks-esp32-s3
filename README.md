@@ -63,3 +63,4 @@ Le serveur BLE implémente les spécifications contractuelles définies dans `co
 - **Haptic Command** : `7a5a0003-...` (WRITE, WRITE_NR - 4 octets Big-Endian)
 - **Studio Control** : `7a5a0004-...` (WRITE, NOTIFY - ASCII UTF-8)
 - **Studio Data Burst** : `7a5a0005-...` (NOTIFY - Paquets MTU-adaptés avec CRC32)
+

@@ -5,10 +5,18 @@ class ServerCallbacks : public NimBLEServerCallbacks {
 public:
     ServerCallbacks(HealthKicksBleServer* parent) : _parent(parent) {}
     void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) override {
+        Serial.printf("[BLE] Client connecté (conn_handle: %d). Négociation MTU en cours...\n", desc->conn_handle);
         _parent->onConnect(pServer, desc);
     }
-    void onDisconnect(NimBLEServer* pServer) override {
+    void onDisconnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) override {
+        Serial.println("[BLE] Client déconnecté. Redémarrage de l'advertising...");
         _parent->onDisconnect(pServer);
+        NimBLEDevice::getAdvertising()->start();
+    }
+    void onDisconnect(NimBLEServer* pServer) override {
+        Serial.println("[BLE] Client déconnecté. Redémarrage de l'advertising...");
+        _parent->onDisconnect(pServer);
+        NimBLEDevice::getAdvertising()->start();
     }
     void onMTUChange(uint16_t MTU, ble_gap_conn_desc* desc) override {
         _parent->onMtuChange(MTU, desc);
@@ -101,6 +109,7 @@ void HealthKicksBleServer::begin(const char* deviceName) {
 
 void HealthKicksBleServer::startAdvertising() {
     NimBLEAdvertising* pAdvertising = NimBLEDevice::getAdvertising();
+    pAdvertising->setName(BLE_DEVICE_NAME);
     pAdvertising->addServiceUUID(HEALTHKICKS_SERVICE_UUID);
     pAdvertising->setScanResponse(true);
     pAdvertising->setMinPreferred(0x06); // Intervalle 7.5ms pour réactivité
@@ -108,47 +117,47 @@ void HealthKicksBleServer::startAdvertising() {
 
     pAdvertising->start();
     _lastActivityTime = millis();
-    log_i("Publicité BLE démarrée (Nom: %s, Service: %s)", BLE_DEVICE_NAME, HEALTHKICKS_SERVICE_UUID);
+    Serial.printf("[BLE] Publicité BLE démarrée (Nom: %s, Service: %s)\n", BLE_DEVICE_NAME, HEALTHKICKS_SERVICE_UUID);
 }
 
 void HealthKicksBleServer::stopAdvertising() {
     NimBLEDevice::getAdvertising()->stop();
-    log_i("Publicité BLE arrêtée.");
+    Serial.println("[BLE] Publicité BLE arrêtée.");
 }
 
 void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) {
     _deviceConnected = true;
     _lastActivityTime = millis();
-    log_i("Client BLE connecté (Handle: %d). Attente négociation MTU...", desc->conn_handle);
+    Serial.printf("[BLE] Client BLE connecté (Handle: %d). Attente négociation MTU...\n", desc->conn_handle);
 }
 
 void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
     _lastActivityTime = millis();
-    log_i("Client BLE déconnecté. Relance de la publicité...");
+    Serial.println("[BLE] Client BLE déconnecté. Relance de la publicité...");
     startAdvertising();
 }
 
 void HealthKicksBleServer::onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc) {
     _negotiatedMtu = MTU;
-    log_i("MTU négociée mise à jour: %d octets", MTU);
+    Serial.printf("[BLE] MTU négociée mise à jour: %d octets\n", MTU);
 }
 
 void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length) {
     _lastActivityTime = millis();
-    if (length < 4) {
-        log_w("Commande haptique BLE invalide (longueur %u < 4)", length);
-        return;
-    }
+    if (length >= 4) {
+        uint8_t pattern = data[0];
+        uint8_t intensity = data[1];
+        uint16_t durationMs = (static_cast<uint16_t>(data[2]) << 8) | data[3];
 
-    uint8_t pattern = data[0];
-    uint8_t intensity = data[1];
-    uint16_t durationMs = (static_cast<uint16_t>(data[2]) << 8) | data[3];
+        Serial.printf("[BLE] Commande haptique reçue: Pattern=%u, Intensité=%u/255, Durée=%u ms\n",
+                      pattern, intensity, durationMs);
 
-    log_i("BLE Haptic Write reçu: Pattern=%u, Intensité=%u, Durée=%u ms", pattern, intensity, durationMs);
-
-    if (_onHaptic) {
-        _onHaptic(pattern, intensity, durationMs);
+        if (_onHaptic) {
+            _onHaptic(pattern, intensity, durationMs);
+        }
+    } else {
+        Serial.printf("[BLE] Commande haptique invalide (taille %u < 4)\n", length);
     }
 }
 

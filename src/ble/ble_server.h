@@ -8,6 +8,9 @@
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
 typedef std::function<void(const String& command)> StudioCommandCallback;
 
+// Drapeau de relance asynchrone de la publicité BLE (géré dans loop() pour éviter les deadlocks radio)
+extern volatile bool g_need_restart_advertising;
+
 class HealthKicksBleServer {
 public:
     HealthKicksBleServer();
@@ -35,7 +38,9 @@ public:
     /**
      * @brief Notifie un message textuel de session Studio (Caractéristique 0004, ASCII).
      */
+    void notifyStudioControl(const std::string& message);
     void notifyStudioControl(const String& message);
+    void notifyStudioControl(const char* message);
 
     /**
      * @brief Émet un paquet binaire haute vitesse sur Studio Data Burst (Caractéristique 0005).

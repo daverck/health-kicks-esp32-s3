@@ -57,7 +57,7 @@ void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t durationMs)
     _isActive = true;
 
     setIntensity(_currentIntensity);
-    log_i("Haptic play: Pattern=%u, Intensité=%u/255, Durée=%u ms", pattern, intensity, durationMs);
+    Serial.printf("[HAPTIC] Play: intensity=%d, duration=%d ms\n", intensity, durationMs);
 }
 
 void HapticDriver::stop() {
@@ -72,13 +72,13 @@ void HapticDriver::update() {
         return;
     }
 
-    uint32_t now = millis();
-
-    // Arrêt strict dès que le délai est écoulé (anti-vibration infinie)
-    if (now >= _stopTimestampMs) {
+    // Arrêt strict dès que le délai est écoulé (sécurisé contre le rollover millis)
+    if ((long)(millis() - _stopTimestampMs) >= 0) {
         stop();
         return;
     }
+
+    uint32_t now = millis();
 
     // Gestion des motifs avancés
     switch (_pattern) {

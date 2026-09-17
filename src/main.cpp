@@ -4,11 +4,13 @@
 #include "sensors/imu_mpu6050.h"
 #include "actuators/haptic_driver.h"
 #include "ble/ble_server.h"
+#include "studio/studio_manager.h"
 
 // Instances des modules matériels et services
 static ImuMpu6050 imu;
 static HapticDriver haptic;
 static HealthKicksBleServer bleServer;
+static StudioManager studioManager;
 
 // Timers et cadencement
 static uint32_t lastImuReadMs = 0;
@@ -77,18 +79,16 @@ void setup() {
     // Diagnostics matériels initiaux
     runHardwareDiagnostics();
 
+    // Configuration du gestionnaire de capture Studio
+    studioManager.begin(&bleServer, &haptic, &imu);
+
     // Configuration des callbacks d'interopérabilité BLE
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
         haptic.play(pattern, intensity, durationMs);
     });
 
     bleServer.setStudioCommandCallback([](const String& command) {
-        Serial.printf("[STUDIO] Commande reçue : \"%s\"\n", command.c_str());
-        if (command.startsWith("START")) {
-            bleServer.notifyStudioControl("RECORDING 5.0");
-        } else if (command == "CANCEL") {
-            bleServer.notifyStudioControl("CANCELLED");
-        }
+        studioManager.handleCommand(command.c_str());
     });
 
     // Démarrage du serveur NimBLE
@@ -99,17 +99,31 @@ void setup() {
 void loop() {
     uint32_t now = millis();
 
-    // 1. Mise à jour de l'actionneur haptique
-    haptic.update();
+    // 0. Relance asynchrone et fiable de la publicité BLE si déconnecté (évite les deadlocks radio)
+    if (g_need_restart_advertising) {
+        g_need_restart_advertising = false;
+        delay(50);
+        NimBLEDevice::getAdvertising()->start();
+        Serial.println("[BLE] Publicité relancée.");
+    }
 
-    // 2. Acquisition IMU à cadence stricte de 50 Hz (toutes les 20 ms)
-    if (now - lastImuReadMs >= IMU_SAMPLE_PERIOD_MS) {
+    // Annulation propre de la session Studio si déconnexion imprévue
+    if (!bleServer.isConnected() && studioManager.isBusy()) {
+        studioManager.cancel();
+    }
+
+    // 1. Mise à jour de l'actionneur haptique et du gestionnaire Studio
+    haptic.update();
+    studioManager.update();
+
+    // 2. Acquisition IMU nominale (uniquement si Studio n'est pas en cours d'enregistrement)
+    if (!studioManager.isRecording() && (now - lastImuReadMs >= IMU_SAMPLE_PERIOD_MS)) {
         lastImuReadMs = now;
 
         if (imuReady) {
             ImuRawFrame frame;
             if (imu.readFrame(frame, (uint16_t)(now & 0xFFFF))) {
-                // En mode connecté nominal, on peut périodiquement afficher l'état
+                // En mode connecté nominal
             }
         }
     }

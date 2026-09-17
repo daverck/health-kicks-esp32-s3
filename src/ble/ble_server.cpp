@@ -1,5 +1,7 @@
 #include "ble_server.h"
 
+volatile bool g_need_restart_advertising = false;
+
 // Callbacks NimBLE pour le serveur
 class ServerCallbacks : public NimBLEServerCallbacks {
 public:
@@ -9,14 +11,14 @@ public:
         _parent->onConnect(pServer, desc);
     }
     void onDisconnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) override {
-        Serial.println("[BLE] Client déconnecté. Redémarrage de l'advertising...");
+        Serial.println("[BLE] Client déconnecté. Signalement pour relance advertising...");
         _parent->onDisconnect(pServer);
-        NimBLEDevice::getAdvertising()->start();
+        g_need_restart_advertising = true;
     }
     void onDisconnect(NimBLEServer* pServer) override {
-        Serial.println("[BLE] Client déconnecté. Redémarrage de l'advertising...");
+        Serial.println("[BLE] Client déconnecté. Signalement pour relance advertising...");
         _parent->onDisconnect(pServer);
-        NimBLEDevice::getAdvertising()->start();
+        g_need_restart_advertising = true;
     }
     void onMTUChange(uint16_t MTU, ble_gap_conn_desc* desc) override {
         _parent->onMtuChange(MTU, desc);
@@ -134,8 +136,7 @@ void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* d
 void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
     _lastActivityTime = millis();
-    Serial.println("[BLE] Client BLE déconnecté. Relance de la publicité...");
-    startAdvertising();
+    Serial.println("[BLE] Client BLE déconnecté.");
 }
 
 void HealthKicksBleServer::onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc) {
@@ -194,12 +195,21 @@ void HealthKicksBleServer::notifyActivity(uint8_t stateCode, uint8_t confidence,
     _pCharActivity->notify();
 }
 
-void HealthKicksBleServer::notifyStudioControl(const String& message) {
+void HealthKicksBleServer::notifyStudioControl(const std::string& message) {
     if (!_deviceConnected || !_pCharStudioControl) return;
 
-    _pCharStudioControl->setValue(message.c_str());
+    _pCharStudioControl->setValue(reinterpret_cast<const uint8_t*>(message.data()), message.length());
     _pCharStudioControl->notify();
-    log_i("BLE Notification Studio Control émise: \"%s\"", message.c_str());
+    Serial.printf("[BLE] Notification Studio Control émise: \"%s\"\n", message.c_str());
+}
+
+void HealthKicksBleServer::notifyStudioControl(const String& message) {
+    notifyStudioControl(std::string(message.c_str()));
+}
+
+void HealthKicksBleServer::notifyStudioControl(const char* message) {
+    if (!message) return;
+    notifyStudioControl(std::string(message));
 }
 
 bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {

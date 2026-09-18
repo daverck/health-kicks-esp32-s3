@@ -38,6 +38,7 @@ private:
     uint8_t _address;
     TwoWire* _wire;
 
+    bool readAlignedRaw(int16_t& ax, int16_t& ay, int16_t& az, int16_t& gx, int16_t& gy, int16_t& gz);
     bool writeRegister(uint8_t reg, uint8_t value);
     uint8_t readRegister(uint8_t reg);
 };

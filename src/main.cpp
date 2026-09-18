@@ -160,14 +160,25 @@ void loop() {
         }
     }
 
-    // 5. Lecture du bouton poussoir (Appui court pour forcer ré-annonce ou test haptique)
-    if (digitalRead(PIN_BTN_PAIRING) == LOW) {
-        delay(50); // Anti-rebond
-        if (digitalRead(PIN_BTN_PAIRING) == LOW) {
-            Serial.println("[BTN] Bouton GPIO 14 appuyé : Déclenchement impulsion test 100ms");
-            haptic.trigger(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
-            while (digitalRead(PIN_BTN_PAIRING) == LOW) {
-                delay(10);
+    // 5. Gestion de l'interrupteur (GPIO 14 - Actif BAS avec pull-up interne)
+    static bool s_switchState = HIGH;
+    static uint32_t s_lastSwitchCheckMs = 0;
+
+    if (now - s_lastSwitchCheckMs >= 50) { // Échantillonnage toutes les 50 ms
+        s_lastSwitchCheckMs = now;
+        bool reading = digitalRead(PIN_BTN_PAIRING);
+
+        if (reading != s_switchState) {
+            s_switchState = reading;
+            if (s_switchState == LOW) {
+                Serial.println("[SWITCH] Position ON (fermé à la masse) : relance advertising BLE");
+                haptic.play(HAPTIC_PATTERN_CONTINUOUS, 180, 80);
+                if (!bleServer.isConnected()) {
+                    NimBLEDevice::getAdvertising()->start();
+                }
+            } else {
+                Serial.println("[SWITCH] Position OFF (ouvert)");
+                haptic.play(HAPTIC_PATTERN_CONTINUOUS, 120, 50);
             }
         }
     }

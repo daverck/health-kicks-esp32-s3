@@ -92,7 +92,7 @@ void StudioManager::startCountdown() {
 
 void StudioManager::startRecording() {
     _frames.clear();
-    size_t expectedSamples = (size_t)(_durationSec * 50) + 10;
+    size_t expectedSamples = (size_t)(_durationSec * IMU_SAMPLE_FREQ_HZ) + 10;
     _frames.reserve(expectedSamples);
 
     _state = StudioState::RECORDING;
@@ -102,7 +102,7 @@ void StudioManager::startRecording() {
     char buf[64];
     snprintf(buf, sizeof(buf), "RECORDING %.1f", _durationSec);
     _bleServer->notifyStudioControl(buf);
-    Serial.printf("[STUDIO] Enregistrement IMU démarré à 50 Hz pour %.1f secondes\n", _durationSec);
+    Serial.printf("[STUDIO] Enregistrement IMU démarré à %d Hz pour %.1f secondes\n", IMU_SAMPLE_FREQ_HZ, _durationSec);
 }
 
 void StudioManager::update() {

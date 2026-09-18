@@ -51,8 +51,8 @@
 // Paramètres I2C IMU
 #define IMU_I2C_ADDR            0x68
 #define IMU_I2C_FREQ_HZ         400000       // I2C Fast Mode (400 kHz)
-#define IMU_SAMPLE_RATE_HZ      50           // Cadence nominale 50 Hz
-#define IMU_SAMPLE_PERIOD_MS    (1000 / IMU_SAMPLE_RATE_HZ) // 20 ms
+#define IMU_SAMPLE_FREQ_HZ      19           // Cadence nominale 19 Hz (~94 points pour 5s)
+#define IMU_SAMPLE_PERIOD_MS    53           // Période 53 ms (5000 ms / 53 ms = ~94 échantillons)
 
 // Paramètres LEDC PWM pour le vibreur
 #define HAPTIC_LEDC_CHANNEL     0

@@ -115,6 +115,13 @@ def generate_c_header(
         c_raw_code,
     )
 
+    # Convert local intermediate variables to static storage to eliminate stack usage on embedded FreeRTOS tasks
+    c_raw_code = re.sub(
+        r"(\n\s*)double\s+(var\d+(\[\d+\])?);",
+        r"\1static double \2;",
+        c_raw_code,
+    )
+
     feature_count = len(feature_names)
     class_count = len(classes)
     window_samples = int(round(window_size_sec * 19)) # 19 Hz nominal rate = 38 samples

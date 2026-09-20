@@ -106,3 +106,4 @@ private:
     // Feature extraction routine
     void computeFeatures(double* featureVector);
 };
+

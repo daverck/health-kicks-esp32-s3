@@ -51,107 +51,107 @@ inline void mul_vector_number(double *v1, double num, int size, double *result) 
         result[i] = v1[i] * num;
 }
 inline void raw_predict_activity(double * input, double * output) {
-    double var0[5];
-    double var1[5];
-    double var2[5];
-    double var3[5];
-    double var4[5];
-    double var5[5];
-    double var6[5];
-    double var7[5];
-    double var8[5];
-    double var9[5];
-    double var10[5];
-    double var11[5];
-    double var12[5];
-    double var13[5];
-    double var14[5];
-    double var15[5];
-    double var16[5];
-    double var17[5];
-    double var18[5];
-    double var19[5];
-    double var20[5];
-    double var21[5];
-    double var22[5];
-    double var23[5];
-    double var24[5];
-    double var25[5];
-    double var26[5];
-    double var27[5];
-    double var28[5];
-    double var29[5];
-    double var30[5];
-    double var31[5];
-    double var32[5];
-    double var33[5];
-    double var34[5];
-    double var35[5];
-    double var36[5];
-    double var37[5];
-    double var38[5];
-    double var39[5];
-    double var40[5];
-    double var41[5];
-    double var42[5];
-    double var43[5];
-    double var44[5];
-    double var45[5];
-    double var46[5];
-    double var47[5];
-    double var48[5];
-    double var49[5];
-    double var50[5];
-    double var51[5];
-    double var52[5];
-    double var53[5];
-    double var54[5];
-    double var55[5];
-    double var56[5];
-    double var57[5];
-    double var58[5];
-    double var59[5];
-    double var60[5];
-    double var61[5];
-    double var62[5];
-    double var63[5];
-    double var64[5];
-    double var65[5];
-    double var66[5];
-    double var67[5];
-    double var68[5];
-    double var69[5];
-    double var70[5];
-    double var71[5];
-    double var72[5];
-    double var73[5];
-    double var74[5];
-    double var75[5];
-    double var76[5];
-    double var77[5];
-    double var78[5];
-    double var79[5];
-    double var80[5];
-    double var81[5];
-    double var82[5];
-    double var83[5];
-    double var84[5];
-    double var85[5];
-    double var86[5];
-    double var87[5];
-    double var88[5];
-    double var89[5];
-    double var90[5];
-    double var91[5];
-    double var92[5];
-    double var93[5];
-    double var94[5];
-    double var95[5];
-    double var96[5];
-    double var97[5];
-    double var98[5];
-    double var99[5];
-    double var100[5];
+    static double var0[5];
+    static double var1[5];
+    static double var2[5];
+    static double var3[5];
+    static double var4[5];
+    static double var5[5];
+    static double var6[5];
+    static double var7[5];
+    static double var8[5];
+    static double var9[5];
+    static double var10[5];
+    static double var11[5];
+    static double var12[5];
+    static double var13[5];
+    static double var14[5];
+    static double var15[5];
+    static double var16[5];
+    static double var17[5];
+    static double var18[5];
+    static double var19[5];
+    static double var20[5];
+    static double var21[5];
+    static double var22[5];
+    static double var23[5];
+    static double var24[5];
+    static double var25[5];
+    static double var26[5];
+    static double var27[5];
+    static double var28[5];
+    static double var29[5];
+    static double var30[5];
+    static double var31[5];
+    static double var32[5];
+    static double var33[5];
+    static double var34[5];
+    static double var35[5];
+    static double var36[5];
+    static double var37[5];
+    static double var38[5];
+    static double var39[5];
+    static double var40[5];
+    static double var41[5];
+    static double var42[5];
+    static double var43[5];
+    static double var44[5];
+    static double var45[5];
+    static double var46[5];
+    static double var47[5];
+    static double var48[5];
+    static double var49[5];
+    static double var50[5];
+    static double var51[5];
+    static double var52[5];
+    static double var53[5];
+    static double var54[5];
+    static double var55[5];
+    static double var56[5];
+    static double var57[5];
+    static double var58[5];
+    static double var59[5];
+    static double var60[5];
+    static double var61[5];
+    static double var62[5];
+    static double var63[5];
+    static double var64[5];
+    static double var65[5];
+    static double var66[5];
+    static double var67[5];
+    static double var68[5];
+    static double var69[5];
+    static double var70[5];
+    static double var71[5];
+    static double var72[5];
+    static double var73[5];
+    static double var74[5];
+    static double var75[5];
+    static double var76[5];
+    static double var77[5];
+    static double var78[5];
+    static double var79[5];
+    static double var80[5];
+    static double var81[5];
+    static double var82[5];
+    static double var83[5];
+    static double var84[5];
+    static double var85[5];
+    static double var86[5];
+    static double var87[5];
+    static double var88[5];
+    static double var89[5];
+    static double var90[5];
+    static double var91[5];
+    static double var92[5];
+    static double var93[5];
+    static double var94[5];
+    static double var95[5];
+    static double var96[5];
+    static double var97[5];
+    static double var98[5];
+    static double var99[5];
+    static double var100[5];
     if (input[12] <= 0.18032008409500122) {
         if (input[9] <= 0.15422560647130013) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var100, _tmp, sizeof(_tmp)); }
@@ -197,7 +197,7 @@ inline void raw_predict_activity(double * input, double * output) {
     } else {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var100, _tmp, sizeof(_tmp)); }
     }
-    double var101[5];
+    static double var101[5];
     if (input[10] <= 0.10463231056928635) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var101, _tmp, sizeof(_tmp)); }
     } else {
@@ -252,7 +252,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var100, var101, 5, var99);
-    double var102[5];
+    static double var102[5];
     if (input[12] <= 0.04909251956269145) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var102, _tmp, sizeof(_tmp)); }
     } else {
@@ -295,7 +295,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var99, var102, 5, var98);
-    double var103[5];
+    static double var103[5];
     if (input[7] <= 0.031107075046747923) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var103, _tmp, sizeof(_tmp)); }
     } else {
@@ -342,7 +342,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var98, var103, 5, var97);
-    double var104[5];
+    static double var104[5];
     if (input[13] <= 0.32483914494514465) {
         if (input[13] <= 0.19243520125746727) {
             if (input[4] <= 0.7599559426307678) {
@@ -409,7 +409,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var104, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var97, var104, 5, var96);
-    double var105[5];
+    static double var105[5];
     if (input[12] <= 0.18058832734823227) {
         if (input[7] <= 0.031104305991902947) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var105, _tmp, sizeof(_tmp)); }
@@ -448,7 +448,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var105, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var96, var105, 5, var95);
-    double var106[5];
+    static double var106[5];
     if (input[0] <= 10.140693187713623) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var106, _tmp, sizeof(_tmp)); }
     } else {
@@ -499,7 +499,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var95, var106, 5, var94);
-    double var107[5];
+    static double var107[5];
     if (input[8] <= 0.10389646515250206) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var107, _tmp, sizeof(_tmp)); }
     } else {
@@ -538,7 +538,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var94, var107, 5, var93);
-    double var108[5];
+    static double var108[5];
     if (input[12] <= 0.18723420798778534) {
         if (input[12] <= 0.12940821796655655) {
             if (input[3] <= 0.15454218722879887) {
@@ -605,7 +605,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var108, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var93, var108, 5, var92);
-    double var109[5];
+    static double var109[5];
     if (input[13] <= 0.3244971036911011) {
         if (input[5] <= 0.15913908183574677) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var109, _tmp, sizeof(_tmp)); }
@@ -656,7 +656,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var109, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var92, var109, 5, var91);
-    double var110[5];
+    static double var110[5];
     if (input[9] <= 0.15470758080482483) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var110, _tmp, sizeof(_tmp)); }
     } else {
@@ -711,7 +711,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var91, var110, 5, var90);
-    double var111[5];
+    static double var111[5];
     if (input[9] <= 0.15470758080482483) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var111, _tmp, sizeof(_tmp)); }
     } else {
@@ -750,7 +750,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var90, var111, 5, var89);
-    double var112[5];
+    static double var112[5];
     if (input[10] <= 0.10234104469418526) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var112, _tmp, sizeof(_tmp)); }
     } else {
@@ -821,7 +821,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var89, var112, 5, var88);
-    double var113[5];
+    static double var113[5];
     if (input[8] <= 0.10406545922160149) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var113, _tmp, sizeof(_tmp)); }
     } else {
@@ -860,7 +860,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var88, var113, 5, var87);
-    double var114[5];
+    static double var114[5];
     if (input[3] <= 0.16102446056902409) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var114, _tmp, sizeof(_tmp)); }
     } else {
@@ -911,7 +911,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var87, var114, 5, var86);
-    double var115[5];
+    static double var115[5];
     if (input[10] <= 0.10581598430871964) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var115, _tmp, sizeof(_tmp)); }
     } else {
@@ -966,7 +966,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var86, var115, 5, var85);
-    double var116[5];
+    static double var116[5];
     if (input[5] <= 0.15819132700562477) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var116, _tmp, sizeof(_tmp)); }
     } else {
@@ -1013,7 +1013,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var85, var116, 5, var84);
-    double var117[5];
+    static double var117[5];
     if (input[13] <= 0.32483914494514465) {
         if (input[8] <= 0.10613339021801949) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var117, _tmp, sizeof(_tmp)); }
@@ -1056,7 +1056,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var117, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var84, var117, 5, var83);
-    double var118[5];
+    static double var118[5];
     if (input[12] <= 0.1262155920267105) {
         if (input[1] <= 9.457672595977783) {
             { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var118, _tmp, sizeof(_tmp)); }
@@ -1135,7 +1135,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var83, var118, 5, var82);
-    double var119[5];
+    static double var119[5];
     if (input[4] <= 0.7741664499044418) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var119, _tmp, sizeof(_tmp)); }
     } else {
@@ -1194,7 +1194,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var82, var119, 5, var81);
-    double var120[5];
+    static double var120[5];
     if (input[3] <= 0.15223634243011475) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var120, _tmp, sizeof(_tmp)); }
     } else {
@@ -1245,7 +1245,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var81, var120, 5, var80);
-    double var121[5];
+    static double var121[5];
     if (input[11] <= 0.0500580295920372) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var121, _tmp, sizeof(_tmp)); }
     } else {
@@ -1300,7 +1300,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var80, var121, 5, var79);
-    double var122[5];
+    static double var122[5];
     if (input[10] <= 0.10269381105899811) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var122, _tmp, sizeof(_tmp)); }
     } else {
@@ -1359,7 +1359,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var79, var122, 5, var78);
-    double var123[5];
+    static double var123[5];
     if (input[1] <= 9.4367094039917) {
         if (input[12] <= 0.18058832734823227) {
             if (input[13] <= 0.1933564469218254) {
@@ -1418,7 +1418,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var123, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var78, var123, 5, var77);
-    double var124[5];
+    static double var124[5];
     if (input[11] <= 0.04979542130604386) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var124, _tmp, sizeof(_tmp)); }
     } else {
@@ -1489,7 +1489,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var77, var124, 5, var76);
-    double var125[5];
+    static double var125[5];
     if (input[13] <= 0.32483914494514465) {
         if (input[13] <= 0.1933564469218254) {
             if (input[7] <= 0.031107075046747923) {
@@ -1540,7 +1540,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var125, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var76, var125, 5, var75);
-    double var126[5];
+    static double var126[5];
     if (input[15] <= 0.012457417164114304) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var126, _tmp, sizeof(_tmp)); }
     } else {
@@ -1603,7 +1603,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var75, var126, 5, var74);
-    double var127[5];
+    static double var127[5];
     if (input[10] <= 0.10269381105899811) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var127, _tmp, sizeof(_tmp)); }
     } else {
@@ -1646,7 +1646,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var74, var127, 5, var73);
-    double var128[5];
+    static double var128[5];
     if (input[11] <= 0.04976722737774253) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var128, _tmp, sizeof(_tmp)); }
     } else {
@@ -1685,7 +1685,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var73, var128, 5, var72);
-    double var129[5];
+    static double var129[5];
     if (input[0] <= 10.140693187713623) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var129, _tmp, sizeof(_tmp)); }
     } else {
@@ -1736,7 +1736,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var72, var129, 5, var71);
-    double var130[5];
+    static double var130[5];
     if (input[12] <= 0.049295961391180754) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var130, _tmp, sizeof(_tmp)); }
     } else {
@@ -1771,7 +1771,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var71, var130, 5, var70);
-    double var131[5];
+    static double var131[5];
     if (input[9] <= 0.15470758080482483) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var131, _tmp, sizeof(_tmp)); }
     } else {
@@ -1830,7 +1830,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var70, var131, 5, var69);
-    double var132[5];
+    static double var132[5];
     if (input[7] <= 0.031107075046747923) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var132, _tmp, sizeof(_tmp)); }
     } else {
@@ -1869,7 +1869,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var69, var132, 5, var68);
-    double var133[5];
+    static double var133[5];
     if (input[13] <= 0.32509221136569977) {
         if (input[11] <= 0.050178023520857096) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var133, _tmp, sizeof(_tmp)); }
@@ -1920,7 +1920,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var133, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var68, var133, 5, var67);
-    double var134[5];
+    static double var134[5];
     if (input[10] <= 0.10269381105899811) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var134, _tmp, sizeof(_tmp)); }
     } else {
@@ -1987,7 +1987,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var67, var134, 5, var66);
-    double var135[5];
+    static double var135[5];
     if (input[13] <= 0.32264427840709686) {
         if (input[1] <= 9.454116344451904) {
             if (input[5] <= 5.987096309661865) {
@@ -2026,7 +2026,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var135, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var66, var135, 5, var65);
-    double var136[5];
+    static double var136[5];
     if (input[12] <= 0.18058832734823227) {
         if (input[7] <= 0.031107075046747923) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var136, _tmp, sizeof(_tmp)); }
@@ -2085,7 +2085,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var136, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var65, var136, 5, var64);
-    double var137[5];
+    static double var137[5];
     if (input[3] <= 0.1540575474500656) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var137, _tmp, sizeof(_tmp)); }
     } else {
@@ -2140,7 +2140,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var64, var137, 5, var63);
-    double var138[5];
+    static double var138[5];
     if (input[8] <= 0.10095759853720665) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var138, _tmp, sizeof(_tmp)); }
     } else {
@@ -2195,7 +2195,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var63, var138, 5, var62);
-    double var139[5];
+    static double var139[5];
     if (input[12] <= 0.049295961391180754) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var139, _tmp, sizeof(_tmp)); }
     } else {
@@ -2246,7 +2246,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var62, var139, 5, var61);
-    double var140[5];
+    static double var140[5];
     if (input[1] <= 9.43315315246582) {
         if (input[12] <= 0.1275847852230072) {
             { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var140, _tmp, sizeof(_tmp)); }
@@ -2301,7 +2301,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var140, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var61, var140, 5, var60);
-    double var141[5];
+    static double var141[5];
     if (input[1] <= 3.1422761380672455) {
         { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var141, _tmp, sizeof(_tmp)); }
     } else {
@@ -2340,7 +2340,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var60, var141, 5, var59);
-    double var142[5];
+    static double var142[5];
     if (input[5] <= 0.17580674588680267) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var142, _tmp, sizeof(_tmp)); }
     } else {
@@ -2379,7 +2379,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var59, var142, 5, var58);
-    double var143[5];
+    static double var143[5];
     if (input[4] <= 0.77080337703228) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var143, _tmp, sizeof(_tmp)); }
     } else {
@@ -2422,7 +2422,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var58, var143, 5, var57);
-    double var144[5];
+    static double var144[5];
     if (input[12] <= 0.04768513096496463) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var144, _tmp, sizeof(_tmp)); }
     } else {
@@ -2465,7 +2465,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var57, var144, 5, var56);
-    double var145[5];
+    static double var145[5];
     if (input[7] <= 0.03452962590381503) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var145, _tmp, sizeof(_tmp)); }
     } else {
@@ -2504,7 +2504,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var56, var145, 5, var55);
-    double var146[5];
+    static double var146[5];
     if (input[15] <= 0.01409075858828146) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var146, _tmp, sizeof(_tmp)); }
     } else {
@@ -2567,7 +2567,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var55, var146, 5, var54);
-    double var147[5];
+    static double var147[5];
     if (input[8] <= 0.10095759853720665) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var147, _tmp, sizeof(_tmp)); }
     } else {
@@ -2610,7 +2610,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var54, var147, 5, var53);
-    double var148[5];
+    static double var148[5];
     if (input[13] <= 0.04717289702966809) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var148, _tmp, sizeof(_tmp)); }
     } else {
@@ -2661,7 +2661,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var53, var148, 5, var52);
-    double var149[5];
+    static double var149[5];
     if (input[9] <= 0.15752393379807472) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var149, _tmp, sizeof(_tmp)); }
     } else {
@@ -2700,7 +2700,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var52, var149, 5, var51);
-    double var150[5];
+    static double var150[5];
     if (input[0] <= 10.172862529754639) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var150, _tmp, sizeof(_tmp)); }
     } else {
@@ -2771,7 +2771,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var51, var150, 5, var50);
-    double var151[5];
+    static double var151[5];
     if (input[4] <= 0.7503853887319565) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var151, _tmp, sizeof(_tmp)); }
     } else {
@@ -2806,7 +2806,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var50, var151, 5, var49);
-    double var152[5];
+    static double var152[5];
     if (input[13] <= 0.3235655725002289) {
         if (input[1] <= 9.419613361358643) {
             if (input[7] <= 0.19855079799890518) {
@@ -2857,7 +2857,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var152, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var49, var152, 5, var48);
-    double var153[5];
+    static double var153[5];
     if (input[12] <= 0.1275847852230072) {
         if (input[10] <= 0.10234104469418526) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var153, _tmp, sizeof(_tmp)); }
@@ -2900,7 +2900,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var48, var153, 5, var47);
-    double var154[5];
+    static double var154[5];
     if (input[12] <= 0.04923694906756282) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var154, _tmp, sizeof(_tmp)); }
     } else {
@@ -2959,7 +2959,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var47, var154, 5, var46);
-    double var155[5];
+    static double var155[5];
     if (input[12] <= 0.18062342703342438) {
         if (input[0] <= 10.140693187713623) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var155, _tmp, sizeof(_tmp)); }
@@ -3018,7 +3018,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var155, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var46, var155, 5, var45);
-    double var156[5];
+    static double var156[5];
     if (input[12] <= 0.1262155920267105) {
         if (input[9] <= 0.15800590813159943) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var156, _tmp, sizeof(_tmp)); }
@@ -3085,7 +3085,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var45, var156, 5, var44);
-    double var157[5];
+    static double var157[5];
     if (input[9] <= 2.2376092672348022) {
         if (input[3] <= 0.15454218722879887) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var157, _tmp, sizeof(_tmp)); }
@@ -3140,7 +3140,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var44, var157, 5, var43);
-    double var158[5];
+    static double var158[5];
     if (input[12] <= 0.18062342703342438) {
         if (input[3] <= 0.15813886560499668) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var158, _tmp, sizeof(_tmp)); }
@@ -3203,7 +3203,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var158, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var43, var158, 5, var42);
-    double var159[5];
+    static double var159[5];
     if (input[5] <= 0.15913908183574677) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var159, _tmp, sizeof(_tmp)); }
     } else {
@@ -3250,7 +3250,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var42, var159, 5, var41);
-    double var160[5];
+    static double var160[5];
     if (input[10] <= 0.10463231056928635) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var160, _tmp, sizeof(_tmp)); }
     } else {
@@ -3293,7 +3293,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var41, var160, 5, var40);
-    double var161[5];
+    static double var161[5];
     if (input[9] <= 0.15470758080482483) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var161, _tmp, sizeof(_tmp)); }
     } else {
@@ -3344,7 +3344,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var40, var161, 5, var39);
-    double var162[5];
+    static double var162[5];
     if (input[9] <= 0.15422560647130013) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var162, _tmp, sizeof(_tmp)); }
     } else {
@@ -3411,7 +3411,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var39, var162, 5, var38);
-    double var163[5];
+    static double var163[5];
     if (input[13] <= 0.19139542803168297) {
         if (input[15] <= 0.01409075858828146) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var163, _tmp, sizeof(_tmp)); }
@@ -3482,7 +3482,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var38, var163, 5, var37);
-    double var164[5];
+    static double var164[5];
     if (input[13] <= 0.3235655725002289) {
         if (input[5] <= 0.15913908183574677) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var164, _tmp, sizeof(_tmp)); }
@@ -3517,7 +3517,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var164, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var37, var164, 5, var36);
-    double var165[5];
+    static double var165[5];
     if (input[13] <= 0.3235655725002289) {
         if (input[12] <= 0.1262155920267105) {
             if (input[1] <= 9.454116344451904) {
@@ -3576,7 +3576,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var165, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var36, var165, 5, var35);
-    double var166[5];
+    static double var166[5];
     if (input[12] <= 0.1849173605442047) {
         if (input[7] <= 0.033308893674984574) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var166, _tmp, sizeof(_tmp)); }
@@ -3619,7 +3619,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var166, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var35, var166, 5, var34);
-    double var167[5];
+    static double var167[5];
     if (input[12] <= 0.1849173605442047) {
         if (input[12] <= 0.1275734007358551) {
             if (input[11] <= 0.04979542130604386) {
@@ -3690,7 +3690,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var167, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var34, var167, 5, var33);
-    double var168[5];
+    static double var168[5];
     if (input[3] <= 0.1540575474500656) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var168, _tmp, sizeof(_tmp)); }
     } else {
@@ -3757,7 +3757,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var33, var168, 5, var32);
-    double var169[5];
+    static double var169[5];
     if (input[5] <= 0.15819132700562477) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var169, _tmp, sizeof(_tmp)); }
     } else {
@@ -3812,7 +3812,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var32, var169, 5, var31);
-    double var170[5];
+    static double var170[5];
     if (input[11] <= 0.050178023520857096) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var170, _tmp, sizeof(_tmp)); }
     } else {
@@ -3847,7 +3847,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var31, var170, 5, var30);
-    double var171[5];
+    static double var171[5];
     if (input[13] <= 0.3244971036911011) {
         if (input[6] <= 0.07933332398533821) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var171, _tmp, sizeof(_tmp)); }
@@ -3894,7 +3894,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var171, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var30, var171, 5, var29);
-    double var172[5];
+    static double var172[5];
     if (input[13] <= 0.3244971036911011) {
         if (input[0] <= 10.140693187713623) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var172, _tmp, sizeof(_tmp)); }
@@ -3953,7 +3953,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var172, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var29, var172, 5, var28);
-    double var173[5];
+    static double var173[5];
     if (input[12] <= 0.18062342703342438) {
         if (input[13] <= 0.047131800558418036) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var173, _tmp, sizeof(_tmp)); }
@@ -3992,7 +3992,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var173, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var28, var173, 5, var27);
-    double var174[5];
+    static double var174[5];
     if (input[12] <= 0.18032008409500122) {
         if (input[13] <= 0.19371239095926285) {
             if (input[13] <= 0.049560919869691133) {
@@ -4071,7 +4071,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var174, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var27, var174, 5, var26);
-    double var175[5];
+    static double var175[5];
     if (input[12] <= 0.1275847852230072) {
         if (input[1] <= 9.423169612884521) {
             { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var175, _tmp, sizeof(_tmp)); }
@@ -4130,7 +4130,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var26, var175, 5, var25);
-    double var176[5];
+    static double var176[5];
     if (input[6] <= 0.07933332398533821) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var176, _tmp, sizeof(_tmp)); }
     } else {
@@ -4165,7 +4165,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var25, var176, 5, var24);
-    double var177[5];
+    static double var177[5];
     if (input[7] <= 0.031107075046747923) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var177, _tmp, sizeof(_tmp)); }
     } else {
@@ -4216,7 +4216,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var24, var177, 5, var23);
-    double var178[5];
+    static double var178[5];
     if (input[4] <= 0.77080337703228) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var178, _tmp, sizeof(_tmp)); }
     } else {
@@ -4279,7 +4279,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var23, var178, 5, var22);
-    double var179[5];
+    static double var179[5];
     if (input[13] <= 0.1933564469218254) {
         if (input[4] <= 0.77080337703228) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var179, _tmp, sizeof(_tmp)); }
@@ -4346,7 +4346,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var22, var179, 5, var21);
-    double var180[5];
+    static double var180[5];
     if (input[12] <= 0.18062342703342438) {
         if (input[12] <= 0.047474872786551714) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var180, _tmp, sizeof(_tmp)); }
@@ -4393,7 +4393,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var180, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var21, var180, 5, var20);
-    double var181[5];
+    static double var181[5];
     if (input[5] <= 0.15913908183574677) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var181, _tmp, sizeof(_tmp)); }
     } else {
@@ -4440,7 +4440,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var20, var181, 5, var19);
-    double var182[5];
+    static double var182[5];
     if (input[6] <= 0.07933332398533821) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var182, _tmp, sizeof(_tmp)); }
     } else {
@@ -4483,7 +4483,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var19, var182, 5, var18);
-    double var183[5];
+    static double var183[5];
     if (input[6] <= 0.07933332398533821) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var183, _tmp, sizeof(_tmp)); }
     } else {
@@ -4530,7 +4530,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var18, var183, 5, var17);
-    double var184[5];
+    static double var184[5];
     if (input[8] <= 0.10078860446810722) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var184, _tmp, sizeof(_tmp)); }
     } else {
@@ -4577,7 +4577,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var17, var184, 5, var16);
-    double var185[5];
+    static double var185[5];
     if (input[1] <= 9.454116344451904) {
         if (input[3] <= 2.2281718254089355) {
             if (input[3] <= 1.5395769476890564) {
@@ -4644,7 +4644,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var185, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var16, var185, 5, var15);
-    double var186[5];
+    static double var186[5];
     if (input[0] <= 10.140693187713623) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var186, _tmp, sizeof(_tmp)); }
     } else {
@@ -4699,7 +4699,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var15, var186, 5, var14);
-    double var187[5];
+    static double var187[5];
     if (input[10] <= 0.10269381105899811) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var187, _tmp, sizeof(_tmp)); }
     } else {
@@ -4754,7 +4754,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var14, var187, 5, var13);
-    double var188[5];
+    static double var188[5];
     if (input[1] <= 9.454116344451904) {
         if (input[1] <= 6.448920249938965) {
             if (input[2] <= 9.30931806564331) {
@@ -4817,7 +4817,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var188, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var13, var188, 5, var12);
-    double var189[5];
+    static double var189[5];
     if (input[15] <= 0.014200885620084591) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var189, _tmp, sizeof(_tmp)); }
     } else {
@@ -4860,7 +4860,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var12, var189, 5, var11);
-    double var190[5];
+    static double var190[5];
     if (input[5] <= 0.17675838246941566) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var190, _tmp, sizeof(_tmp)); }
     } else {
@@ -4903,7 +4903,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var11, var190, 5, var10);
-    double var191[5];
+    static double var191[5];
     if (input[9] <= 0.16044089198112488) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var191, _tmp, sizeof(_tmp)); }
     } else {
@@ -4938,7 +4938,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var10, var191, 5, var9);
-    double var192[5];
+    static double var192[5];
     if (input[13] <= 0.32353775203227997) {
         if (input[7] <= 0.031107075046747923) {
             { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var192, _tmp, sizeof(_tmp)); }
@@ -4993,7 +4993,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var192, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var9, var192, 5, var8);
-    double var193[5];
+    static double var193[5];
     if (input[1] <= 9.457672595977783) {
         if (input[15] <= 0.15974321216344833) {
             if (input[3] <= 0.8468883782625198) {
@@ -5068,7 +5068,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var193, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var8, var193, 5, var7);
-    double var194[5];
+    static double var194[5];
     if (input[10] <= 0.10511764883995056) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var194, _tmp, sizeof(_tmp)); }
     } else {
@@ -5111,7 +5111,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var7, var194, 5, var6);
-    double var195[5];
+    static double var195[5];
     if (input[10] <= 0.10143476165831089) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var195, _tmp, sizeof(_tmp)); }
     } else {
@@ -5150,7 +5150,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var6, var195, 5, var5);
-    double var196[5];
+    static double var196[5];
     if (input[13] <= 0.3235655725002289) {
         if (input[1] <= 9.457672595977783) {
             if (input[12] <= 0.12745338678359985) {
@@ -5193,7 +5193,7 @@ inline void raw_predict_activity(double * input, double * output) {
         { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var196, _tmp, sizeof(_tmp)); }
     }
     add_vectors(var5, var196, 5, var4);
-    double var197[5];
+    static double var197[5];
     if (input[10] <= 0.10269381105899811) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var197, _tmp, sizeof(_tmp)); }
     } else {
@@ -5232,7 +5232,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var4, var197, 5, var3);
-    double var198[5];
+    static double var198[5];
     if (input[5] <= 0.15819132700562477) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var198, _tmp, sizeof(_tmp)); }
     } else {
@@ -5267,7 +5267,7 @@ inline void raw_predict_activity(double * input, double * output) {
         }
     }
     add_vectors(var3, var198, 5, var2);
-    double var199[5];
+    static double var199[5];
     if (input[8] <= 0.10598317161202431) {
         { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var199, _tmp, sizeof(_tmp)); }
     } else {

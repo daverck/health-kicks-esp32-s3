@@ -254,3 +254,4 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
 
     return true;
 }
+

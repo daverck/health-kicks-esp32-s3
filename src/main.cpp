@@ -5,17 +5,20 @@
 #include "actuators/haptic_driver.h"
 #include "ble/ble_server.h"
 #include "studio/studio_manager.h"
+#include "activity_detector.h"
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
 static HapticDriver haptic;
 static HealthKicksBleServer bleServer;
 static StudioManager studioManager;
+static ActivityDetector activityDetector;
 
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
 static uint32_t lastDiagnosticPrintMs = 0;
 static bool imuReady = false;
+static uint8_t lastReportedActivityState = 0xFF;
 
 /**
  * @brief Runs the hardware self-test diagnostic suite at startup.
@@ -82,6 +85,11 @@ void setup() {
     // Configure Studio capture manager
     studioManager.begin(&bleServer, &haptic, &imu);
 
+    // Configure Edge AI activity detection engine
+    activityDetector.begin(0.65f, 5000, 18.0f);
+    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%).\n",
+                  MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT, activityDetector.getConfidenceThreshold() * 100.0f);
+
     // Configure BLE interoperability callbacks
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
         haptic.play(pattern, intensity, durationMs);
@@ -116,14 +124,53 @@ void loop() {
     haptic.update();
     studioManager.update();
 
-    // 2. Nominal IMU acquisition (only if Studio is not recording)
+    // 2. Nominal IMU acquisition & Edge AI Activity Detection (only if Studio is not recording)
     if (!studioManager.isRecording() && (now - lastImuReadMs >= IMU_SAMPLE_PERIOD_MS)) {
         lastImuReadMs = now;
 
         if (imuReady) {
             ImuRawFrame frame;
             if (imu.readFrame(frame, (uint16_t)(now & 0xFFFF))) {
-                // In nominal connected mode
+                // Ingest sample into sliding buffer
+                activityDetector.pushFrame(frame);
+
+                // Run real-time edge inference if step interval is due
+                if (activityDetector.isEvaluationDue()) {
+                    ActivityDetectionResult result;
+                    if (activityDetector.detect(result)) {
+                        if (result.confidence >= activityDetector.getConfidenceThreshold()) {
+                            uint32_t epochSec = (uint32_t)(now / 1000);
+
+                            if (result.isFall) {
+                                Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Latency: %u us) ***\n",
+                                              result.className, result.confidence * 100.0f, result.inferenceTimeUs);
+
+                                // Trigger emergency haptic feedback alert
+                                haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 255, 500);
+
+                                // Notify connected mobile client over BLE with critical fall flags
+                                bleServer.notifyActivity(
+                                    result.stateCode,
+                                    (uint8_t)(result.confidence * 100.0f),
+                                    epochSec,
+                                    DETECTION_FLAG_CRITICAL_FALL | DETECTION_FLAG_LOCAL_HAPTIC
+                                );
+                                lastReportedActivityState = result.stateCode;
+                            } else if (result.stateCode != lastReportedActivityState) {
+                                Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Latency: %u us)\n",
+                                              result.className, result.confidence * 100.0f, result.inferenceTimeUs);
+
+                                bleServer.notifyActivity(
+                                    result.stateCode,
+                                    (uint8_t)(result.confidence * 100.0f),
+                                    epochSec,
+                                    0
+                                );
+                                lastReportedActivityState = result.stateCode;
+                            }
+                        }
+                    }
+                }
             }
         }
     }

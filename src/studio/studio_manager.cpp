@@ -39,11 +39,11 @@ void StudioManager::begin(HealthKicksBleServer* bleServer, HapticDriver* haptic,
     _haptic = haptic;
     _imu = imu;
     _state = StudioState::IDLE;
-    _frames.reserve(1600); // Réserve pour 30s à 50Hz (1500 trames)
+    _frames.reserve(1600); // Reserve for 30s at 50Hz (1500 frames)
 }
 
 void StudioManager::handleCommand(const std::string& command) {
-    Serial.printf("[STUDIO] Commande reçue : \"%s\"\n", command.c_str());
+    Serial.printf("[STUDIO] Command received: \"%s\"\n", command.c_str());
 
     if (command.rfind("START", 0) == 0) {
         std::istringstream iss(command);
@@ -61,10 +61,10 @@ void StudioManager::handleCommand(const std::string& command) {
 
         if (_state != StudioState::IDLE) {
             if (sessId == _sessionId) {
-                Serial.println("[STUDIO] Commande START en doublon pour la même session : ignorée.");
+                Serial.println("[STUDIO] Duplicate START command for same session: ignored.");
                 return;
             }
-            Serial.println("[STUDIO] Rejet : session déjà en cours.");
+            Serial.println("[STUDIO] Rejected: session already in progress.");
             _bleServer->notifyStudioControl("ERROR busy");
             return;
         }
@@ -80,12 +80,12 @@ void StudioManager::handleCommand(const std::string& command) {
 }
 
 void StudioManager::startCountdown() {
-    Serial.printf("[STUDIO] Début countdown (3 impulsions haptiques) pour session \"%s\" (%.1fs)...\n",
+    Serial.printf("[STUDIO] Starting countdown (3 haptic pulses) for session \"%s\" (%.1fs)...\n",
                   _sessionId.c_str(), _durationSec);
 
     _state = StudioState::COUNTDOWN_PULSE_1;
     _stepTimestampMs = millis();
-    Serial.println("[STUDIO] Compte à rebours : 1/3");
+    Serial.println("[STUDIO] Countdown: 1/3");
     _bleServer->notifyStudioControl("COUNTDOWN 1/3");
     _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
 }
@@ -102,7 +102,7 @@ void StudioManager::startRecording() {
     char buf[64];
     snprintf(buf, sizeof(buf), "RECORDING %.1f", _durationSec);
     _bleServer->notifyStudioControl(buf);
-    Serial.printf("[STUDIO] Enregistrement IMU démarré à %d Hz pour %.1f secondes\n", IMU_SAMPLE_FREQ_HZ, _durationSec);
+    Serial.printf("[STUDIO] IMU recording started at %d Hz for %.1f seconds\n", IMU_SAMPLE_FREQ_HZ, _durationSec);
 }
 
 void StudioManager::update() {
@@ -116,7 +116,7 @@ void StudioManager::update() {
             if (now - _stepTimestampMs >= 1000) {
                 _state = StudioState::COUNTDOWN_PULSE_2;
                 _stepTimestampMs = now;
-                Serial.println("[STUDIO] Compte à rebours : 2/3");
+                Serial.println("[STUDIO] Countdown: 2/3");
                 _bleServer->notifyStudioControl("COUNTDOWN 2/3");
                 _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
             }
@@ -126,7 +126,7 @@ void StudioManager::update() {
             if (now - _stepTimestampMs >= 1000) {
                 _state = StudioState::COUNTDOWN_PULSE_3;
                 _stepTimestampMs = now;
-                Serial.println("[STUDIO] Compte à rebours : 3/3");
+                Serial.println("[STUDIO] Countdown: 3/3");
                 _bleServer->notifyStudioControl("COUNTDOWN 3/3");
                 _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
             }
@@ -134,7 +134,7 @@ void StudioManager::update() {
 
         case StudioState::COUNTDOWN_PULSE_3:
             if (now - _stepTimestampMs >= 1000) {
-                Serial.println("[STUDIO] Compte à rebours terminé -> Démarrage RECORDING");
+                Serial.println("[STUDIO] Countdown finished -> Starting RECORDING");
                 startRecording();
             }
             break;
@@ -165,7 +165,7 @@ void StudioManager::update() {
 void StudioManager::finishRecordingAndStreamBurst() {
     _state = StudioState::TRANSMITTING_BURST;
 
-    Serial.printf("[STUDIO] Enregistrement terminé. Échantillons collectés : %u\n", (unsigned int)_frames.size());
+    Serial.printf("[STUDIO] Recording finished. Samples collected: %u\n", (unsigned int)_frames.size());
 
     char finishMsg[128];
     snprintf(finishMsg, sizeof(finishMsg), "FINISHED %u %s", (unsigned int)_frames.size(), _sessionId.c_str());
@@ -179,12 +179,12 @@ void StudioManager::finishRecordingAndStreamBurst() {
 
 void StudioManager::sendBurstPackets() {
     if (!_bleServer || !_bleServer->isConnected()) {
-        Serial.println("[STUDIO] Annulation burst : client BLE non connecté.");
+        Serial.println("[STUDIO] Aborting burst: BLE client disconnected.");
         return;
     }
 
     uint16_t mtu = _bleServer->getNegotiatedMtu();
-    int usable = mtu - 3 - 4; // MTU - 3 ATT - 4 En-tête
+    int usable = mtu - 3 - 4; // MTU - 3 ATT - 4 Header
     int framesPerPacket = usable / IMU_BYTES_PER_FRAME;
     if (framesPerPacket < 1) framesPerPacket = 1;
     if (framesPerPacket > 17) framesPerPacket = 17;
@@ -193,7 +193,7 @@ void StudioManager::sendBurstPackets() {
     size_t offset = 0;
     uint16_t seqNum = 0;
 
-    Serial.printf("[STUDIO] Début transmission Burst : %u trames (MTU=%d, %d trames/paquet)...\n",
+    Serial.printf("[STUDIO] Starting Burst transmission: %u frames (MTU=%d, %d frames/packet)...\n",
                   (unsigned int)totalSamples, mtu, framesPerPacket);
 
     uint8_t packetBuf[256];
@@ -218,13 +218,13 @@ void StudioManager::sendBurstPackets() {
         offset += chunkCount;
         seqNum++;
 
-        delay(5); // Pause inter-paquets pour éviter la saturation du buffer radio BLE
+        delay(5); // Inter-packet delay to prevent BLE radio buffer overflow
     }
 
-    // Calcul CRC32 IEEE 802.3 sur l'ensemble des octets utiles transmis
+    // Compute CRC32 IEEE 802.3 over all payload bytes transmitted
     uint32_t crc32 = computeCrc32(reinterpret_cast<const uint8_t*>(_frames.data()), totalSamples * IMU_BYTES_PER_FRAME);
 
-    // Paquet END_OF_BURST (12 octets)
+    // END_OF_BURST packet (12 bytes)
     uint8_t endBuf[12];
     endBuf[0] = BURST_PACKET_END_OF_BURST; // 0x03
     endBuf[1] = (uint8_t)((seqNum >> 8) & 0xFF);
@@ -243,7 +243,7 @@ void StudioManager::sendBurstPackets() {
 
     _bleServer->sendBurstPacket(endBuf, sizeof(endBuf));
 
-    Serial.printf("[STUDIO] Burst transmis avec succès : %u échantillons en %u paquets (CRC32: 0x%08X)\n",
+    Serial.printf("[STUDIO] Burst successfully transmitted: %u samples across %u packets (CRC32: 0x%08X)\n",
                   (unsigned int)totalSamples, seqNum, crc32);
 }
 
@@ -253,6 +253,6 @@ void StudioManager::cancel() {
         _frames.clear();
         _haptic->stop();
         _bleServer->notifyStudioControl("CANCELLED");
-        Serial.println("[STUDIO] Session annulée.");
+        Serial.println("[STUDIO] Session cancelled.");
     }
 }

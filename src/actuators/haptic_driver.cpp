@@ -9,15 +9,15 @@ static void haptic_task(void* pvParameters) {
     while (true) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        Serial.printf("[HAPTIC] Activation GPIO %d pour %d ms (val=%d)\n", 
+        Serial.printf("[HAPTIC] Activating GPIO %d for %d ms (val=%d)\n", 
                       PIN_HAPTIC_PWM, s_pending_duration, s_pending_intensity);
 
-        // Pilotage direct à l'état HAUT
+        // Direct drive HIGH state
         digitalWrite(PIN_HAPTIC_PWM, HIGH);
         vTaskDelay(pdMS_TO_TICKS(s_pending_duration));
         digitalWrite(PIN_HAPTIC_PWM, LOW);
 
-        Serial.println("[HAPTIC] Extinction GPIO terminee");
+        Serial.println("[HAPTIC] GPIO turned off");
     }
 }
 
@@ -45,11 +45,11 @@ void HapticDriver::init(int pin) {
             &s_haptic_task_handle
         );
     }
-    Serial.printf("[HAPTIC] Driver initialise en pilotage direct GPIO %d (FreeRTOS Task)\n", _pin);
+    Serial.printf("[HAPTIC] Driver initialized with direct GPIO drive %d (FreeRTOS Task)\n", _pin);
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
-    // Pilotage direct tout-ou-rien
+    // Direct digital on-off drive
 }
 
 void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t duration_ms) {
@@ -70,7 +70,7 @@ void HapticDriver::stop() {
 }
 
 void HapticDriver::update() {
-    // Rien a faire dans loop()
+    // Nothing to do in loop()
 }
 
 void HapticDriver::testRampUp() {

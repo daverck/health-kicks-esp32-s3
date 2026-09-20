@@ -2,21 +2,21 @@
 
 volatile bool g_need_restart_advertising = false;
 
-// Callbacks NimBLE pour le serveur
+// NimBLE Callbacks for the server
 class ServerCallbacks : public NimBLEServerCallbacks {
 public:
     ServerCallbacks(HealthKicksBleServer* parent) : _parent(parent) {}
     void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) override {
-        Serial.printf("[BLE] Client connecté (conn_handle: %d). Négociation MTU en cours...\n", desc->conn_handle);
+        Serial.printf("[BLE] Client connected (conn_handle: %d). Negotiating MTU...\n", desc->conn_handle);
         _parent->onConnect(pServer, desc);
     }
     void onDisconnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) override {
-        Serial.println("[BLE] Client déconnecté. Signalement pour relance advertising...");
+        Serial.println("[BLE] Client disconnected. Signalling advertising restart...");
         _parent->onDisconnect(pServer);
         g_need_restart_advertising = true;
     }
     void onDisconnect(NimBLEServer* pServer) override {
-        Serial.println("[BLE] Client déconnecté. Signalement pour relance advertising...");
+        Serial.println("[BLE] Client disconnected. Signalling advertising restart...");
         _parent->onDisconnect(pServer);
         g_need_restart_advertising = true;
     }
@@ -27,7 +27,7 @@ private:
     HealthKicksBleServer* _parent;
 };
 
-// Callbacks pour l'écriture de commande haptique (0003)
+// Callbacks for Haptic Command write (0003)
 class HapticCharCallbacks : public NimBLECharacteristicCallbacks {
 public:
     HapticCharCallbacks(HealthKicksBleServer* parent) : _parent(parent) {}
@@ -39,7 +39,7 @@ private:
     HealthKicksBleServer* _parent;
 };
 
-// Callbacks pour l'écriture de commande Studio Control (0004)
+// Callbacks for Studio Control write (0004)
 class StudioControlCallbacks : public NimBLECharacteristicCallbacks {
 public:
     StudioControlCallbacks(HealthKicksBleServer* parent) : _parent(parent) {}
@@ -69,10 +69,10 @@ void HealthKicksBleServer::begin(const char* deviceName) {
     _pServer = NimBLEDevice::createServer();
     _pServer->setCallbacks(new ServerCallbacks(this));
 
-    // Création du service principal Footwear
+    // Create main Footwear service
     _pService = _pServer->createService(HEALTHKICKS_SERVICE_UUID);
 
-    // Caractéristique 1 : Activity Detection (READ, NOTIFY - 7 octets Big-Endian)
+    // Characteristic 1: Activity Detection (READ, NOTIFY - 7 bytes Big-Endian)
     _pCharActivity = _pService->createCharacteristic(
         CHAR_ACTIVITY_DETECTION_UUID,
         NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
@@ -80,31 +80,31 @@ void HealthKicksBleServer::begin(const char* deviceName) {
     uint8_t defaultActivity[7] = {STATE_CODE_IDLE, 0, 0, 0, 0, 0, 0};
     _pCharActivity->setValue(defaultActivity, sizeof(defaultActivity));
 
-    // Caractéristique 2 : Haptic Command (WRITE, WRITE_NR - 4 octets Big-Endian)
+    // Characteristic 2: Haptic Command (WRITE, WRITE_NR - 4 bytes Big-Endian)
     _pCharHaptic = _pService->createCharacteristic(
         CHAR_HAPTIC_COMMAND_UUID,
         NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR
     );
     _pCharHaptic->setCallbacks(new HapticCharCallbacks(this));
 
-    // Caractéristique 3 : Studio Control (WRITE, NOTIFY - ASCII UTF-8)
+    // Characteristic 3: Studio Control (WRITE, NOTIFY - ASCII UTF-8)
     _pCharStudioControl = _pService->createCharacteristic(
         CHAR_STUDIO_CONTROL_UUID,
         NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY
     );
     _pCharStudioControl->setCallbacks(new StudioControlCallbacks(this));
 
-    // Caractéristique 4 : Studio Data Burst (NOTIFY - Paquets MTU)
+    // Characteristic 4: Studio Data Burst (NOTIFY - MTU Packets)
     _pCharStudioBurst = _pService->createCharacteristic(
         CHAR_STUDIO_DATA_BURST_UUID,
         NIMBLE_PROPERTY::NOTIFY
     );
 
-    // Démarrage du service
+    // Start service
     _pService->start();
 
     _lastActivityTime = millis();
-    log_i("Serveur NimBLE configuré avec service Footwear: %s", HEALTHKICKS_SERVICE_UUID);
+    log_i("NimBLE server configured with Footwear service: %s", HEALTHKICKS_SERVICE_UUID);
 
     startAdvertising();
 }
@@ -114,40 +114,40 @@ void HealthKicksBleServer::startAdvertising() {
     pAdvertising->setName(BLE_DEVICE_NAME);
     pAdvertising->addServiceUUID(HEALTHKICKS_SERVICE_UUID);
     pAdvertising->setScanResponse(true);
-    pAdvertising->setMinPreferred(0x06); // Intervalle 7.5ms pour réactivité
-    pAdvertising->setMaxPreferred(0x12); // Intervalle 22.5ms
+    pAdvertising->setMinPreferred(0x06); // 7.5ms interval for responsiveness
+    pAdvertising->setMaxPreferred(0x12); // 22.5ms interval
 
     pAdvertising->start();
     _lastActivityTime = millis();
-    Serial.printf("[BLE] Publicité BLE démarrée (Nom: %s, Service: %s)\n", BLE_DEVICE_NAME, HEALTHKICKS_SERVICE_UUID);
+    Serial.printf("[BLE] BLE advertising started (Name: %s, Service: %s)\n", BLE_DEVICE_NAME, HEALTHKICKS_SERVICE_UUID);
 }
 
 void HealthKicksBleServer::stopAdvertising() {
     NimBLEDevice::getAdvertising()->stop();
-    Serial.println("[BLE] Publicité BLE arrêtée.");
+    Serial.println("[BLE] BLE advertising stopped.");
 }
 
 void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) {
     _deviceConnected = true;
     _lastActivityTime = millis();
-    Serial.printf("[BLE] Client BLE connecté (Handle: %d). Attente négociation MTU...\n", desc->conn_handle);
+    Serial.printf("[BLE] BLE client connected (Handle: %d). Waiting for MTU negotiation...\n", desc->conn_handle);
 }
 
 void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
     _lastActivityTime = millis();
-    Serial.println("[BLE] Client BLE déconnecté.");
+    Serial.println("[BLE] BLE client disconnected.");
 }
 
 void HealthKicksBleServer::onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc) {
     _negotiatedMtu = MTU;
-    Serial.printf("[BLE] MTU négociée mise à jour: %d octets\n", MTU);
+    Serial.printf("[BLE] Negotiated MTU updated: %d bytes\n", MTU);
 }
 
 void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length) {
     _lastActivityTime = millis();
 
-    Serial.printf("[BLE] Commande haptique brute reçue (taille %u): ", (unsigned int)length);
+    Serial.printf("[BLE] Raw haptic command received (len %u): ", (unsigned int)length);
     for (size_t i = 0; i < length; i++) {
         Serial.printf("%02X ", data[i]);
     }
@@ -157,18 +157,18 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
         uint8_t pattern = data[0];
         uint8_t intensity = data[1];
         uint16_t duration_ms = ((uint16_t)data[2] << 8) | (uint16_t)data[3];
-        if (duration_ms == 0) duration_ms = 400; // Fallback de sécurité
+        if (duration_ms == 0) duration_ms = 400; // Safety fallback
 
-        Serial.printf("[BLE] Commande haptique reçue: Pattern=%u, Intensité=%u/255, Durée=%u ms\n",
+        Serial.printf("[BLE] Haptic command received: Pattern=%u, Intensity=%u/255, Duration=%u ms\n",
                       pattern, intensity, duration_ms);
 
         if (_onHaptic) {
             _onHaptic(pattern, intensity, duration_ms);
         } else {
-            Serial.println("[BLE] AVERTISSEMENT : Aucun callback haptique assigné (_onHaptic est nul) !");
+            Serial.println("[BLE] WARNING: No haptic callback assigned (_onHaptic is null)!");
         }
     } else {
-        Serial.printf("[BLE] Commande haptique invalide (taille %u < 4)\n", (unsigned int)length);
+        Serial.printf("[BLE] Invalid haptic command (len %u < 4)\n", (unsigned int)length);
     }
 }
 
@@ -182,7 +182,7 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
     }
     cmd.trim();
 
-    log_i("BLE Studio Control Write reçu: \"%s\"", cmd.c_str());
+    log_i("BLE Studio Control Write received: \"%s\"", cmd.c_str());
 
     if (_onStudioCommand) {
         _onStudioCommand(cmd);
@@ -210,7 +210,7 @@ void HealthKicksBleServer::notifyStudioControl(const std::string& message) {
 
     _pCharStudioControl->setValue(reinterpret_cast<const uint8_t*>(message.data()), message.length());
     _pCharStudioControl->notify();
-    Serial.printf("[BLE] Notification Studio Control émise: \"%s\"\n", message.c_str());
+    Serial.printf("[BLE] Studio Control notification sent: \"%s\"\n", message.c_str());
 }
 
 void HealthKicksBleServer::notifyStudioControl(const String& message) {

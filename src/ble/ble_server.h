@@ -8,7 +8,7 @@
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
 typedef std::function<void(const String& command)> StudioCommandCallback;
 
-// Drapeau de relance asynchrone de la publicité BLE (géré dans loop() pour éviter les deadlocks radio)
+// Asynchronous BLE advertising restart flag (handled in loop() to avoid radio deadlocks)
 extern volatile bool g_need_restart_advertising;
 
 class HealthKicksBleServer {
@@ -16,38 +16,38 @@ public:
     HealthKicksBleServer();
 
     /**
-     * @brief Initialise la pile NimBLE, le service Footwear et les 4 caractéristiques.
+     * @brief Initializes NimBLE stack, Footwear service and the 4 characteristics.
      */
     void begin(const char* deviceName = BLE_DEVICE_NAME);
 
     /**
-     * @brief Lance la publicité BLE (Advertising).
+     * @brief Starts BLE advertising.
      */
     void startAdvertising();
 
     /**
-     * @brief Arrête la publicité BLE.
+     * @brief Stops BLE advertising.
      */
     void stopAdvertising();
 
     /**
-     * @brief Notifie un changement d'état d'activité (Caractéristique 0002, 7 octets Big-Endian).
+     * @brief Notifies an activity state change (Characteristic 0002, 7 bytes Big-Endian).
      */
     void notifyActivity(uint8_t stateCode, uint8_t confidence, uint32_t timestampSec, uint8_t flags = 0);
 
     /**
-     * @brief Notifie un message textuel de session Studio (Caractéristique 0004, ASCII).
+     * @brief Notifies a text message for Studio session (Characteristic 0004, ASCII).
      */
     void notifyStudioControl(const std::string& message);
     void notifyStudioControl(const String& message);
     void notifyStudioControl(const char* message);
 
     /**
-     * @brief Émet un paquet binaire haute vitesse sur Studio Data Burst (Caractéristique 0005).
+     * @brief Sends a high-speed binary packet over Studio Data Burst (Characteristic 0005).
      */
     bool sendBurstPacket(const uint8_t* data, size_t length);
 
-    // Callbacks d'événements
+    // Event callbacks
     void setHapticCallback(HapticCallback cb) { _onHaptic = cb; }
     void setStudioCommandCallback(StudioCommandCallback cb) { _onStudioCommand = cb; }
 
@@ -55,7 +55,7 @@ public:
     uint16_t getNegotiatedMtu() const { return _negotiatedMtu; }
     uint32_t getLastActivityTime() const { return _lastActivityTime; }
 
-    // Méthodes internes appelées par les callbacks NimBLE
+    // Internal methods invoked by NimBLE callbacks
     void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc);
     void onDisconnect(NimBLEServer* pServer);
     void onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc);

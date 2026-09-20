@@ -64,3 +64,36 @@ Le serveur BLE implémente les spécifications contractuelles définies dans `co
 - **Studio Control** : `7a5a0004-...` (WRITE, NOTIFY - ASCII UTF-8)
 - **Studio Data Burst** : `7a5a0005-...` (NOTIFY - Paquets MTU-adaptés avec CRC32)
 
+---
+
+## 4. Edge AI : Export et Transpilation du Modèle (`tools/export_model_to_c.py`)
+
+Le firmware embarque directement le modèle d'inférence d'activité (Random Forest scikit-learn) transpilé en C pur header-only (`include/activity_model_generated.h`) via `m2cgen`.
+
+### A. Prérequis Python
+```bash
+pip install m2cgen joblib scikit-learn numpy
+```
+*(ou utiliser l'environnement virtuel avec `uv run`)*
+
+### B. Utilisation du script d'export
+Pour convertir un modèle entraîné `.joblib` en header C++ :
+
+```bash
+# Export standard (chemins par défaut : scripts/models/activity_classifier.joblib -> include/activity_model_generated.h)
+python tools/export_model_to_c.py
+
+# Export avec chemins personnalisés
+python tools/export_model_to_c.py --model path/to/model.joblib --output include/activity_model_generated.h
+```
+
+### C. Options disponibles
+* `--model <chemin>` : Chemin vers le fichier `.joblib` du modèle entraîné (Recherche automatique par défaut dans `scripts/models/`, `../health-kicks/scripts/models/`, `../health-kicks-edge-script/models/`).
+* `--output <chemin>` : Chemin du fichier header C généré (Défaut : `include/activity_model_generated.h`).
+
+### D. Workflow après mise à jour du modèle
+1. Entraîner ou ajuster le modèle scikit-learn (Random Forest / Decision Tree).
+2. Lancer `python tools/export_model_to_c.py --model <chemin_modele.joblib>`.
+3. Recompiler le firmware avec `pio run`.
+
+

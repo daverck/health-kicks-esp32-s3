@@ -14,6 +14,7 @@
 #define CHAR_HAPTIC_COMMAND_UUID        "7a5a0003-c529-4d64-8848-18e5904de22a"
 #define CHAR_STUDIO_CONTROL_UUID        "7a5a0004-c529-4d64-8848-18e5904de22a"
 #define CHAR_STUDIO_DATA_BURST_UUID     "7a5a0005-c529-4d64-8848-18e5904de22a"
+#define CHAR_STEP_COUNTER_UUID          "7a5a0006-c529-4d64-8848-18e5904de22a"
 
 // Activity state codes (Characteristic 0002)
 #define STATE_CODE_IDLE                 0x00
@@ -66,6 +67,19 @@ struct BurstPacketHeader {
     uint8_t packet_type;    // 0x01 = START, 0x02 = DATA_CHUNK, 0x03 = END
     uint16_t seq_num;       // Sequence number (Big-Endian)
     uint8_t payload_len;    // Sample count or payload length
+};
+
+/**
+ * @brief Packed 13-byte Step Counter / Pedometer payload structure (Big-Endian).
+ * Characteristic 0006.
+ */
+struct StepCounterPayload {
+    uint32_t total_steps;        // offset 0..3 (Big-Endian)
+    uint16_t walk_steps;         // offset 4..5 (Big-Endian)
+    uint16_t run_steps;          // offset 6..7 (Big-Endian)
+    uint16_t stairs_steps;       // offset 8..9 (Big-Endian)
+    uint16_t unclassified_steps; // offset 10..11 (Big-Endian)
+    uint8_t cadence_spm;         // offset 12 (0 - 255 SPM)
 };
 #pragma pack(pop)
 

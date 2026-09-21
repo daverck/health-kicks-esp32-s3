@@ -58,6 +58,7 @@ HealthKicksBleServer::HealthKicksBleServer()
       _pCharHaptic(nullptr),
       _pCharStudioControl(nullptr),
       _pCharStudioBurst(nullptr),
+      _pCharStepCounter(nullptr),
       _deviceConnected(false),
       _negotiatedMtu(23),
       _lastActivityTime(0) {}
@@ -99,6 +100,14 @@ void HealthKicksBleServer::begin(const char* deviceName) {
         CHAR_STUDIO_DATA_BURST_UUID,
         NIMBLE_PROPERTY::NOTIFY
     );
+
+    // Characteristic 5: Step Counter / Pedometer (READ, NOTIFY - 13 bytes Big-Endian)
+    _pCharStepCounter = _pService->createCharacteristic(
+        CHAR_STEP_COUNTER_UUID,
+        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
+    );
+    StepCounterPayload defaultSteps = {0, 0, 0, 0, 0, 0};
+    _pCharStepCounter->setValue(reinterpret_cast<const uint8_t*>(&defaultSteps), sizeof(defaultSteps));
 
     // Start service
     _pService->start();
@@ -221,6 +230,13 @@ void HealthKicksBleServer::notifyActivity(uint8_t stateCode, uint8_t confidence,
 
     _pCharActivity->setValue(payload, sizeof(payload));
     _pCharActivity->notify();
+}
+
+void HealthKicksBleServer::notifyStepCounter(const StepCounterPayload& payload) {
+    if (!_deviceConnected || !_pCharStepCounter) return;
+
+    _pCharStepCounter->setValue(reinterpret_cast<const uint8_t*>(&payload), sizeof(payload));
+    _pCharStepCounter->notify();
 }
 
 void HealthKicksBleServer::notifyStudioControl(const std::string& message) {

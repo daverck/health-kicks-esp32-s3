@@ -7,6 +7,7 @@
 #include "studio/studio_manager.h"
 #include "activity_detector.h"
 #include "imu_calibrator.h"
+#include "step_detector.h"
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
@@ -15,12 +16,15 @@ static HealthKicksBleServer bleServer;
 static StudioManager studioManager;
 static ActivityDetector activityDetector;
 static ImuCalibrator imuCalibrator;
+static StepDetector stepDetector;
 
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
 static uint32_t lastDiagnosticPrintMs = 0;
+static uint32_t lastStepNotifyMs = 0;
 static bool imuReady = false;
 static uint8_t lastReportedActivityState = 0xFF;
+static uint8_t currentActivityState = STATE_CODE_IDLE;
 
 /**
  * @brief Runs the hardware self-test diagnostic suite at startup.
@@ -105,6 +109,9 @@ void setup() {
         }
     });
 
+    // Configure Deterministic Step Detector
+    stepDetector.begin();
+
     // Configure BLE interoperability callbacks
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
         haptic.play(pattern, intensity, durationMs);
@@ -157,6 +164,18 @@ void loop() {
                 // Apply dynamic alignment rotation matrix (corrects sensor PCB tilt)
                 imuCalibrator.applyCalibration(ax, ay, az, gx, gy, gz);
 
+                // Step detection on calibrated vertical acceleration with activity gating
+                bool stepDetected = stepDetector.processSample(ax, ay, az, currentActivityState, now);
+                if (stepDetected && bleServer.isConnected()) {
+                    StepCounterPayload payload = stepDetector.getPayload(now);
+                    bleServer.notifyStepCounter(payload);
+                    lastStepNotifyMs = now;
+                    Serial.printf("[STEP] Step detected! Total: %u (W:%u, R:%u, S:%u, U:%u) | Cadence: %u SPM\n",
+                                  stepDetector.getTotalSteps(), stepDetector.getWalkSteps(),
+                                  stepDetector.getRunSteps(), stepDetector.getStairsSteps(),
+                                  stepDetector.getUnclassifiedSteps(), payload.cadence_spm);
+                }
+
                 // Push calibrated sample into sliding buffer
                 activityDetector.pushSample(ax, ay, az, gx, gy, gz);
 
@@ -166,6 +185,7 @@ void loop() {
                     if (activityDetector.detect(result)) {
                         if (result.confidence >= activityDetector.getConfidenceThreshold()) {
                             uint32_t epochSec = (uint32_t)(now / 1000);
+                            currentActivityState = result.stateCode;
 
                             // Notify calibrator if walking activity detected (triggers step 2 refinement on next rest)
                             if (result.stateCode == STATE_CODE_WALK) {
@@ -204,6 +224,13 @@ void loop() {
                 }
             }
         }
+    }
+
+    // Periodic Step Counter refresh (1 Hz heartbeat to update cadence even during rest)
+    if (bleServer.isConnected() && (now - lastStepNotifyMs >= 1000)) {
+        lastStepNotifyMs = now;
+        StepCounterPayload payload = stepDetector.getPayload(now);
+        bleServer.notifyStepCounter(payload);
     }
 
     // 3. Periodic debug telemetry output (every 3 seconds)

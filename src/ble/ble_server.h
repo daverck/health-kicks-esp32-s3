@@ -37,6 +37,11 @@ public:
     void notifyActivity(uint8_t stateCode, uint8_t confidence, uint32_t timestampSec, uint8_t flags = 0);
 
     /**
+     * @brief Notifies step counter data (Characteristic 0006, 13 bytes Big-Endian).
+     */
+    void notifyStepCounter(const StepCounterPayload& payload);
+
+    /**
      * @brief Notifies a text message for Studio session (Characteristic 0004, ASCII).
      */
     void notifyStudioControl(const std::string& message);
@@ -71,6 +76,7 @@ private:
     NimBLECharacteristic* _pCharHaptic;
     NimBLECharacteristic* _pCharStudioControl;
     NimBLECharacteristic* _pCharStudioBurst;
+    NimBLECharacteristic* _pCharStepCounter;
 
     bool _deviceConnected;
     uint16_t _negotiatedMtu;

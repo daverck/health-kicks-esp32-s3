@@ -45,10 +45,10 @@ STATE_CODE_MAP = {
     "walk": "0x01",
     "run": "0x02",
     "stairs": "0x03",
-    "stumble_recover": "0x04",
     "fall_forward": "0x10",
     "fall_backward": "0x11",
     "fall_lateral": "0x12",
+    "stumble_recover": "0x1E",
     "fall_generic": "0x1F",
 }
 
@@ -171,11 +171,13 @@ static const char* const MODEL_CLASS_NAMES[MODEL_CLASS_COUNT] = {{
 static const uint8_t MODEL_CLASS_STATE_CODES[MODEL_CLASS_COUNT] = {{
     {state_codes_c}
 }};
+#define MODEL_CLASS_TO_GATT_STATE MODEL_CLASS_STATE_CODES
 
 // Critical Fall classification mask
 static const bool MODEL_IS_FALL_CLASS[MODEL_CLASS_COUNT] = {{
     {fall_flags_c}
 }};
+#define MODEL_CLASS_IS_FALL MODEL_IS_FALL_CLASS
 
 #define MODEL_HAS_SCALER        {"1" if has_scaler else "0"}
 """

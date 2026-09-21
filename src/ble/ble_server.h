@@ -7,6 +7,7 @@
 
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
 typedef std::function<void(const String& command)> StudioCommandCallback;
+typedef std::function<void()> CalibrationTriggerCallback;
 
 // Asynchronous BLE advertising restart flag (handled in loop() to avoid radio deadlocks)
 extern volatile bool g_need_restart_advertising;
@@ -50,6 +51,7 @@ public:
     // Event callbacks
     void setHapticCallback(HapticCallback cb) { _onHaptic = cb; }
     void setStudioCommandCallback(StudioCommandCallback cb) { _onStudioCommand = cb; }
+    void setCalibrationCallback(CalibrationTriggerCallback cb) { _onCalibration = cb; }
 
     bool isConnected() const { return _deviceConnected; }
     uint16_t getNegotiatedMtu() const { return _negotiatedMtu; }
@@ -76,5 +78,6 @@ private:
 
     HapticCallback _onHaptic;
     StudioCommandCallback _onStudioCommand;
+    CalibrationTriggerCallback _onCalibration;
 };
 

@@ -7,7 +7,7 @@ ActivityDetector::ActivityDetector()
     : _writeIndex(0),
       _sampleCount(0),
       _samplesSinceLastEval(0),
-      _confidenceThreshold(0.65f),
+      _confidenceThreshold(0.75f),
       _fallCooldownMs(5000),
       _minFallImpactMs2(18.0f),
       _lastFallTimestampMs(0) {
@@ -200,20 +200,34 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     memset(scores, 0, sizeof(scores));
     evaluate_model(features, scores);
 
-    // Find predicted class with maximum score
-    int bestIdx = 0;
-    double bestScore = scores[0];
-    double sumScores = scores[0];
-
+    // Numerically stable Softmax calculation over raw model scores/logits
+    double max_val = scores[0];
     for (int i = 1; i < MODEL_CLASS_COUNT; ++i) {
-        sumScores += scores[i];
-        if (scores[i] > bestScore) {
-            bestScore = scores[i];
+        if (scores[i] > max_val) {
+            max_val = scores[i];
+        }
+    }
+
+    double sum = 0.0;
+    double probs[MODEL_CLASS_COUNT];
+    for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+        probs[i] = exp(scores[i] - max_val);
+        sum += probs[i];
+    }
+
+    int bestIdx = 0;
+    double bestProb = 0.0;
+    for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+        if (sum > 0.0) {
+            probs[i] /= sum;
+        }
+        if (probs[i] > bestProb) {
+            bestProb = probs[i];
             bestIdx = i;
         }
     }
 
-    float confidence = (sumScores > 0.0) ? (float)(bestScore / sumScores) : (float)bestScore;
+    float confidence = (float)bestProb;
     if (confidence > 1.0f) confidence = 1.0f;
     if (confidence < 0.0f) confidence = 0.0f;
 
@@ -249,7 +263,7 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     result.inferenceTimeUs = elapsedUs;
 
     for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-        result.classScores[i] = (sumScores > 0.0) ? (scores[i] / sumScores) : scores[i];
+        result.classScores[i] = probs[i];
     }
 
     return true;

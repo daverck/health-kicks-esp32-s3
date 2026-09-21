@@ -153,6 +153,15 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
     }
     Serial.println();
 
+    // Check for Zero-Calibration command (Opcode 0x05)
+    if (length >= 1 && data[0] == CMD_TRIGGER_CALIBRATION) {
+        Serial.println("[BLE] Zero-calibration command received (Opcode 0x05)");
+        if (_onCalibration) {
+            _onCalibration();
+        }
+        return;
+    }
+
     if (length >= 4) {
         uint8_t pattern = data[0];
         uint8_t intensity = data[1];
@@ -183,6 +192,15 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
     cmd.trim();
 
     log_i("BLE Studio Control Write received: \"%s\"", cmd.c_str());
+
+    // Check for ASCII CALIBRATE command
+    if (cmd.equalsIgnoreCase("CALIBRATE") || cmd.startsWith("CALIB")) {
+        Serial.println("[BLE] Studio Control CALIBRATE command received");
+        if (_onCalibration) {
+            _onCalibration();
+        }
+        return;
+    }
 
     if (_onStudioCommand) {
         _onStudioCommand(cmd);

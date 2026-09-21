@@ -6,6 +6,7 @@
 #include "ble/ble_server.h"
 #include "studio/studio_manager.h"
 #include "activity_detector.h"
+#include "imu_calibrator.h"
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
@@ -13,6 +14,7 @@ static HapticDriver haptic;
 static HealthKicksBleServer bleServer;
 static StudioManager studioManager;
 static ActivityDetector activityDetector;
+static ImuCalibrator imuCalibrator;
 
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
@@ -86,9 +88,22 @@ void setup() {
     studioManager.begin(&bleServer, &haptic, &imu);
 
     // Configure Edge AI activity detection engine
-    activityDetector.begin(0.65f, 5000, 18.0f);
+    activityDetector.begin(0.75f, 5000, 18.0f);
     Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%).\n",
                   MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT, activityDetector.getConfidenceThreshold() * 100.0f);
+
+    // Configure Dynamic IMU Tilt Calibrator (4.0s stillness window @ 19 Hz)
+    imuCalibrator.begin(IMU_SAMPLE_FREQ_HZ, 4.0f);
+    imuCalibrator.setOnCalibrationComplete([](bool success, int step) {
+        if (success) {
+            // Trigger confirmation haptic pulse strictly after calibration and NVS persistence
+            haptic.play(HAPTIC_PATTERN_DOUBLE_PULSE, 200, 250);
+            bleServer.notifyStudioControl("CALIBRATION_OK");
+            Serial.printf("[CALIB] Calibration sequence completed (step %d), notified mobile client.\n", step);
+        } else {
+            bleServer.notifyStudioControl("CALIBRATION_ERROR motion_detected");
+        }
+    });
 
     // Configure BLE interoperability callbacks
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
@@ -97,6 +112,11 @@ void setup() {
 
     bleServer.setStudioCommandCallback([](const String& command) {
         studioManager.handleCommand(command.c_str());
+    });
+
+    bleServer.setCalibrationCallback([]() {
+        bleServer.notifyStudioControl("CALIBRATING 4.0");
+        imuCalibrator.triggerManualCalibration();
     });
 
     // Start NimBLE server
@@ -129,10 +149,16 @@ void loop() {
         lastImuReadMs = now;
 
         if (imuReady) {
-            ImuRawFrame frame;
-            if (imu.readFrame(frame, (uint16_t)(now & 0xFFFF))) {
-                // Ingest sample into sliding buffer
-                activityDetector.pushFrame(frame);
+            float ax, ay, az, gx, gy, gz;
+            if (imu.readRawMetrics(ax, ay, az, gx, gy, gz)) {
+                // Ingest raw physical readings into dynamic orientation calibrator
+                imuCalibrator.update(ax, ay, az, gx, gy, gz);
+
+                // Apply dynamic alignment rotation matrix (corrects sensor PCB tilt)
+                imuCalibrator.applyCalibration(ax, ay, az, gx, gy, gz);
+
+                // Push calibrated sample into sliding buffer
+                activityDetector.pushSample(ax, ay, az, gx, gy, gz);
 
                 // Run real-time edge inference if step interval is due
                 if (activityDetector.isEvaluationDue()) {
@@ -140,6 +166,11 @@ void loop() {
                     if (activityDetector.detect(result)) {
                         if (result.confidence >= activityDetector.getConfidenceThreshold()) {
                             uint32_t epochSec = (uint32_t)(now / 1000);
+
+                            // Notify calibrator if walking activity detected (triggers step 2 refinement on next rest)
+                            if (result.stateCode == STATE_CODE_WALK) {
+                                imuCalibrator.notifyWalkDetected();
+                            }
 
                             if (result.isFall) {
                                 Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Latency: %u us) ***\n",

@@ -88,6 +88,14 @@ void ImuCalibrator::update(float ax_raw, float ay_raw, float az_raw, float gx_ra
         _sumAz += (double)az_raw;
         _stillnessSampleCount++;
 
+        // Log progress every second (or every 19 samples)
+        if (_stillnessSampleCount % _sampleRateHz == 0 || _stillnessSampleCount == 1) {
+            float accelMag = sqrtf(ax_raw * ax_raw + ay_raw * ay_raw + az_raw * az_raw);
+            float gyroMag = sqrtf(gx_raw * gx_raw + gy_raw * gy_raw + gz_raw * gz_raw);
+            Serial.printf("[CALIB] Sampling stillness: %u/%u samples (accel=%.2fg, gyro=%.1fdps, Az=%.2fg)...\n",
+                          _stillnessSampleCount, _requiredSamples, accelMag, gyroMag, az_raw);
+        }
+
         if (_stillnessSampleCount >= _requiredSamples) {
             int step = _manualCalibrationPending ? 0 : (_phase == CALIB_WAITING_INITIAL_IDLE ? 1 : 2);
             computeAndApplyAlignment(step);
@@ -116,7 +124,13 @@ void ImuCalibrator::update(float ax_raw, float ay_raw, float az_raw, float gx_ra
             }
         }
     } else {
-        // Motion detected: reset continuous stillness accumulator
+        // Motion or tilt detected: reset continuous stillness accumulator
+        if (_stillnessSampleCount > 5) {
+            float accelMag = sqrtf(ax_raw * ax_raw + ay_raw * ay_raw + az_raw * az_raw);
+            float gyroMag = sqrtf(gx_raw * gx_raw + gy_raw * gy_raw + gz_raw * gz_raw);
+            Serial.printf("[CALIB] Motion/tilt detected: reset accumulator (was %u/%u). Accel=%.2fg, Gyro=%.1fdps, Az=%.2fg\n",
+                          _stillnessSampleCount, _requiredSamples, accelMag, gyroMag, az_raw);
+        }
         if (_stillnessSampleCount > 0) {
             _stillnessSampleCount = 0;
             _sumAx = 0.0;

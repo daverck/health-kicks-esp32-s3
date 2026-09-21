@@ -28,10 +28,10 @@ typedef std::function<void(bool success, int step)> CalibrationCompleteCallback;
 class ImuCalibrator {
 public:
     static constexpr float DEFAULT_CALIBRATION_IDLE_DURATION_SEC = 4.0f;
-    static constexpr float MAX_GYRO_STILLNESS_DPS = 3.0f;
-    static constexpr float MIN_ACCEL_STILLNESS_G = 0.9f;
-    static constexpr float MAX_ACCEL_STILLNESS_G = 1.1f;
-    static constexpr float MIN_ROUGH_HORIZONTAL_AZ_G = 0.7f;
+    static constexpr float MAX_GYRO_STILLNESS_DPS = 25.0f;       // Tolerates MPU-6050 zero-rate drift at rest
+    static constexpr float MIN_ACCEL_STILLNESS_G = 0.80f;
+    static constexpr float MAX_ACCEL_STILLNESS_G = 1.20f;
+    static constexpr float MIN_ROUGH_HORIZONTAL_AZ_G = 0.60f;     // Rough horizontal level requirement
     static constexpr uint16_t DEFAULT_SAMPLE_RATE_HZ = 19;
 
     ImuCalibrator();

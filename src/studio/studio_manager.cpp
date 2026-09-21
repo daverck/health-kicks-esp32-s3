@@ -26,6 +26,7 @@ StudioManager::StudioManager()
     : _bleServer(nullptr),
       _haptic(nullptr),
       _imu(nullptr),
+      _calibrator(nullptr),
       _state(StudioState::IDLE),
       _label(""),
       _durationSec(5.0f),
@@ -34,10 +35,11 @@ StudioManager::StudioManager()
       _recordingStartTimeMs(0),
       _lastSampleTimeMs(0) {}
 
-void StudioManager::begin(HealthKicksBleServer* bleServer, HapticDriver* haptic, ImuMpu6050* imu) {
+void StudioManager::begin(HealthKicksBleServer* bleServer, HapticDriver* haptic, ImuMpu6050* imu, ImuCalibrator* calibrator) {
     _bleServer = bleServer;
     _haptic = haptic;
     _imu = imu;
+    _calibrator = calibrator;
     _state = StudioState::IDLE;
     _frames.reserve(1600); // Reserve for 30s at 50Hz (1500 frames)
 }
@@ -150,6 +152,24 @@ void StudioManager::update() {
                 if (_imu) {
                     ImuRawFrame frame;
                     if (_imu->readFrame(frame, (uint16_t)elapsed)) {
+                        if (_calibrator && _calibrator->isCalibrated()) {
+                            // Scale from milli-g and tenths dps to physical units, rotate, and convert back
+                            float ax_g = (float)frame.ax / 1000.0f;
+                            float ay_g = (float)frame.ay / 1000.0f;
+                            float az_g = (float)frame.az / 1000.0f;
+                            float gx_dps = (float)frame.gx / 10.0f;
+                            float gy_dps = (float)frame.gy / 10.0f;
+                            float gz_dps = (float)frame.gz / 10.0f;
+
+                            _calibrator->applyCalibration(ax_g, ay_g, az_g, gx_dps, gy_dps, gz_dps);
+
+                            frame.ax = (int16_t)roundf(ax_g * 1000.0f);
+                            frame.ay = (int16_t)roundf(ay_g * 1000.0f);
+                            frame.az = (int16_t)roundf(az_g * 1000.0f);
+                            frame.gx = (int16_t)roundf(gx_dps * 10.0f);
+                            frame.gy = (int16_t)roundf(gy_dps * 10.0f);
+                            frame.gz = (int16_t)roundf(gz_dps * 10.0f);
+                        }
                         _frames.push_back(frame);
                     }
                 }

@@ -8,6 +8,7 @@
 #include "sensors/imu_mpu6050.h"
 #include "actuators/haptic_driver.h"
 #include "ble/ble_server.h"
+#include "imu_calibrator.h"
 
 enum class StudioState {
     IDLE,
@@ -22,7 +23,7 @@ class StudioManager {
 public:
     StudioManager();
 
-    void begin(HealthKicksBleServer* bleServer, HapticDriver* haptic, ImuMpu6050* imu);
+    void begin(HealthKicksBleServer* bleServer, HapticDriver* haptic, ImuMpu6050* imu, ImuCalibrator* calibrator = nullptr);
 
     /**
      * @brief Parse et traite une commande Studio Control (ex: "START walk 5.0 <uuid>" ou "CANCEL").
@@ -51,6 +52,7 @@ private:
     HealthKicksBleServer* _bleServer;
     HapticDriver* _haptic;
     ImuMpu6050* _imu;
+    ImuCalibrator* _calibrator;
 
     StudioState _state;
     std::string _label;

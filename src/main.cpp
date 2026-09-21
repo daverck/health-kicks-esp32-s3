@@ -84,8 +84,8 @@ void setup() {
     // Initial hardware diagnostics
     runHardwareDiagnostics();
 
-    // Configure Studio capture manager
-    studioManager.begin(&bleServer, &haptic, &imu);
+    // Configure Studio capture manager with dynamic tilt calibrator
+    studioManager.begin(&bleServer, &haptic, &imu, &imuCalibrator);
 
     // Configure Edge AI activity detection engine
     activityDetector.begin(0.75f, 5000, 18.0f);
@@ -215,10 +215,15 @@ void loop() {
             imu.readRawMetrics(ax, ay, az, gx, gy, gz);
         }
 
-        Serial.printf("[HEARTBEAT] BLE: %s | MTU: %d | IMU: [%.2f, %.2f, %.2f] g | Free PSRAM: %u KB\n",
+        float c_ax = ax, c_ay = ay, c_az = az, c_gx = gx, c_gy = gy, c_gz = gz;
+        imuCalibrator.applyCalibration(c_ax, c_ay, c_az, c_gx, c_gy, c_gz);
+
+        Serial.printf("[HEARTBEAT] BLE: %s | MTU: %d | Raw: [%.2f, %.2f, %.2f]g | Calib: [%.2f, %.2f, %.2f]g (%s) | Free PSRAM: %u KB\n",
                       bleServer.isConnected() ? "CONNECTED" : "ADVERTISING",
                       bleServer.getNegotiatedMtu(),
                       ax, ay, az,
+                      c_ax, c_ay, c_az,
+                      imuCalibrator.isCalibrated() ? "CALIBRATED" : "UNCALIBRATED",
                       ESP.getFreePsram() / 1024);
     }
 

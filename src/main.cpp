@@ -21,10 +21,17 @@ static StepDetector stepDetector;
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
 static uint32_t lastDiagnosticPrintMs = 0;
-static uint32_t lastStepNotifyMs = 0;
 static bool imuReady = false;
 static uint8_t lastReportedActivityState = 0xFF;
 static uint8_t currentActivityState = STATE_CODE_IDLE;
+
+// Low-power step notification state
+static const uint32_t STEP_NOTIFY_BATCH_COUNT = 50;
+static const uint32_t STEP_IDLE_CONFIRM_DELAY_MS = 3000;
+static uint32_t lastNotifiedTotalSteps = 0;
+static uint32_t lastStepDetectedMs = 0;
+static bool hasPendingIdleConfirmation = false;
+static bool prevBleConnected = false;
 
 /**
  * @brief Runs the hardware self-test diagnostic suite at startup.
@@ -134,6 +141,18 @@ void setup() {
 void loop() {
     uint32_t now = millis();
 
+    // BLE connection edge detection for initial step state synchronization
+    bool bleConnected = bleServer.isConnected();
+    if (bleConnected && !prevBleConnected) {
+        // Just connected: notify immediately to sync initial step state
+        StepCounterPayload payload = stepDetector.getPayload(now);
+        bleServer.notifyStepCounter(payload);
+        lastNotifiedTotalSteps = stepDetector.getTotalSteps();
+        hasPendingIdleConfirmation = false;
+        Serial.printf("[STEP] BLE connected, sent initial step state: Total=%u\n", lastNotifiedTotalSteps);
+    }
+    prevBleConnected = bleConnected;
+
     // 0. Asynchronous and reliable BLE advertising restart if disconnected (avoids radio deadlocks)
     if (g_need_restart_advertising) {
         g_need_restart_advertising = false;
@@ -166,14 +185,20 @@ void loop() {
 
                 // Step detection on calibrated vertical acceleration with activity gating
                 bool stepDetected = stepDetector.processSample(ax, ay, az, currentActivityState, now);
-                if (stepDetected && bleServer.isConnected()) {
-                    StepCounterPayload payload = stepDetector.getPayload(now);
-                    bleServer.notifyStepCounter(payload);
-                    lastStepNotifyMs = now;
-                    Serial.printf("[STEP] Step detected! Total: %u (W:%u, R:%u, S:%u, U:%u) | Cadence: %u SPM\n",
-                                  stepDetector.getTotalSteps(), stepDetector.getWalkSteps(),
-                                  stepDetector.getRunSteps(), stepDetector.getStairsSteps(),
-                                  stepDetector.getUnclassifiedSteps(), payload.cadence_spm);
+                if (stepDetected) {
+                    lastStepDetectedMs = now;
+                    hasPendingIdleConfirmation = true;
+
+                    uint32_t totalSteps = stepDetector.getTotalSteps();
+                    if (bleServer.isConnected() && (totalSteps - lastNotifiedTotalSteps >= STEP_NOTIFY_BATCH_COUNT)) {
+                        StepCounterPayload payload = stepDetector.getPayload(now);
+                        bleServer.notifyStepCounter(payload);
+                        lastNotifiedTotalSteps = totalSteps;
+                        Serial.printf("[STEP] Batched notification (%u steps): Total=%u (W:%u, R:%u, S:%u, U:%u) | Cadence: %u SPM\n",
+                                      STEP_NOTIFY_BATCH_COUNT, totalSteps, stepDetector.getWalkSteps(),
+                                      stepDetector.getRunSteps(), stepDetector.getStairsSteps(),
+                                      stepDetector.getUnclassifiedSteps(), payload.cadence_spm);
+                    }
                 }
 
                 // Push calibrated sample into sliding buffer
@@ -226,11 +251,14 @@ void loop() {
         }
     }
 
-    // Periodic Step Counter refresh (1 Hz heartbeat to update cadence even during rest)
-    if (bleServer.isConnected() && (now - lastStepNotifyMs >= 1000)) {
-        lastStepNotifyMs = now;
+    // Rest / Idle confirmation notification check
+    if (bleServer.isConnected() && hasPendingIdleConfirmation && (now - lastStepDetectedMs >= STEP_IDLE_CONFIRM_DELAY_MS)) {
+        hasPendingIdleConfirmation = false;
         StepCounterPayload payload = stepDetector.getPayload(now);
         bleServer.notifyStepCounter(payload);
+        lastNotifiedTotalSteps = stepDetector.getTotalSteps();
+        Serial.printf("[STEP] Idle rest confirmation sent: Total=%u | Cadence=%u SPM\n",
+                      lastNotifiedTotalSteps, payload.cadence_spm);
     }
 
     // 3. Periodic debug telemetry output (every 3 seconds)
@@ -293,4 +321,3 @@ void loop() {
         }
     }
 }
-

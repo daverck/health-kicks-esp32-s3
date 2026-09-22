@@ -94,3 +94,4 @@ private:
     void addStepTimestamp(uint32_t timestampMs);
     void cleanCadenceBuffer(uint32_t nowMs);
 };
+

@@ -170,3 +170,4 @@ StepCounterPayload StepDetector::getPayload(uint32_t nowMs) {
 
     return payload;
 }
+

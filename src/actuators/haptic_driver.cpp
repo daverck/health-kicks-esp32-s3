@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 static TaskHandle_t s_haptic_task_handle = nullptr;
+static volatile uint8_t s_pending_pattern = 0;
 static volatile uint16_t s_pending_duration = 0;
 static volatile uint8_t s_pending_intensity = 0;
 
@@ -9,15 +10,36 @@ static void haptic_task(void* pvParameters) {
     while (true) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        Serial.printf("[HAPTIC] Activating GPIO %d for %d ms (val=%d)\n", 
-                      PIN_HAPTIC_PWM, s_pending_duration, s_pending_intensity);
+        Serial.printf("[HAPTIC] Activating GPIO %d (pattern=%u, dur=%d ms, val=%d)\n", 
+                      PIN_HAPTIC_PWM, s_pending_pattern, s_pending_duration, s_pending_intensity);
 
-        // Direct drive HIGH state
-        digitalWrite(PIN_HAPTIC_PWM, HIGH);
-        vTaskDelay(pdMS_TO_TICKS(s_pending_duration));
-        digitalWrite(PIN_HAPTIC_PWM, LOW);
+        if (s_pending_pattern == HAPTIC_PATTERN_DOUBLE_PULSE) {
+            // Double pulse: 2 crisp distinct vibration pulses with inter-pulse pause
+            digitalWrite(PIN_HAPTIC_PWM, HIGH);
+            vTaskDelay(pdMS_TO_TICKS(220));
+            digitalWrite(PIN_HAPTIC_PWM, LOW);
+            vTaskDelay(pdMS_TO_TICKS(140));
+            digitalWrite(PIN_HAPTIC_PWM, HIGH);
+            vTaskDelay(pdMS_TO_TICKS(220));
+            digitalWrite(PIN_HAPTIC_PWM, LOW);
+        } else if (s_pending_pattern == HAPTIC_PATTERN_ALERT_PULSE) {
+            // Triple alert pulses
+            for (int i = 0; i < 3; i++) {
+                digitalWrite(PIN_HAPTIC_PWM, HIGH);
+                vTaskDelay(pdMS_TO_TICKS(180));
+                digitalWrite(PIN_HAPTIC_PWM, LOW);
+                if (i < 2) {
+                    vTaskDelay(pdMS_TO_TICKS(100));
+                }
+            }
+        } else {
+            // Direct continuous drive for requested duration
+            digitalWrite(PIN_HAPTIC_PWM, HIGH);
+            vTaskDelay(pdMS_TO_TICKS(s_pending_duration > 0 ? s_pending_duration : 200));
+            digitalWrite(PIN_HAPTIC_PWM, LOW);
+        }
 
-        Serial.println("[HAPTIC] GPIO turned off");
+        Serial.println("[HAPTIC] Vibration completed, GPIO LOW");
     }
 }
 
@@ -49,14 +71,15 @@ void HapticDriver::init(int pin) {
 }
 
 void HapticDriver::setIntensity(uint8_t intensity) {
-    // Direct digital on-off drive
+    // Direct digital drive
 }
 
 void HapticDriver::play(uint8_t pattern, uint8_t intensity, uint16_t duration_ms) {
-    if (duration_ms == 0 || intensity == 0) {
+    if (intensity == 0) {
         stop();
         return;
     }
+    s_pending_pattern = pattern;
     s_pending_intensity = intensity;
     s_pending_duration = duration_ms;
 
@@ -70,9 +93,9 @@ void HapticDriver::stop() {
 }
 
 void HapticDriver::update() {
-    // Nothing to do in loop()
+    // Handled by FreeRTOS task
 }
 
 void HapticDriver::testRampUp() {
-    play(0, 255, 300);
+    play(HAPTIC_PATTERN_DOUBLE_PULSE, 255, 400);
 }

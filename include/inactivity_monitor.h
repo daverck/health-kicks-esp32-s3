@@ -78,3 +78,4 @@ private:
     InactivityAlertCallback _onInactivityAlert;
     Preferences _prefs;
 };
+

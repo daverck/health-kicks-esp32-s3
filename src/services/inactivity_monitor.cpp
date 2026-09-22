@@ -85,3 +85,4 @@ void InactivityMonitor::resetTimer() {
     _lastStepTimestampMs = millis();
     _alertTriggered = false;
 }
+

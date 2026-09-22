@@ -8,6 +8,7 @@
 #include "activity_detector.h"
 #include "imu_calibrator.h"
 #include "step_detector.h"
+#include "inactivity_monitor.h"
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
@@ -17,6 +18,7 @@ static StudioManager studioManager;
 static ActivityDetector activityDetector;
 static ImuCalibrator imuCalibrator;
 static StepDetector stepDetector;
+static InactivityMonitor inactivityMonitor;
 
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
@@ -119,6 +121,15 @@ void setup() {
     // Configure Deterministic Step Detector
     stepDetector.begin();
 
+    // Configure Autonomous Inactivity Monitor
+    inactivityMonitor.begin();
+    inactivityMonitor.setInactivityAlertCallback([](uint32_t nowMs) {
+        haptic.play(HAPTIC_PATTERN_DOUBLE_PULSE, 160, 200);
+        uint32_t epochSec = (uint32_t)(nowMs / 1000);
+        bleServer.notifyActivity(STATE_CODE_INACTIVITY_ALERT, 100, epochSec, DETECTION_FLAG_LOCAL_HAPTIC);
+        Serial.printf("[INACTIVITY] Emitted 0x20 alert notification & discrete haptic pulse at %u ms\n", nowMs);
+    });
+
     // Configure BLE interoperability callbacks
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
         haptic.play(pattern, intensity, durationMs);
@@ -131,6 +142,10 @@ void setup() {
     bleServer.setCalibrationCallback([]() {
         bleServer.notifyStudioControl("CALIBRATING 4.0");
         imuCalibrator.triggerManualCalibration();
+    });
+
+    bleServer.setInactivityConfigCallback([](bool enabled, uint16_t threshSec, uint16_t coolSec) {
+        inactivityMonitor.configure(enabled, threshSec, coolSec);
     });
 
     // Start NimBLE server
@@ -200,6 +215,9 @@ void loop() {
                                       stepDetector.getUnclassifiedSteps(), payload.cadence_spm);
                     }
                 }
+
+                // Inactivity monitoring with step accumulation gating
+                inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
 
                 // Push calibrated sample into sliding buffer
                 activityDetector.pushSample(ax, ay, az, gx, gy, gz);

@@ -61,7 +61,11 @@ HealthKicksBleServer::HealthKicksBleServer()
       _pCharStepCounter(nullptr),
       _deviceConnected(false),
       _negotiatedMtu(23),
-      _lastActivityTime(0) {}
+      _lastActivityTime(0),
+      _onHaptic(nullptr),
+      _onStudioCommand(nullptr),
+      _onCalibration(nullptr),
+      _onInactivityConfig(nullptr) {}
 
 void HealthKicksBleServer::begin(const char* deviceName) {
     NimBLEDevice::init(deviceName);
@@ -81,7 +85,7 @@ void HealthKicksBleServer::begin(const char* deviceName) {
     uint8_t defaultActivity[7] = {STATE_CODE_IDLE, 0, 0, 0, 0, 0, 0};
     _pCharActivity->setValue(defaultActivity, sizeof(defaultActivity));
 
-    // Characteristic 2: Haptic Command (WRITE, WRITE_NR - 4 bytes Big-Endian)
+    // Characteristic 2: Haptic Command (WRITE, WRITE_NR - 4 or 6 bytes Big-Endian)
     _pCharHaptic = _pService->createCharacteristic(
         CHAR_HAPTIC_COMMAND_UUID,
         NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR
@@ -162,6 +166,20 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
     }
     Serial.println();
 
+    // Check for Inactivity configuration command (Opcode 0x06 - 6 bytes)
+    if (length >= 6 && data[0] == CMD_SET_INACTIVITY_CONFIG) {
+        bool enabled = (data[1] != 0);
+        uint16_t thresh = ((uint16_t)data[2] << 8) | (uint16_t)data[3];
+        uint16_t cool = ((uint16_t)data[4] << 8) | (uint16_t)data[5];
+
+        Serial.printf("[BLE] Inactivity config received: enabled=%d, thresh=%u s, cool=%u s\n",
+                      enabled, thresh, cool);
+        if (_onInactivityConfig) {
+            _onInactivityConfig(enabled, thresh, cool);
+        }
+        return;
+    }
+
     // Check for Zero-Calibration command (Opcode 0x05)
     if (length >= 1 && data[0] == CMD_TRIGGER_CALIBRATION) {
         Serial.println("[BLE] Zero-calibration command received (Opcode 0x05)");
@@ -201,6 +219,32 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
     cmd.trim();
 
     log_i("BLE Studio Control Write received: \"%s\"", cmd.c_str());
+
+    // Check for ASCII SET_INACTIVITY command: SET_INACTIVITY <0|1> <thresh_sec> <cool_sec>
+    if (cmd.startsWith("SET_INACTIVITY")) {
+        int firstSpace = cmd.indexOf(' ');
+        if (firstSpace > 0) {
+            int secondSpace = cmd.indexOf(' ', firstSpace + 1);
+            if (secondSpace > 0) {
+                int thirdSpace = cmd.indexOf(' ', secondSpace + 1);
+                if (thirdSpace > 0) {
+                    bool enabled = cmd.substring(firstSpace + 1, secondSpace).toInt() != 0;
+                    uint16_t thresh = (uint16_t)cmd.substring(secondSpace + 1, thirdSpace).toInt();
+                    uint16_t cool = (uint16_t)cmd.substring(thirdSpace + 1).toInt();
+
+                    Serial.printf("[BLE] Studio Control SET_INACTIVITY: enabled=%d, thresh=%u s, cool=%u s\n",
+                                  enabled, thresh, cool);
+                    if (_onInactivityConfig) {
+                        _onInactivityConfig(enabled, thresh, cool);
+                    }
+                    notifyStudioControl("INACTIVITY_CONFIG_OK");
+                    return;
+                }
+            }
+        }
+        notifyStudioControl("INACTIVITY_CONFIG_ERROR invalid_params");
+        return;
+    }
 
     // Check for ASCII CALIBRATE command
     if (cmd.equalsIgnoreCase("CALIBRATE") || cmd.startsWith("CALIB")) {
@@ -263,4 +307,3 @@ bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {
     _pCharStudioBurst->notify();
     return true;
 }
-

@@ -8,6 +8,7 @@
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
 typedef std::function<void(const String& command)> StudioCommandCallback;
 typedef std::function<void()> CalibrationTriggerCallback;
+typedef std::function<void(bool enabled, uint16_t thresholdSec, uint16_t cooldownSec)> InactivityConfigCallback;
 
 // Asynchronous BLE advertising restart flag (handled in loop() to avoid radio deadlocks)
 extern volatile bool g_need_restart_advertising;
@@ -17,7 +18,7 @@ public:
     HealthKicksBleServer();
 
     /**
-     * @brief Initializes NimBLE stack, Footwear service and the 4 characteristics.
+     * @brief Initializes NimBLE stack, Footwear service and the 5 characteristics.
      */
     void begin(const char* deviceName = BLE_DEVICE_NAME);
 
@@ -57,6 +58,7 @@ public:
     void setHapticCallback(HapticCallback cb) { _onHaptic = cb; }
     void setStudioCommandCallback(StudioCommandCallback cb) { _onStudioCommand = cb; }
     void setCalibrationCallback(CalibrationTriggerCallback cb) { _onCalibration = cb; }
+    void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
 
     bool isConnected() const { return _deviceConnected; }
     uint16_t getNegotiatedMtu() const { return _negotiatedMtu; }
@@ -85,5 +87,5 @@ private:
     HapticCallback _onHaptic;
     StudioCommandCallback _onStudioCommand;
     CalibrationTriggerCallback _onCalibration;
+    InactivityConfigCallback _onInactivityConfig;
 };
-

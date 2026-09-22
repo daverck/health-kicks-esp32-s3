@@ -26,6 +26,7 @@
 #define STATE_CODE_FALL_LATERAL         0x12
 #define STATE_CODE_STUMBLE_RECOVER      0x1E
 #define STATE_CODE_FALL_GENERIC         0x1F
+#define STATE_CODE_INACTIVITY_ALERT     0x20
 
 // Detection flags (Characteristic 0002)
 #define DETECTION_FLAG_CRITICAL_FALL    (1 << 0)
@@ -41,6 +42,7 @@
 #define HAPTIC_PATTERN_DOUBLE_PULSE     1
 #define HAPTIC_PATTERN_ALERT_PULSE      2
 #define CMD_TRIGGER_CALIBRATION         0x05
+#define CMD_SET_INACTIVITY_CONFIG       0x06
 
 // IMU frame parameters
 #define IMU_BYTES_PER_FRAME             14
@@ -81,5 +83,15 @@ struct StepCounterPayload {
     uint16_t unclassified_steps; // offset 10..11 (Big-Endian)
     uint8_t cadence_spm;         // offset 12 (0 - 255 SPM)
 };
-#pragma pack(pop)
 
+/**
+ * @brief Packed 6-byte Inactivity Configuration Payload (Big-Endian).
+ * Characteristic 0003 (Haptic/Control Command with Opcode 0x06).
+ */
+struct InactivityConfigPayload {
+    uint8_t cmd_opcode;               // 0x06
+    uint8_t is_enabled;               // 0 or 1
+    uint16_t inactivity_threshold_sec;// Big-Endian
+    uint16_t cooldown_duration_sec;   // Big-Endian
+};
+#pragma pack(pop)

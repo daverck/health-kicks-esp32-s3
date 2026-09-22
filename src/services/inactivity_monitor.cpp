@@ -70,7 +70,7 @@ void InactivityMonitor::processStepActivity(uint32_t totalSteps, uint8_t current
             }
         }
     } else {
-        if ((nowMs - _lastAlertTimestampMs) >= ((uint32_t)_cooldownDurationSec * 1000)) {
+        if (_cooldownDurationSec > 0 && (nowMs - _lastAlertTimestampMs) >= ((uint32_t)_cooldownDurationSec * 1000)) {
             _lastAlertTimestampMs = nowMs;
 
             Serial.println("[INACTIVITY] Cooldown repeat alert triggered.");

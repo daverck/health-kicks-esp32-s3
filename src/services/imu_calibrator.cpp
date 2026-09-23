@@ -307,3 +307,26 @@ void ImuCalibrator::reset() {
     Serial.println("[CALIB] NVS calibration cleared. Calibrator reset to initial identity state.");
 }
 
+void ImuCalibrator::getRotationMatrixFlat(float matrix9[9]) const {
+    if (matrix9 == nullptr) return;
+    int idx = 0;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            matrix9[idx++] = _r[i][j];
+        }
+    }
+}
+
+void ImuCalibrator::restoreFromMatrix(const float matrix9[9]) {
+    if (matrix9 == nullptr) return;
+    int idx = 0;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            _r[i][j] = matrix9[idx++];
+        }
+    }
+    _isCalibrated = true;
+    _phase = CALIB_FIRST_DONE_WAITING_WALK;
+}
+
+

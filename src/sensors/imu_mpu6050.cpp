@@ -1,13 +1,20 @@
 #include "imu_mpu6050.h"
 
 // MPU-6050 Registers
-static const uint8_t MPU_REG_SMPLRT_DIV   = 0x19;
-static const uint8_t MPU_REG_CONFIG       = 0x1A;
-static const uint8_t MPU_REG_GYRO_CONFIG  = 0x1B;
-static const uint8_t MPU_REG_ACCEL_CONFIG = 0x1C;
-static const uint8_t MPU_REG_ACCEL_XOUT_H = 0x3B;
-static const uint8_t MPU_REG_PWR_MGMT_1   = 0x6B;
-static const uint8_t MPU_REG_WHO_AM_I     = 0x75;
+static const uint8_t MPU_REG_SMPLRT_DIV      = 0x19;
+static const uint8_t MPU_REG_CONFIG          = 0x1A;
+static const uint8_t MPU_REG_GYRO_CONFIG     = 0x1B;
+static const uint8_t MPU_REG_ACCEL_CONFIG    = 0x1C;
+static const uint8_t MPU_REG_MOT_THR         = 0x1F;
+static const uint8_t MPU_REG_MOT_DUR         = 0x20;
+static const uint8_t MPU_REG_INT_PIN_CFG     = 0x37;
+static const uint8_t MPU_REG_INT_ENABLE      = 0x38;
+static const uint8_t MPU_REG_INT_STATUS      = 0x3A;
+static const uint8_t MPU_REG_ACCEL_XOUT_H    = 0x3B;
+static const uint8_t MPU_REG_MOT_DETECT_CTRL = 0x69;
+static const uint8_t MPU_REG_PWR_MGMT_1      = 0x6B;
+static const uint8_t MPU_REG_PWR_MGMT_2      = 0x6C;
+static const uint8_t MPU_REG_WHO_AM_I        = 0x75;
 
 ImuMpu6050::ImuMpu6050() : _address(IMU_I2C_ADDR), _wire(&Wire) {}
 
@@ -165,4 +172,54 @@ uint8_t ImuMpu6050::readRegister(uint8_t reg) {
         return _wire->read();
     }
     return 0;
+}
+
+bool ImuMpu6050::enableWakeOnMotion(uint8_t threshold, uint8_t duration) {
+    // 1. Ensure chip is awake to configure registers
+    if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x00)) {
+        return false;
+    }
+    delay(10);
+
+    // 2. Configure INT pin: Active HIGH, Push-Pull, Latch until cleared
+    if (!writeRegister(MPU_REG_INT_PIN_CFG, 0x20)) {
+        return false;
+    }
+
+    // 3. Configure High-Pass Filter for motion detection (5Hz HPF, +/-8g scale)
+    if (!writeRegister(MPU_REG_ACCEL_CONFIG, 0x11)) {
+        return false;
+    }
+
+    // 4. Set motion detection threshold and duration
+    if (!writeRegister(MPU_REG_MOT_THR, threshold)) {
+        return false;
+    }
+    if (!writeRegister(MPU_REG_MOT_DUR, duration)) {
+        return false;
+    }
+
+    // 5. Configure motion detection control (accel power-on delay)
+    if (!writeRegister(MPU_REG_MOT_DETECT_CTRL, 0x15)) {
+        return false;
+    }
+
+    // 6. Enable Motion Detection Interrupt (Bit 6 MOT_EN = 0x40)
+    if (!writeRegister(MPU_REG_INT_ENABLE, 0x40)) {
+        return false;
+    }
+
+    // 7. Configure low-power sampling in PWR_MGMT_2:
+    // LP_WAKE_CTRL = 00 (1.25 Hz), STBY_ACCEL = 000 (active), STBY_GYRO = 111 (disable gyroscopes to minimize current)
+    if (!writeRegister(MPU_REG_PWR_MGMT_2, 0x07)) {
+        return false;
+    }
+
+    // 8. Put MPU-6050 in CYCLE mode (Bit 5 CYCLE = 1, Bit 6 SLEEP = 0, Bit 3 TEMP_DIS = 1) -> 0x28
+    if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x28)) {
+        return false;
+    }
+
+    log_i("MPU-6050 configured for Wake-On-Motion (WOM): Thr=%u, Dur=%u, 1.25 Hz cycle mode", threshold, duration);
+    return true;
 }

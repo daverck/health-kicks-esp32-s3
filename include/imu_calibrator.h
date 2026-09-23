@@ -101,6 +101,16 @@ public:
      */
     void reset();
 
+    /**
+     * @brief Exports the 3x3 rotation matrix as a flat 9-element array (for RTC memory backup).
+     */
+    void getRotationMatrixFlat(float matrix9[9]) const;
+
+    /**
+     * @brief Restores the 3x3 rotation matrix from a flat 9-element array (from RTC memory).
+     */
+    void restoreFromMatrix(const float matrix9[9]);
+
 private:
     CalibrationPhase _phase;
     bool _isCalibrated;

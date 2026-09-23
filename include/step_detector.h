@@ -66,6 +66,11 @@ public:
      */
     void reset();
 
+    /**
+     * @brief Restores step accumulation counters across Deep Sleep cycles.
+     */
+    void restoreState(uint32_t total, uint16_t walk, uint16_t run, uint16_t stairs, uint16_t unclassified);
+
 private:
     float _stepThreshold;
     uint32_t _refractoryMs;

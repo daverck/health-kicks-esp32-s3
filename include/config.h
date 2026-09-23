@@ -65,12 +65,23 @@
 #define BLE_ADVERTISING_TIMEOUT_SEC 180      // 3 minutes disconnected before Deep Sleep
 #define BLE_PREFERRED_MTU       247
 
-// Deep Sleep Configuration
-#define DEEP_SLEEP_TIMEOUT_MS   (BLE_ADVERTISING_TIMEOUT_SEC * 1000UL)
+// Deep Sleep & Power Management Configuration
+#define DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC   900      // 15 minutes of stillness and disconnection before Deep Sleep
+#define DEEP_SLEEP_TIMEOUT_MS               (DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC * 1000UL)
+
+// MPU-6050 Wake-On-Motion (WOM) Parameters
+#define IMU_WOM_THRESHOLD                   20       // Motion threshold (1 LSB = 32 mg, 20 = ~640 mg)
+#define IMU_WOM_DURATION                    2        // Minimum duration count for motion event
 
 /**
  * @brief Configure Deep Sleep wakeup via GPIO 14 button (ext1)
  */
 #define CONFIGURE_EXT1_WAKEUP() \
     esp_sleep_enable_ext1_wakeup(1ULL << PIN_BTN_PAIRING, ESP_EXT1_WAKEUP_ANY_LOW)
+
+/**
+ * @brief Configure Deep Sleep wakeup via MPU-6050 INT pin on GPIO 6 (ext0)
+ */
+#define CONFIGURE_EXT0_WAKEUP() \
+    esp_sleep_enable_ext0_wakeup(PIN_IMU_INT, 1)
 

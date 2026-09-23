@@ -34,6 +34,14 @@ public:
      */
     bool readRawMetrics(float& ax_g, float& ay_g, float& az_g, float& gx_dps, float& gy_dps, float& gz_dps);
 
+    /**
+     * @brief Configures MPU-6050 in ultra-low power Wake-On-Motion (WOM) mode for Deep Sleep.
+     * @param threshold Acceleration threshold (1 LSB = 32 mg, default from config.h).
+     * @param duration Minimum event duration count (default from config.h).
+     * @return true if registers configured successfully, false otherwise.
+     */
+    bool enableWakeOnMotion(uint8_t threshold = IMU_WOM_THRESHOLD, uint8_t duration = IMU_WOM_DURATION);
+
 private:
     uint8_t _address;
     TwoWire* _wire;

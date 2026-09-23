@@ -9,6 +9,7 @@
 #include "imu_calibrator.h"
 #include "step_detector.h"
 #include "inactivity_monitor.h"
+#include "power_manager.h"
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
@@ -91,9 +92,6 @@ void setup() {
     // Configure pairing button on GPIO 14
     pinMode(PIN_BTN_PAIRING, INPUT_PULLUP);
 
-    // Configure Deep Sleep wakeup (ext1 on GPIO 14 active low)
-    CONFIGURE_EXT1_WAKEUP();
-
     // Initial hardware diagnostics
     runHardwareDiagnostics();
 
@@ -121,30 +119,38 @@ void setup() {
     // Configure Deterministic Step Detector
     stepDetector.begin();
 
+    // Initialize Power Manager and restore persisted state from RTC memory
+    PowerManager::init(&stepDetector, &imuCalibrator);
+
     // Configure Autonomous Inactivity Monitor
     inactivityMonitor.begin();
     inactivityMonitor.setInactivityAlertCallback([](uint32_t nowMs) {
         haptic.play(HAPTIC_PATTERN_DOUBLE_PULSE, 160, 200);
         uint32_t epochSec = (uint32_t)(nowMs / 1000);
         bleServer.notifyActivity(STATE_CODE_INACTIVITY_ALERT, 100, epochSec, DETECTION_FLAG_LOCAL_HAPTIC);
+        PowerManager::recordActivity(nowMs);
         Serial.printf("[INACTIVITY] Emitted 0x20 alert notification & discrete haptic pulse at %u ms\n", nowMs);
     });
 
     // Configure BLE interoperability callbacks
     bleServer.setHapticCallback([](uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
+        PowerManager::recordActivity(millis());
         haptic.play(pattern, intensity, durationMs);
     });
 
     bleServer.setStudioCommandCallback([](const String& command) {
+        PowerManager::recordActivity(millis());
         studioManager.handleCommand(command.c_str());
     });
 
     bleServer.setCalibrationCallback([]() {
+        PowerManager::recordActivity(millis());
         bleServer.notifyStudioControl("CALIBRATING 4.0");
         imuCalibrator.triggerManualCalibration();
     });
 
     bleServer.setInactivityConfigCallback([](bool enabled, uint16_t threshSec, uint16_t coolSec) {
+        PowerManager::recordActivity(millis());
         inactivityMonitor.configure(enabled, threshSec, coolSec);
     });
 
@@ -203,6 +209,7 @@ void loop() {
                 if (stepDetected) {
                     lastStepDetectedMs = now;
                     hasPendingIdleConfirmation = true;
+                    PowerManager::recordActivity(now);
 
                     uint32_t totalSteps = stepDetector.getTotalSteps();
                     if (bleServer.isConnected() && (totalSteps - lastNotifiedTotalSteps >= STEP_NOTIFY_BATCH_COUNT)) {
@@ -300,21 +307,17 @@ void loop() {
                       ESP.getFreePsram() / 1024);
     }
 
-    // 4. Handle inactivity and switch to Deep Sleep after 3 minutes without connection
-    if (!bleServer.isConnected()) {
-        uint32_t inactiveMs = now - bleServer.getLastActivityTime();
-        if (inactiveMs >= DEEP_SLEEP_TIMEOUT_MS) {
-            Serial.printf("[POWER] Inactivity of %u seconds reached. Entering Deep Sleep...\n", BLE_ADVERTISING_TIMEOUT_SEC);
-            Serial.println("[POWER] Press GPIO 14 button to wake up the shoe.");
-            Serial.flush();
-
-            bleServer.stopAdvertising();
-            haptic.stop();
-
-            // Enter deep sleep
-            esp_deep_sleep_start();
-        }
-    }
+    // 4. Inactivity evaluation and automatic Deep Sleep management (~10 uA)
+    PowerManager::checkSleepConditions(
+        bleServer.isConnected(),
+        studioManager.isRecording(),
+        now,
+        imu,
+        bleServer,
+        haptic,
+        stepDetector,
+        imuCalibrator
+    );
 
     // 5. Handle power/pairing switch (GPIO 14 - Active LOW with internal pull-up)
     static bool s_switchState = HIGH;
@@ -326,6 +329,7 @@ void loop() {
 
         if (reading != s_switchState) {
             s_switchState = reading;
+            PowerManager::recordActivity(now);
             if (s_switchState == LOW) {
                 Serial.println("[SWITCH] Position ON (grounded): restarting BLE advertising");
                 haptic.play(HAPTIC_PATTERN_CONTINUOUS, 180, 80);

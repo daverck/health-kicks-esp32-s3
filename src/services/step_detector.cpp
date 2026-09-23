@@ -36,6 +36,15 @@ void StepDetector::reset() {
     memset(_stepTimestamps, 0, sizeof(_stepTimestamps));
 }
 
+void StepDetector::restoreState(uint32_t total, uint16_t walk, uint16_t run, uint16_t stairs, uint16_t unclassified) {
+    _totalSteps = total;
+    _walkSteps = walk;
+    _runSteps = run;
+    _stairsSteps = stairs;
+    _unclassifiedSteps = unclassified;
+}
+
+
 void StepDetector::addStepTimestamp(uint32_t timestampMs) {
     _stepTimestamps[_timestampHead] = timestampMs;
     _timestampHead = (_timestampHead + 1) % MAX_CADENCE_HISTORY;

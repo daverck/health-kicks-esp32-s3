@@ -21,66 +21,44 @@ ImuMpu6050::ImuMpu6050() : _address(IMU_I2C_ADDR), _wire(&Wire) {}
 bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
     _wire->begin(sdaPin, sclPin);
     _wire->setClock(frequency);
-    _wire->setTimeOut(50);
 
     delay(50);
 
-    // 1. Wake up from any previous sleep/cycle mode (Bit 6 SLEEP = 0, Bit 5 CYCLE = 0)
-    writeRegister(MPU_REG_PWR_MGMT_1, 0x00);
-    delay(10);
-
-    // 2. Software reset of MPU-6050 (Bit 7 = 1)
+    // 1. Software reset of MPU-6050 (Bit 7 = 1)
     if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x80)) {
         return false;
     }
     delay(100);
 
-    // 3. Clear sleep mode after reset (reset sets Bit 6 SLEEP = 1)
-    if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x00)) {
-        return false;
-    }
-    delay(20);
-
-    // 4. Fully enable all accelerometer and gyroscope axes in PWR_MGMT_2 (clear standby modes)
-    if (!writeRegister(MPU_REG_PWR_MGMT_2, 0x00)) {
-        return false;
-    }
-    delay(10);
-
-    // 5. Select auto X-Gyro clock source (0x01)
+    // 2. Wake up + Select clock source Auto X-Gyro (0x01)
     if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x01)) {
         return false;
     }
-    delay(20);
+    delay(30);
 
-    // 6. Disable all interrupts and reset INT pin config
-    writeRegister(MPU_REG_INT_ENABLE, 0x00);
-    writeRegister(MPU_REG_INT_PIN_CFG, 0x00);
-    readRegister(MPU_REG_INT_STATUS); // Clear any latched status
-
-    // 7. Verify WHO_AM_I
+    // 3. Verify WHO_AM_I
     uint8_t who = readWhoAmI();
     if (who != 0x68 && who != 0x70 && who != 0x72) { // 0x68 is nominal, some silicon revisions return 0x70/0x72
         log_e("Invalid IMU WHO_AM_I: 0x%02X (expected 0x68)", who);
         return false;
     }
 
-    // 8. Configure accelerometer to +/- 8g (0x1C = 0x10) -> 4096 LSB/g, HPF disabled
+    // 4. Configure accelerometer to +/- 8g (0x1C = 0x10) -> 4096 LSB/g
     if (!writeRegister(MPU_REG_ACCEL_CONFIG, 0x10)) {
         return false;
     }
 
-    // 9. Configure gyroscope to +/- 250 deg/s (0x1B = 0x00) -> 131.0 LSB/(deg/s)
+    // 5. Configure gyroscope to +/- 250 deg/s (0x1B = 0x00) -> 131.0 LSB/(deg/s)
     if (!writeRegister(MPU_REG_GYRO_CONFIG, 0x00)) {
         return false;
     }
 
-    // 10. Configure hardware low-pass filter (DLPF ~21 Hz) (0x1A = 0x03)
+    // 6. Configure hardware low-pass filter (DLPF ~21 Hz) (0x1A = 0x03)
     if (!writeRegister(MPU_REG_CONFIG, 0x03)) {
         return false;
     }
 
-    // 11. Sample Rate Divider (Sample Rate Divider = 19 -> 50 Hz with 1 kHz DLPF base)
+    // 7. Sample Rate Divider (Sample Rate Divider = 19 -> 50 Hz with 1 kHz DLPF base)
     // Sample Rate = 1000 / (1 + 19) = 50 Hz
     if (!writeRegister(MPU_REG_SMPLRT_DIV, 19)) {
         return false;

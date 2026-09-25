@@ -89,9 +89,8 @@ void setup() {
     Serial.begin(115200);
     delay(1000); // Allow USB CDC port time to enumerate
 
-    // Configure pairing button on GPIO 14 and IMU interrupt on GPIO 6
+    // Configure pairing button on GPIO 14
     pinMode(PIN_BTN_PAIRING, INPUT_PULLUP);
-    pinMode(PIN_IMU_INT, INPUT);
 
     // Initial hardware diagnostics
     runHardwareDiagnostics();

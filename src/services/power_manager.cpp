@@ -140,3 +140,4 @@ void PowerManager::setTimeoutSec(uint32_t sec) {
 uint32_t PowerManager::getTimeoutSec() {
     return _inactivityTimeoutSec;
 }
+

@@ -95,3 +95,4 @@ private:
     static uint32_t _inactivityTimeoutSec;
     static esp_sleep_wakeup_cause_t _wakeupCause;
 };
+

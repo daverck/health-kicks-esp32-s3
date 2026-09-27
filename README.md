@@ -29,11 +29,154 @@ Ce dépôt contient le firmware unifié pour la chaussure connectée **HealthKic
 | **Strapping Pins** | - | **GPIO 0, 45, 46** | Boot Strapping | Ne pas connecter de charge externe |
 | **USB Natif CDC** | USB D- / D+ | **GPIO 19, 20** | USB CDC/JTAG | Moniteur série & flash |
 
-### C. Recommandation Transistor Vibreur (MOSFET N-Channel)
-Pour garantir la pleine saturation du transistor avec le niveau logique 3.3V de l'ESP32-S3, utiliser un MOSFET N-Channel à très bas seuil de déclenchement (*Logic-Level* $V_{gs(th)} < 1.8\text{V}$, idéalement **AO3400** ou **2N7002** faible $V_{gs(th)}$) :
-- **Gate** : Reliée à **GPIO 7** via une résistance de 100 Ω.
-- **Pull-down Gate** : Résistance de 100 kΩ entre Gate et GND pour éviter les vibrations intempestives au boot.
-- **Diode de roue libre** : Diode de redressement rapide (1N4148 ou Schottky BAT43 / SS14) en parallèle inverse aux bornes du moteur.
+### C. Schéma Fonctionnel Global d'Interconnexion
+
+```mermaid
+graph LR
+    subgraph ESP32["ESP32-S3-N16R8 (Microcontrôleur)"]
+        3V3["3.3V"]
+        GND["GND (Masse)"]
+        GPIO4["GPIO 4 (I2C SDA)"]
+        GPIO5["GPIO 5 (I2C SCL)"]
+        GPIO6["GPIO 6 (INT / Wakeup ext0)"]
+        GPIO7["GPIO 7 (LEDC PWM Out)"]
+        GPIO14["GPIO 14 (Bouton / Wakeup ext1)"]
+        GPIO10["GPIO 10 (ADC1_CH9 Batterie)"]
+    end
+
+    subgraph IMU["Module IMU (MPU-6050)"]
+        IMU_VCC["VCC"]
+        IMU_GND["GND"]
+        IMU_SDA["SDA"]
+        IMU_SCL["SCL"]
+        IMU_INT["INT (Wake-On-Motion)"]
+        IMU_AD0["AD0 (GND = Addr 0x68)"]
+    end
+
+    subgraph HAPTIC["Module Vibreur Haptique"]
+        MOT_POS["Moteur (+)"]
+        MOT_NEG["Moteur (-)"]
+        MOSFET["N-MOSFET (AO3400 / 2N7002)"]
+        DIODE["Diode Roue Libre (1N4148 / SS14)"]
+    end
+
+    subgraph BTN["Bouton / Interrupteur"]
+        SW_1["Broche Signal"]
+        SW_2["Broche GND"]
+    end
+
+    %% Alimentations
+    3V3 --> IMU_VCC
+    3V3 --> MOT_POS
+    GND --> IMU_GND
+    GND --> IMU_AD0
+    GND --> SW_2
+    GND --> MOSFET
+
+    %% Signaux IMU
+    GPIO4 <--> IMU_SDA
+    GPIO5 --> IMU_SCL
+    IMU_INT --> GPIO6
+
+    %% Signal Vibreur
+    GPIO7 --> MOSFET
+    MOSFET --> MOT_NEG
+
+    %% Signal Bouton
+    SW_1 --> GPIO14
+```
+
+### D. Schéma Électronique Détaillé des Composants
+
+```text
+==================================================================================================
+                              SCHÉMA DE CÂBLAGE COMPLET - ESP32-S3
+==================================================================================================
+
+1. MODULE IMU (MPU-6050) - BUS I2C ET INTERRUPTION WOM
+--------------------------------------------------------------------------------------------------
+   ESP32-S3                                                Module MPU-6050
+  +-----------+                                           +---------------+
+  |      3.3V |------------------------------------------>| VCC           |
+  |       GND |-------------------+---------------------->| GND           |
+  |           |                   |                       | AD0           | (GND = Addr 0x68)
+  |           |       3.3V        |                       |               |
+  |           |        |          |                       |               |
+  |           |       [4.7k]      |                       |               | (Résistance Pull-up I2C)
+  |    GPIO 4 |--------+--------------------------------->| SDA           |
+  |           |        |                                  |               |
+  |           |       3.3V                                |               |
+  |           |        |                                  |               |
+  |           |       [4.7k]                              |               | (Résistance Pull-up I2C)
+  |    GPIO 5 |--------+--------------------------------->| SCL           |
+  |           |                                           |               |
+  |    GPIO 6 |<------------------------------------------| INT           | (Réveil WOM / ext0)
+  +-----------+                                           +---------------+
+
+
+2. MODULE VIBREUR HAPTIQUE (DISCRET OU BREAKOUT)
+--------------------------------------------------------------------------------------------------
+   ESP32-S3                                                Étage de Puissance Moteur
+  +-----------+                                           +3.3V (ou VBAT)
+  |           |                                             |
+  |           |                                             +--------+
+  |           |                                             |        |
+  |           |                                           +---+    +---+
+  |           |                                           | + |    | A | Diode de roue libre
+  |           |                                    Moteur | M |    |   | 1N4148 / SS14
+  |           |                                   Vibreur | - |    | K | (Cathode vers +3.3V)
+  |           |                                           +---+    +---+
+  |           |                                             |        |
+  |           |                                             +--------+
+  |           |                                             |
+  |           |                                           D | (Drain)
+  |           |              100 Ω                       +--+
+  |    GPIO 7 |-------------[\/\/\]-----+--------------G |  | N-MOSFET (AO3400 / 2N7002)
+  |           |                         |                +--+
+  |           |                       [100k]              | S (Source)
+  |           |                      Pull-down            |
+  |       GND |-------------------------+-----------------+
+  +-----------+                                           |
+                                                         GND
+
+   *Note pour module vibrant pré-assemblé (ex: breakout Grove / Keyes) :*
+   - VCC -> 3.3V
+   - GND -> GND
+   - IN / SIG -> GPIO 7
+
+
+3. BOUTON POUSSOIR / INTERRUPTEUR (APPAIRAGE & RÉVEIL DEEP SLEEP)
+--------------------------------------------------------------------------------------------------
+   ESP32-S3                                                Bouton Poussoir
+  +-----------+                                           +---------------+
+  |   GPIO 14 |------------------------------------------>| Contact A     | (Actif bas)
+  |       GND |------------------------------------------>| Contact B     | (Pull-up interne active)
+  +-----------+                                           +---------------+
+
+
+4. DIVISEUR DE TENSION MESURE BATTERIE (OPTIONNEL)
+--------------------------------------------------------------------------------------------------
+   ESP32-S3                                                Batterie LiPo (3.7V - 4.2V)
+  +-----------+                                           +VBAT
+  |           |                                             |
+  |           |                                           [100k] (1%)
+  |           |                                             |
+  |   GPIO 10 |---------------------------------------------+ (Tension max = VBAT / 2 = 2.1V)
+  |           |                                             |
+  |           |                                           [100k] (1%)
+  |           |                                             |
+  |       GND |---------------------------------------------+
+  +-----------+                                            GND
+==================================================================================================
+
+### E. Recommandations de Montage & Transistor Vibreur
+Pour garantir la pleine saturation du transistor avec le niveau logique 3.3V de l'ESP32-S3 :
+- Utiliser un MOSFET N-Channel à très bas seuil de déclenchement (*Logic-Level* $V_{gs(th)} < 1.8\text{V}$, idéalement **AO3400**, **IRLML2502** ou **2N7002** à faible $V_{gs(th)}$).
+- **Gate** : Résistance de limitation de 100 Ω connectée à **GPIO 7**.
+- **Pull-down Gate** : Résistance de 100 kΩ entre Gate et GND pour éviter toute impulsion au démarrage ou en Deep Sleep.
+- **Diode de roue libre** : Diode de redressement rapide (1N4148 ou diode Schottky SS14/BAT43) placée en parallèle inverse aux bornes du moteur pour absorber les surtensions inductives.
+- **Module IMU MPU-6050** : Si le module MPU-6050 intègre déjà des résistances de pull-up I2C internes de 4.7 kΩ vers 3.3V, les résistances externes peuvent être omises. La broche `AD0` doit impérativement être reliée à `GND` pour fixer l'adresse I2C à `0x68`.
+
 
 ---
 

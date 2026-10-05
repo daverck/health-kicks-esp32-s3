@@ -41,6 +41,9 @@
 // Addressable RGB Status LED (Onboard DevKitC-1)
 #define PIN_LED_RGB             GPIO_NUM_48  // WS2812 Data In
 
+// Blue Status LED (Active High, 100 Ohm series resistor)
+#define PIN_LED_BLUE            GPIO_NUM_13  // Status LED for BLE, Calibration, and Studio
+
 // Battery Voltage Analog Sense
 #define PIN_VBAT_SENSE          GPIO_NUM_10  // ADC1_CHANNEL_9 (Voltage divider 2x 100k)
 

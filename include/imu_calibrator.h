@@ -87,6 +87,11 @@ public:
     bool isCalibrated() const { return _isCalibrated; }
 
     /**
+     * @brief Returns true if an on-demand manual calibration sequence is currently in progress.
+     */
+    bool isCalibrating() const { return _manualCalibrationPending; }
+
+    /**
      * @brief Returns current calibration phase.
      */
     CalibrationPhase getPhase() const { return _phase; }

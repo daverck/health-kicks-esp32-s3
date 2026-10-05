@@ -3,6 +3,7 @@
 #include "invariants.h"
 #include "sensors/imu_mpu6050.h"
 #include "actuators/haptic_driver.h"
+#include "actuators/led_driver.h"
 #include "ble/ble_server.h"
 #include "studio/studio_manager.h"
 #include "activity_detector.h"
@@ -14,6 +15,7 @@
 // Hardware module and service instances
 static ImuMpu6050 imu;
 static HapticDriver haptic;
+static LedDriver statusLed;
 static HealthKicksBleServer bleServer;
 static StudioManager studioManager;
 static ActivityDetector activityDetector;
@@ -81,6 +83,11 @@ static void runHardwareDiagnostics() {
     haptic.init(PIN_HAPTIC_PWM);
     Serial.println("[PASS] Haptic driver initialized (Anti-glitch LOW, ready for commands).");
 
+    // 4. Status LED diagnostics (Blue LED on GPIO 13)
+    Serial.printf("[LED] Initializing status LED on GPIO %d...\n", PIN_LED_BLUE);
+    statusLed.init(PIN_LED_BLUE);
+    Serial.println("[PASS] Status LED initialized (Ready for BLE, Calibration, and Studio).");
+
     Serial.println("========================================================\n");
 }
 
@@ -91,6 +98,10 @@ void setup() {
 
     // Configure pairing button on GPIO 14
     pinMode(PIN_BTN_PAIRING, INPUT_PULLUP);
+
+    // Configure Blue Status LED on GPIO 13
+    statusLed.init(PIN_LED_BLUE);
+    statusLed.setBleAdvertising();
 
     // Initial hardware diagnostics
     runHardwareDiagnostics();
@@ -162,15 +173,20 @@ void setup() {
 void loop() {
     uint32_t now = millis();
 
-    // BLE connection edge detection for initial step state synchronization
+    // BLE connection edge detection for initial step state synchronization & status LED
     bool bleConnected = bleServer.isConnected();
     if (bleConnected && !prevBleConnected) {
-        // Just connected: notify immediately to sync initial step state
+        // Just connected: notify immediately to sync initial step state and signal LED connection confirmation
+        statusLed.setBleConnected();
         StepCounterPayload payload = stepDetector.getPayload(now);
         bleServer.notifyStepCounter(payload);
         lastNotifiedTotalSteps = stepDetector.getTotalSteps();
         hasPendingIdleConfirmation = false;
         Serial.printf("[STEP] BLE connected, sent initial step state: Total=%u\n", lastNotifiedTotalSteps);
+    } else if (!bleConnected && prevBleConnected) {
+        // Just disconnected: signal alert pattern then return to advertising
+        statusLed.setBleDisconnected();
+        Serial.println("[BLE] Client disconnected, status LED set to disconnected alert.");
     }
     prevBleConnected = bleConnected;
 
@@ -179,6 +195,7 @@ void loop() {
         g_need_restart_advertising = false;
         delay(50);
         NimBLEDevice::getAdvertising()->start();
+        statusLed.setBleAdvertising();
         Serial.println("[BLE] Advertising restarted.");
     }
 
@@ -187,9 +204,12 @@ void loop() {
         studioManager.cancel();
     }
 
-    // 1. Update haptic actuator and Studio manager
+    // 1. Update haptic actuator, Studio manager, and status LED
     haptic.update();
     studioManager.update();
+    statusLed.setCalibrating(imuCalibrator.isCalibrating());
+    statusLed.setStudioRecording(studioManager.isRecording());
+    statusLed.update(now);
 
     // 2. Nominal IMU acquisition & Edge AI Activity Detection (only if Studio is not recording)
     if (!studioManager.isRecording() && (now - lastImuReadMs >= IMU_SAMPLE_PERIOD_MS)) {

@@ -22,6 +22,7 @@ Ce dépôt contient le firmware unifié pour la chaussure connectée **HealthKic
 | **MPU-6050 (IMU)** | AD0 | GND | Adresse I2C | Fixe l'adresse à `0x68` |
 | **MPU-6050 (IMU)** | INT | **GPIO 6** | GPIO Interrupt | Optionnel (Wake-on-motion) |
 | **Vibreur Haptique** | Gate (MOSFET) | **GPIO 7** | LEDC PWM (0-255) | Fréquence 10 kHz, Timer 0 |
+| **LED Bleue Statut** | Anode (+ R 100 Ω)| **GPIO 13** | Output (Actif Haut) | BLE (appairage/connecté/déconnecté), Calibration, Studio |
 | **Bouton Appairage** | Contact | **GPIO 14** | RTC IO 14 (Input) | Pull-up interne, actif bas (GND), réveil `ext1` |
 | **LED RGB Statut** | Data In | **GPIO 48** | RMT / WS2812 | LED RGB embarquée sur DevKitC-1 |
 | **Mesure Batterie** | Diviseur $V_{bat}$ | **GPIO 10** | ADC1_CH9 | Diviseur 2x 100 kΩ ($V_{bat}/2$) |
@@ -40,6 +41,7 @@ graph LR
         GPIO5["GPIO 5 (I2C SCL)"]
         GPIO6["GPIO 6 (INT / Wakeup ext0)"]
         GPIO7["GPIO 7 (LEDC PWM Out)"]
+        GPIO13["GPIO 13 (LED Statut Bleue)"]
         GPIO14["GPIO 14 (Bouton / Wakeup ext1)"]
         GPIO10["GPIO 10 (ADC1_CH9 Batterie)"]
     end
@@ -60,18 +62,32 @@ graph LR
         DIODE["Diode Roue Libre (1N4148 / SS14)"]
     end
 
+    subgraph LED["LED Bleue de Statut"]
+        R_LED["Résistance 100 Ω"]
+        LED_BL["LED Bleue (Anode/Cathode)"]
+    end
+
     subgraph BTN["Bouton / Interrupteur"]
         SW_1["Broche Signal"]
         SW_2["Broche GND"]
     end
 
-    %% Alimentations
+    %% Alimentations & Contrôles
     3V3 --> IMU_VCC
     3V3 --> MOT_POS
     GND --> IMU_GND
     GND --> IMU_AD0
     GND --> SW_2
     GND --> MOSFET
+    GND --> LED_BL
+
+    GPIO4 --> IMU_SDA
+    GPIO5 --> IMU_SCL
+    IMU_INT --> GPIO6
+    GPIO7 --> MOSFET
+    GPIO13 --> R_LED --> LED_BL
+    SW_1 --> GPIO14
+```
 
     %% Signaux IMU
     GPIO4 <--> IMU_SDA
@@ -154,7 +170,17 @@ graph LR
   +-----------+                                           +---------------+
 
 
-4. DIVISEUR DE TENSION MESURE BATTERIE (OPTIONNEL)
+4. LED BLEUE DE STATUT (BLE, CALIBRATION, STUDIO)
+--------------------------------------------------------------------------------------------------
+   ESP32-S3                                                LED Bleue + Résistance Série
+  +-----------+                                           
+  |   GPIO 13 |----------------[\/\/\]------------------->| Anode (+)     | LED Bleue
+  |           |                 100 Ω                     | Cathode (-)   |
+  |       GND |------------------------------------------>|               |
+  +-----------+                                           +---------------+
+
+
+5. DIVISEUR DE TENSION MESURE BATTERIE (OPTIONNEL)
 --------------------------------------------------------------------------------------------------
    ESP32-S3                                                Batterie LiPo (3.7V - 4.2V)
   +-----------+                                           +VBAT
@@ -176,6 +202,18 @@ Pour garantir la pleine saturation du transistor avec le niveau logique 3.3V de 
 - **Pull-down Gate** : Résistance de 100 kΩ entre Gate et GND pour éviter toute impulsion au démarrage ou en Deep Sleep.
 - **Diode de roue libre** : Diode de redressement rapide (1N4148 ou diode Schottky SS14/BAT43) placée en parallèle inverse aux bornes du moteur pour absorber les surtensions inductives.
 - **Module IMU MPU-6050** : Si le module MPU-6050 intègre déjà des résistances de pull-up I2C internes de 4.7 kΩ vers 3.3V, les résistances externes peuvent être omises. La broche `AD0` doit impérativement être reliée à `GND` pour fixer l'adresse I2C à `0x68`.
+
+### F. Comportement & Signaux Visuels de la LED Bleue (GPIO 13)
+
+La LED de statut bleue (`LedDriver`) fonctionne selon une machine à états non-bloquante avec priorisation des états matériels et logiciels :
+
+| Événement / État | Comportement LED (GPIO 13) | Fréquence / Temporisation | Objectif & Contexte |
+| :--- | :--- | :--- | :--- |
+| **Calibration IMU en cours** | **Allumée Fixe (Solid ON)** | Continue pendant la capture | Signale l'immobilité requise pour le calibrage des offsets |
+| **Capture Studio en cours** | **Allumée Fixe (Solid ON)** | Continue pendant l'enregistrement | Signale la capture cinématique brute haute fréquence (54 Hz) |
+| **BLE en attente d'appairage** | **Clignotement régulier** | $2\,\text{Hz}$ (250 ms ON / 250 ms OFF) | Mode *Advertising*, prêt pour connexion smartphone |
+| **BLE Connecté** | **Allumée Fixe 2 secondes** | Fixe 2000 ms puis extinction (OFF) | Confirmation visuelle de liaison, puis économie batterie |
+| **BLE Déconnecté** | **Double flash rapide** | 2 pulses (100 ms ON / 100 ms OFF) | Alerte de perte de liaison avant reprise d'appairage |
 
 
 ---

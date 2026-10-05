@@ -72,7 +72,7 @@ struct BurstPacketHeader {
 };
 
 /**
- * @brief Packed 13-byte Step Counter / Pedometer payload structure (Big-Endian).
+ * @brief Packed 15-byte Step Counter / Pedometer payload structure (Big-Endian).
  * Characteristic 0006.
  */
 struct StepCounterPayload {
@@ -82,6 +82,7 @@ struct StepCounterPayload {
     uint16_t stairs_steps;       // offset 8..9 (Big-Endian)
     uint16_t unclassified_steps; // offset 10..11 (Big-Endian)
     uint8_t cadence_spm;         // offset 12 (0 - 255 SPM)
+    uint16_t gct_ms;             // offset 13..14 (Big-Endian)
 };
 
 /**

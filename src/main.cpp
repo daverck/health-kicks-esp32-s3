@@ -204,8 +204,8 @@ void loop() {
                 // Apply dynamic alignment rotation matrix (corrects sensor PCB tilt)
                 imuCalibrator.applyCalibration(ax, ay, az, gx, gy, gz);
 
-                // Step detection on calibrated vertical acceleration with activity gating
-                bool stepDetected = stepDetector.processSample(ax, ay, az, currentActivityState, now);
+                // Step detection on calibrated vertical acceleration with activity gating & GCT estimation
+                bool stepDetected = stepDetector.processSample(ax, ay, az, gy, currentActivityState, now);
                 if (stepDetected) {
                     lastStepDetectedMs = now;
                     hasPendingIdleConfirmation = true;
@@ -216,10 +216,10 @@ void loop() {
                         StepCounterPayload payload = stepDetector.getPayload(now);
                         bleServer.notifyStepCounter(payload);
                         lastNotifiedTotalSteps = totalSteps;
-                        Serial.printf("[STEP] Batched notification (%u steps): Total=%u (W:%u, R:%u, S:%u, U:%u) | Cadence: %u SPM\n",
+                        Serial.printf("[STEP] Batched notification (%u steps): Total=%u (W:%u, R:%u, S:%u, U:%u) | Cadence: %u SPM | GCT: %u ms\n",
                                       STEP_NOTIFY_BATCH_COUNT, totalSteps, stepDetector.getWalkSteps(),
                                       stepDetector.getRunSteps(), stepDetector.getStairsSteps(),
-                                      stepDetector.getUnclassifiedSteps(), payload.cadence_spm);
+                                      stepDetector.getUnclassifiedSteps(), payload.cadence_spm, stepDetector.getAverageGctMs());
                     }
                 }
 

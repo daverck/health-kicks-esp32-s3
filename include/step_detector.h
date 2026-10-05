@@ -37,7 +37,24 @@ public:
      * @param nowMs Current system timestamp in ms.
      * @return true if a valid new step was detected and counted, false otherwise.
      */
-    bool processSample(float ax, float ay, float az, uint8_t currentActivityState, uint32_t nowMs);
+    /**
+     * @brief Ingests a calibrated IMU sample (accel + pitch gyro) and evaluates step & GCT estimation.
+     * @param ax Calibrated X acceleration in g.
+     * @param ay Calibrated Y acceleration in g.
+     * @param az Calibrated Z acceleration in g (vertical resting norm = 1.0g).
+     * @param gy Calibrated Y angular velocity in deg/s (pitch rate for heel-to-toe push-off).
+     * @param currentActivityState Current ML activity state code (e.g., STATE_CODE_WALK).
+     * @param nowMs Current system timestamp in ms.
+     * @return true if a valid new step was detected and counted, false otherwise.
+     */
+    bool processSample(float ax, float ay, float az, float gy, uint8_t currentActivityState, uint32_t nowMs);
+
+    /**
+     * @brief Overload without gy for backward compatibility.
+     */
+    bool processSample(float ax, float ay, float az, uint8_t currentActivityState, uint32_t nowMs) {
+        return processSample(ax, ay, az, 0.0f, currentActivityState, nowMs);
+    }
 
     /**
      * @brief Computes instant cadence in Steps Per Minute (SPM) based on 5s sliding window.
@@ -60,9 +77,10 @@ public:
     uint16_t getStairsSteps() const { return _stairsSteps; }
     uint16_t getUnclassifiedSteps() const { return _unclassifiedSteps; }
     uint32_t getLastStepTimeMs() const { return _lastStepTimeMs; }
+    uint16_t getAverageGctMs() const { return _lastGctMs; }
 
     /**
-     * @brief Resets all step accumulators and cadence history.
+     * @brief Resets all step accumulators, GCT history, and cadence history.
      */
     void reset();
 
@@ -90,6 +108,15 @@ private:
 
     uint32_t _lastStepTimeMs;
     float _peakVertAccel;
+
+    // Ground Contact Time (GCT) estimation state
+    uint32_t _stanceStartMs;
+    bool _inStance;
+    float _maxPitchRateInStance;
+    float _smoothGctMs;
+    uint16_t _lastGctMs;
+
+    void updateGct(uint32_t instantGct, uint8_t activityState);
 
     // Ring buffer for cadence sliding window
     uint32_t _stepTimestamps[MAX_CADENCE_HISTORY];

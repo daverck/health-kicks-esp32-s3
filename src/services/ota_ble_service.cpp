@@ -7,7 +7,8 @@ OtaBleService::OtaBleService()
       _otaHandle(0),
       _updatePartition(nullptr),
       _notifyControl(nullptr),
-      _onStateChange(nullptr) {}
+      _onStateChange(nullptr),
+      _sha256Initialized(false) {}
 
 void OtaBleService::begin(OtaNotifyCallback notifyCb) {
     _notifyControl = notifyCb;
@@ -16,6 +17,7 @@ void OtaBleService::begin(OtaNotifyCallback notifyCb) {
     _totalSize = 0;
     _otaHandle = 0;
     _updatePartition = nullptr;
+    _sha256Initialized = false;
 
     const esp_partition_t* running = esp_ota_get_running_partition();
     if (running) {
@@ -89,6 +91,11 @@ void OtaBleService::handleControlWrite(const uint8_t* data, size_t len) {
             return;
         }
 
+        // Initialize SHA-256 hashing context for on-the-fly binary validation
+        mbedtls_sha256_init(&_sha256Ctx);
+        mbedtls_sha256_starts(&_sha256Ctx, 0); // 0 = standard SHA-256
+        _sha256Initialized = true;
+
         _inProgress = true;
         _bytesWritten = 0;
 
@@ -96,7 +103,7 @@ void OtaBleService::handleControlWrite(const uint8_t* data, size_t len) {
             _onStateChange(true);
         }
 
-        Serial.println("[OTA] Initialized OTA handle successfully. Notifying OTA_READY (0x10)...");
+        Serial.println("[OTA] Initialized OTA handle & SHA-256 context successfully. Notifying OTA_READY (0x10)...");
         notifyStatus(OTA_RESP_READY);
         return;
     }
@@ -117,6 +124,39 @@ void OtaBleService::handleControlWrite(const uint8_t* data, size_t len) {
             abort();
             notifyError(OTA_ERR_SIZE_MISMATCH);
             return;
+        }
+
+        // Cryptographic SHA-256 validation if client supplied checksum (len >= 33)
+        if (len >= 33) {
+            uint8_t calculatedSha256[32];
+            if (_sha256Initialized) {
+                mbedtls_sha256_finish(&_sha256Ctx, calculatedSha256);
+                mbedtls_sha256_free(&_sha256Ctx);
+                _sha256Initialized = false;
+            } else {
+                memset(calculatedSha256, 0, sizeof(calculatedSha256));
+            }
+
+            if (memcmp(calculatedSha256, &data[1], 32) != 0) {
+                Serial.println("[OTA] SECURITY ALERT: SHA-256 Checksum mismatch!");
+                Serial.print("[OTA] Expected:   ");
+                for (int i = 0; i < 32; i++) Serial.printf("%02x", data[1 + i]);
+                Serial.println();
+                Serial.print("[OTA] Calculated: ");
+                for (int i = 0; i < 32; i++) Serial.printf("%02x", calculatedSha256[i]);
+                Serial.println();
+
+                abort();
+                notifyError(OTA_ERR_CHECKSUM_MISMATCH);
+                return;
+            }
+            Serial.println("[OTA] SHA-256 Cryptographic Checksum verified successfully!");
+        } else {
+            if (_sha256Initialized) {
+                mbedtls_sha256_free(&_sha256Ctx);
+                _sha256Initialized = false;
+            }
+            Serial.println("[OTA] Warning: No SHA-256 checksum provided in OTA_END packet. Proceeding with image validation...");
         }
 
         esp_err_t err = esp_ota_end(_otaHandle);
@@ -180,6 +220,10 @@ void OtaBleService::handleDataWrite(const uint8_t* data, size_t len) {
         return;
     }
 
+    if (_sha256Initialized) {
+        mbedtls_sha256_update(&_sha256Ctx, data, len);
+    }
+
     _bytesWritten += len;
 
     // Periodic progress logging every ~64KB or when complete
@@ -193,6 +237,10 @@ void OtaBleService::abort() {
     if (_inProgress && _otaHandle != 0) {
         esp_ota_abort(_otaHandle);
         _otaHandle = 0;
+    }
+    if (_sha256Initialized) {
+        mbedtls_sha256_free(&_sha256Ctx);
+        _sha256Initialized = false;
     }
     _inProgress = false;
     _bytesWritten = 0;

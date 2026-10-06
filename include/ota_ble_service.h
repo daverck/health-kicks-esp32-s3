@@ -4,6 +4,7 @@
 #include <functional>
 #include "esp_ota_ops.h"
 #include "esp_partition.h"
+#include "mbedtls/sha256.h"
 #include "invariants.h"
 
 typedef std::function<void(const uint8_t* data, size_t len)> OtaNotifyCallback;
@@ -70,6 +71,9 @@ private:
 
     OtaNotifyCallback _notifyControl;
     OtaStateChangeCallback _onStateChange;
+
+    mbedtls_sha256_context _sha256Ctx;
+    bool _sha256Initialized;
 
     void notifyError(uint8_t errorCode);
     void notifyStatus(uint8_t statusCode);

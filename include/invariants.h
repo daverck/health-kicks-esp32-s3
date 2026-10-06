@@ -37,6 +37,7 @@
 #define OTA_ERR_SIZE_MISMATCH           0x04
 #define OTA_ERR_VALIDATION_FAILED       0x05
 #define OTA_ERR_SET_BOOT_FAILED         0x06
+#define OTA_ERR_CHECKSUM_MISMATCH       0x07
 
 // Activity state codes (Characteristic 0002)
 #define STATE_CODE_IDLE                 0x00

@@ -38,6 +38,11 @@ static uint32_t lastStepDetectedMs = 0;
 static bool hasPendingIdleConfirmation = false;
 static bool prevBleConnected = false;
 
+// Anti-Bricking & Rollback Probationary State
+static bool otaPendingVerification = false;
+static uint32_t otaVerificationStartMs = 0;
+static const uint32_t OTA_VERIFY_PROBATION_PERIOD_MS = 15000; // 15 seconds probationary window
+
 /**
  * @brief Runs the hardware self-test diagnostic suite at startup.
  */
@@ -105,6 +110,32 @@ void setup() {
 
     // Initial hardware diagnostics
     runHardwareDiagnostics();
+
+    // Check if running in probationary state (Anti-Bricking & Rollback)
+    const esp_partition_t* runningPartition = esp_ota_get_running_partition();
+    esp_ota_img_states_t otaState;
+    if (runningPartition && esp_ota_get_state_partition(runningPartition, &otaState) == ESP_OK) {
+        if (otaState == ESP_OTA_IMG_PENDING_VERIFY) {
+            otaPendingVerification = true;
+            otaVerificationStartMs = millis();
+            Serial.println("\n[OTA-ROLLBACK] ========================================================");
+            Serial.println("[OTA-ROLLBACK] *** FIRMWARE RUNNING IN PROBATIONARY STATE (PENDING_VERIFY) ***");
+            Serial.printf("[OTA-ROLLBACK] Active slot: %s (address: 0x%08X, size: %u bytes)\n",
+                          runningPartition->label, runningPartition->address, runningPartition->size);
+
+            if (!imuReady) {
+                Serial.println("[OTA-ROLLBACK] CRITICAL FAILURE: IMU sensor failed self-test on new firmware!");
+                Serial.println("[OTA-ROLLBACK] Triggering immediate automatic rollback to previous slot...");
+                delay(1000);
+                esp_ota_mark_app_invalid_rollback_and_reboot();
+            } else {
+                Serial.println("[OTA-ROLLBACK] Hardware self-test PASSED. Starting 15s probation timer...");
+            }
+            Serial.println("[OTA-ROLLBACK] ========================================================\n");
+        } else if (otaState == ESP_OTA_IMG_VALID) {
+            Serial.printf("[OTA-ROLLBACK] Running partition '%s' is confirmed VALID.\n", runningPartition->label);
+        }
+    }
 
     // Configure Studio capture manager with dynamic tilt calibrator
     studioManager.begin(&bleServer, &haptic, &imu, &imuCalibrator);
@@ -193,6 +224,29 @@ void loop() {
         statusLed.update(now);
         delay(2);
         return;
+    }
+
+    // Anti-Bricking probation monitoring: confirm stability after 15 seconds of nominal execution
+    if (otaPendingVerification) {
+        if (!imuReady) {
+            Serial.println("[OTA-ROLLBACK] CRITICAL: IMU became unresponsive during probation period!");
+            Serial.println("[OTA-ROLLBACK] Triggering emergency rollback to previous operational slot...");
+            delay(1000);
+            esp_ota_mark_app_invalid_rollback_and_reboot();
+        } else if (now - otaVerificationStartMs >= OTA_VERIFY_PROBATION_PERIOD_MS) {
+            otaPendingVerification = false;
+            esp_err_t err = esp_ota_mark_app_valid_cancel_rollback();
+            if (err == ESP_OK) {
+                Serial.println("\n[OTA-ROLLBACK] ========================================================");
+                Serial.println("[OTA-ROLLBACK] *** SUCCESS: Probation period passed without error! ***");
+                Serial.println("[OTA-ROLLBACK] *** Firmware marked as VALID. Rollback cancelled.      ***");
+                Serial.println("[OTA-ROLLBACK] ========================================================\n");
+                haptic.play(HAPTIC_PATTERN_DOUBLE_PULSE, 180, 200);
+            } else {
+                Serial.printf("[OTA-ROLLBACK] Warning: esp_ota_mark_app_valid_cancel_rollback failed: %s (0x%X)\n",
+                              esp_err_to_name(err), err);
+            }
+        }
     }
 
     // BLE connection edge detection for initial step state synchronization & status LED

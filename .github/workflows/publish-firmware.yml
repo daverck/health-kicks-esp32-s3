@@ -1,0 +1,100 @@
+name: Build & Publish Firmware to S3
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Firmware semantic version (e.g. v1.2.1-esp32s3)'
+        required: true
+        default: 'v1.2.1-esp32s3'
+        type: string
+      changelog:
+        description: 'Changelog / Release notes summary'
+        required: false
+        default: 'Manual release build via GitHub Actions'
+        type: string
+
+env:
+  AWS_REGION: eu-north-1
+  S3_BUCKET: healthkicks-firmware-releases
+  S3_DESTINATION_KEY: firmware/esp32s3/latest/firmware.bin
+
+jobs:
+  build-and-publish:
+    name: Compile ESP32-S3 Firmware & Upload to S3
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache PlatformIO & packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            .pio
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install PlatformIO Core
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Compile Firmware
+        run: |
+          pio run -e esp32-s3-devkitc-1
+
+      - name: Verify Binary & Compute SHA-256 Checksum
+        id: checksum
+        run: |
+          BIN_PATH=".pio/build/esp32-s3-devkitc-1/firmware.bin"
+          if [ ! -f "$BIN_PATH" ]; then
+            echo "::error::Binary $BIN_PATH not found after build!"
+            exit 1
+          fi
+          
+          # Compute lowercase 64-character hex SHA-256 digest
+          SHA256_HASH=$(sha256sum "$BIN_PATH" | awk '{print $1}')
+          FILE_SIZE=$(stat -c%s "$BIN_PATH")
+          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          echo "sha256=$SHA256_HASH" >> $GITHUB_OUTPUT
+          echo "size=$FILE_SIZE" >> $GITHUB_OUTPUT
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          
+          echo "=========================================="
+          echo "Firmware Version: ${{ inputs.version }}"
+          echo "Binary Size:      $FILE_SIZE bytes"
+          echo "SHA-256 Digest:   $SHA256_HASH"
+          echo "UTC Build Date:   $BUILD_DATE"
+          echo "=========================================="
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload Single Latest Firmware to S3
+        run: |
+          BIN_PATH=".pio/build/esp32-s3-devkitc-1/firmware.bin"
+          
+          echo "Uploading firmware to s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}..."
+          
+          # Overwrite destination key so strictly ONE latest firmware file is retained on S3
+          aws s3 cp "$BIN_PATH" "s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}" \
+            --metadata "version=${{ inputs.version }},sha256=${{ steps.checksum.outputs.sha256 }},built_at=${{ steps.checksum.outputs.build_date }}" \
+            --content-type "application/octet-stream"
+          
+          echo "Upload complete! Verified single latest firmware in S3:"
+          aws s3api head-object --bucket "${{ env.S3_BUCKET }}" --key "${{ env.S3_DESTINATION_KEY }}"

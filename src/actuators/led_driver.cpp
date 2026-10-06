@@ -5,6 +5,7 @@ LedDriver::LedDriver()
       _bleState(LedBleState::ADVERTISING),
       _isCalibrating(false),
       _isStudioRecording(false),
+      _isOtaUpdating(false),
       _stateTimestampMs(0),
       _currentPinState(false) {}
 
@@ -46,7 +47,18 @@ void LedDriver::setStudioRecording(bool active) {
     _isStudioRecording = active;
 }
 
+void LedDriver::setOtaUpdating(bool active) {
+    _isOtaUpdating = active;
+}
+
 void LedDriver::update(uint32_t nowMs) {
+    // 0. Highest priority: Fast blinking during OTA flashing (100ms ON / 100ms OFF = 5 Hz)
+    if (_isOtaUpdating) {
+        uint32_t phase = (nowMs - _stateTimestampMs) % 200;
+        setPinState(phase < 100);
+        return;
+    }
+
     // 1. High-priority override: Solid ON during IMU calibration or Studio capture
     if (_isCalibrating || _isStudioRecording) {
         setPinState(true);

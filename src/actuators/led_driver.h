@@ -54,6 +54,12 @@ public:
     void setStudioRecording(bool active);
 
     /**
+     * @brief Sets Over-The-Air firmware flashing status.
+     * @param active When true, LED blinks rapidly (5 Hz) until set to false.
+     */
+    void setOtaUpdating(bool active);
+
+    /**
      * @brief Non-blocking state machine update called at each loop iteration.
      * @param nowMs Current timestamp from millis().
      */
@@ -61,6 +67,7 @@ public:
 
     bool isCalibrating() const { return _isCalibrating; }
     bool isStudioRecording() const { return _isStudioRecording; }
+    bool isOtaUpdating() const { return _isOtaUpdating; }
     LedBleState getBleState() const { return _bleState; }
 
 private:
@@ -68,6 +75,7 @@ private:
     LedBleState _bleState;
     bool _isCalibrating;
     bool _isStudioRecording;
+    bool _isOtaUpdating;
 
     uint32_t _stateTimestampMs;
     bool _currentPinState;

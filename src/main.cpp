@@ -171,6 +171,15 @@ void setup() {
         inactivityMonitor.configure(enabled, threshSec, coolSec);
     });
 
+    bleServer.getOtaService().setStateChangeCallback([](bool active) {
+        statusLed.setOtaUpdating(active);
+        if (active) {
+            Serial.println("[MAIN] OTA Update started: IMU sampling & Edge AI paused.");
+        } else {
+            Serial.println("[MAIN] OTA Update ended or aborted. Resuming nominal operation.");
+        }
+    });
+
     // Start NimBLE server
     Serial.printf("[BLE] Starting NimBLE server with name \"%s\"...\n", BLE_DEVICE_NAME);
     bleServer.begin(BLE_DEVICE_NAME);
@@ -178,6 +187,13 @@ void setup() {
 
 void loop() {
     uint32_t now = millis();
+
+    // Fast-path handling during OTA firmware flash: dedicate 100% CPU and Flash bandwidth to BLE stream
+    if (bleServer.getOtaService().isOtaInProgress()) {
+        statusLed.update(now);
+        delay(2);
+        return;
+    }
 
     // BLE connection edge detection for initial step state synchronization & status LED
     bool bleConnected = bleServer.isConnected();

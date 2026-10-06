@@ -15,6 +15,28 @@
 #define CHAR_STUDIO_CONTROL_UUID        "7a5a0004-c529-4d64-8848-18e5904de22a"
 #define CHAR_STUDIO_DATA_BURST_UUID     "7a5a0005-c529-4d64-8848-18e5904de22a"
 #define CHAR_STEP_COUNTER_UUID          "7a5a0006-c529-4d64-8848-18e5904de22a"
+#define HEALTHKICKS_OTA_SERVICE_UUID    "7a5a0010-c529-4d64-8848-18e5904de22a"
+#define CHAR_OTA_CONTROL_UUID           "7a5a0011-c529-4d64-8848-18e5904de22a"
+#define CHAR_OTA_DATA_UUID              "7a5a0012-c529-4d64-8848-18e5904de22a"
+
+// OTA Commands (Client -> ESP32 on Characteristic 0011)
+#define OTA_CMD_BEGIN                   0x01
+#define OTA_CMD_END                     0x02
+#define OTA_CMD_ABORT                   0x03
+
+// OTA Notifications (ESP32 -> Client on Characteristic 0011)
+#define OTA_RESP_READY                  0x10
+#define OTA_RESP_CHUNK_ACK              0x11
+#define OTA_RESP_SUCCESS                0x12
+#define OTA_RESP_ERROR                  0xFF
+
+// OTA Error Codes (Sent with OTA_RESP_ERROR)
+#define OTA_ERR_PARTITION_NOT_FOUND     0x01
+#define OTA_ERR_BEGIN_FAILED            0x02
+#define OTA_ERR_WRITE_FAILED            0x03
+#define OTA_ERR_SIZE_MISMATCH           0x04
+#define OTA_ERR_VALIDATION_FAILED       0x05
+#define OTA_ERR_SET_BOOT_FAILED         0x06
 
 // Activity state codes (Characteristic 0002)
 #define STATE_CODE_IDLE                 0x00

@@ -51,6 +51,30 @@ private:
     HealthKicksBleServer* _parent;
 };
 
+// Callbacks for OTA Control write (0011)
+class OtaControlCallbacks : public NimBLECharacteristicCallbacks {
+public:
+    OtaControlCallbacks(HealthKicksBleServer* parent) : _parent(parent) {}
+    void onWrite(NimBLECharacteristic* pCharacteristic) override {
+        std::string val = pCharacteristic->getValue();
+        _parent->handleOtaControlWrite(reinterpret_cast<const uint8_t*>(val.data()), val.length());
+    }
+private:
+    HealthKicksBleServer* _parent;
+};
+
+// Callbacks for OTA Data write (0012)
+class OtaDataCallbacks : public NimBLECharacteristicCallbacks {
+public:
+    OtaDataCallbacks(HealthKicksBleServer* parent) : _parent(parent) {}
+    void onWrite(NimBLECharacteristic* pCharacteristic) override {
+        std::string val = pCharacteristic->getValue();
+        _parent->handleOtaDataWrite(reinterpret_cast<const uint8_t*>(val.data()), val.length());
+    }
+private:
+    HealthKicksBleServer* _parent;
+};
+
 HealthKicksBleServer::HealthKicksBleServer()
     : _pServer(nullptr),
       _pService(nullptr),
@@ -59,6 +83,9 @@ HealthKicksBleServer::HealthKicksBleServer()
       _pCharStudioControl(nullptr),
       _pCharStudioBurst(nullptr),
       _pCharStepCounter(nullptr),
+      _pOtaService(nullptr),
+      _pCharOtaControl(nullptr),
+      _pCharOtaData(nullptr),
       _deviceConnected(false),
       _negotiatedMtu(23),
       _lastActivityTime(0),
@@ -113,12 +140,37 @@ void HealthKicksBleServer::begin(const char* deviceName) {
     StepCounterPayload defaultSteps = {0, 0, 0, 0, 0, 0};
     _pCharStepCounter->setValue(reinterpret_cast<const uint8_t*>(&defaultSteps), sizeof(defaultSteps));
 
-    // Start service
+    // Start primary Footwear service
     _pService->start();
-
-    _lastActivityTime = millis();
     log_i("NimBLE server configured with Footwear service: %s", HEALTHKICKS_SERVICE_UUID);
 
+    // Create OTA Firmware Update Service (0010)
+    _pOtaService = _pServer->createService(HEALTHKICKS_OTA_SERVICE_UUID);
+
+    // OTA Characteristic 1: OTA Control (WRITE, NOTIFY - 0011)
+    _pCharOtaControl = _pOtaService->createCharacteristic(
+        CHAR_OTA_CONTROL_UUID,
+        NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY
+    );
+    _pCharOtaControl->setCallbacks(new OtaControlCallbacks(this));
+
+    // OTA Characteristic 2: OTA Data (WRITE, WRITE_NR - 0012)
+    _pCharOtaData = _pOtaService->createCharacteristic(
+        CHAR_OTA_DATA_UUID,
+        NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR
+    );
+    _pCharOtaData->setCallbacks(new OtaDataCallbacks(this));
+
+    // Start OTA service
+    _pOtaService->start();
+    log_i("NimBLE server configured with OTA service: %s", HEALTHKICKS_OTA_SERVICE_UUID);
+
+    // Initialize OtaBleService logic
+    _otaService.begin([this](const uint8_t* data, size_t len) {
+        this->notifyOtaControl(data, len);
+    });
+
+    _lastActivityTime = millis();
     startAdvertising();
 }
 
@@ -149,6 +201,10 @@ void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* d
 void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
     _lastActivityTime = millis();
+    if (_otaService.isOtaInProgress()) {
+        Serial.println("[BLE] Client disconnected during OTA! Aborting OTA session...");
+        _otaService.abort();
+    }
     Serial.println("[BLE] BLE client disconnected.");
 }
 
@@ -306,4 +362,21 @@ bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {
     _pCharStudioBurst->setValue(data, length);
     _pCharStudioBurst->notify();
     return true;
+}
+
+void HealthKicksBleServer::handleOtaControlWrite(const uint8_t* data, size_t length) {
+    _lastActivityTime = millis();
+    _otaService.handleControlWrite(data, length);
+}
+
+void HealthKicksBleServer::handleOtaDataWrite(const uint8_t* data, size_t length) {
+    _lastActivityTime = millis();
+    _otaService.handleDataWrite(data, length);
+}
+
+void HealthKicksBleServer::notifyOtaControl(const uint8_t* data, size_t length) {
+    if (!_deviceConnected || !_pCharOtaControl) return;
+
+    _pCharOtaControl->setValue(data, length);
+    _pCharOtaControl->notify();
 }

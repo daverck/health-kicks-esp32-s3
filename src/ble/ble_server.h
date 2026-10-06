@@ -4,6 +4,7 @@
 #include <NimBLEDevice.h>
 #include "config.h"
 #include "invariants.h"
+#include "ota_ble_service.h"
 
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
 typedef std::function<void(const String& command)> StudioCommandCallback;
@@ -70,6 +71,11 @@ public:
     void onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc);
     void handleHapticWrite(const uint8_t* data, size_t length);
     void handleStudioControlWrite(const uint8_t* data, size_t length);
+    void handleOtaControlWrite(const uint8_t* data, size_t length);
+    void handleOtaDataWrite(const uint8_t* data, size_t length);
+    void notifyOtaControl(const uint8_t* data, size_t length);
+
+    OtaBleService& getOtaService() { return _otaService; }
 
 private:
     NimBLEServer* _pServer;
@@ -79,6 +85,11 @@ private:
     NimBLECharacteristic* _pCharStudioControl;
     NimBLECharacteristic* _pCharStudioBurst;
     NimBLECharacteristic* _pCharStepCounter;
+
+    NimBLEService* _pOtaService;
+    NimBLECharacteristic* _pCharOtaControl;
+    NimBLECharacteristic* _pCharOtaData;
+    OtaBleService _otaService;
 
     bool _deviceConnected;
     uint16_t _negotiatedMtu;

@@ -133,6 +133,12 @@ void setup() {
     // Initialize Power Manager and restore persisted state from RTC memory
     PowerManager::init(&stepDetector, &imuCalibrator);
 
+    // Check if woken up by manual button press on GPIO 14
+    if (PowerManager::getWakeupCause() == ESP_SLEEP_WAKEUP_EXT1) {
+        haptic.play(HAPTIC_PATTERN_CONTINUOUS, 150, 100);
+        Serial.println("[POWER] Woken up by Manual Button (GPIO 14). Welcome back!");
+    }
+
     // Configure Autonomous Inactivity Monitor
     inactivityMonitor.begin();
     inactivityMonitor.setInactivityAlertCallback([](uint32_t nowMs) {
@@ -339,27 +345,60 @@ void loop() {
         imuCalibrator
     );
 
-    // 5. Handle power/pairing switch (GPIO 14 - Active LOW with internal pull-up)
-    static bool s_switchState = HIGH;
-    static uint32_t s_lastSwitchCheckMs = 0;
+    // 5. Handle power/pairing button (GPIO 14 - Active LOW with internal pull-up)
+    static const uint32_t BUTTON_LONG_PRESS_MS = 2500;
+    static bool s_lastButtonReading = HIGH;
+    static uint32_t s_pressStartMs = 0;
+    static bool s_isPressed = false;
+    static bool s_isShuttingDown = false;
+    static uint32_t s_lastButtonCheckMs = 0;
 
-    if (now - s_lastSwitchCheckMs >= 50) { // Sample every 50 ms
-        s_lastSwitchCheckMs = now;
+    if (now - s_lastButtonCheckMs >= 20) { // Sample every 20 ms
+        s_lastButtonCheckMs = now;
         bool reading = digitalRead(PIN_BTN_PAIRING);
 
-        if (reading != s_switchState) {
-            s_switchState = reading;
+        // Transition: HIGH -> LOW (Button Pressed)
+        if (reading == LOW && s_lastButtonReading == HIGH) {
+            s_pressStartMs = now;
+            s_isPressed = true;
             PowerManager::recordActivity(now);
-            if (s_switchState == LOW) {
-                Serial.println("[SWITCH] Position ON (grounded): restarting BLE advertising");
-                haptic.play(HAPTIC_PATTERN_CONTINUOUS, 180, 80);
-                if (!bleServer.isConnected()) {
-                    NimBLEDevice::getAdvertising()->start();
+        }
+
+        // While button is held LOW
+        if (reading == LOW && s_isPressed && !s_isShuttingDown) {
+            if (now - s_pressStartMs >= BUTTON_LONG_PRESS_MS) {
+                s_isShuttingDown = true;
+                Serial.println("[POWER] Long press detected (>= 2.5s). Shutting down device (Manual Power OFF)...");
+                haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 200, 300);
+                digitalWrite(PIN_LED_BLUE, LOW);
+
+                // Wait for user to release the button so release does not re-trigger wakeup
+                while (digitalRead(PIN_BTN_PAIRING) == LOW) {
+                    delay(20);
                 }
-            } else {
-                Serial.println("[SWITCH] Position OFF (open)");
-                haptic.play(HAPTIC_PATTERN_CONTINUOUS, 120, 50);
+                delay(150); // Debounce post-release
+
+                PowerManager::enterDeepSleep(imu, bleServer, haptic, stepDetector, imuCalibrator, PowerManager::SLEEP_REASON_MANUAL_POWER_OFF);
             }
         }
+
+        // Transition: LOW -> HIGH (Button Released)
+        if (reading == HIGH && s_lastButtonReading == LOW) {
+            if (s_isPressed && !s_isShuttingDown) {
+                uint32_t pressDuration = now - s_pressStartMs;
+                if (pressDuration < BUTTON_LONG_PRESS_MS && pressDuration >= 50) {
+                    Serial.printf("[BUTTON] Short press (%u ms): restarting BLE advertising\n", pressDuration);
+                    haptic.play(HAPTIC_PATTERN_CONTINUOUS, 180, 80);
+                    if (!bleServer.isConnected()) {
+                        NimBLEDevice::getAdvertising()->start();
+                        statusLed.setBleAdvertising();
+                    }
+                }
+            }
+            s_isPressed = false;
+            s_isShuttingDown = false;
+        }
+
+        s_lastButtonReading = reading;
     }
 }

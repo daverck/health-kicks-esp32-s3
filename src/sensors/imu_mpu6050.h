@@ -42,6 +42,13 @@ public:
      */
     bool enableWakeOnMotion(uint8_t threshold = IMU_WOM_THRESHOLD, uint8_t duration = IMU_WOM_DURATION);
 
+    /**
+     * @brief Puts MPU-6050 into low-power sleep mode (~5 uA) with interrupts disabled or wakes it up.
+     * @param enable True to enter sleep mode, false to wake up.
+     * @return true if register configuration was successful, false otherwise.
+     */
+    bool setSleepEnabled(bool enable);
+
 private:
     uint8_t _address;
     TwoWire* _wire;

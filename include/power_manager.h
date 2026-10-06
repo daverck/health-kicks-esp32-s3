@@ -23,6 +23,11 @@ class ImuCalibrator;
  */
 class PowerManager {
 public:
+    enum DeepSleepReason {
+        SLEEP_REASON_INACTIVITY = 0,
+        SLEEP_REASON_MANUAL_POWER_OFF = 1
+    };
+
     /**
      * @brief Initializes power management, checks wakeup cause, and restores state from RTC fast memory.
      * @param stepDetector Pointer to StepDetector instance for counter restoration.
@@ -63,12 +68,14 @@ public:
      * @param haptic Reference to haptic driver.
      * @param stepDetector Reference to step detector.
      * @param imuCalibrator Reference to IMU calibrator.
+     * @param reason Shutdown reason (Auto-Standby vs Manual Power OFF).
      */
     static void enterDeepSleep(ImuMpu6050& imu,
                               HealthKicksBleServer& bleServer,
                               HapticDriver& haptic,
                               StepDetector& stepDetector,
-                              ImuCalibrator& imuCalibrator);
+                              ImuCalibrator& imuCalibrator,
+                              DeepSleepReason reason = SLEEP_REASON_INACTIVITY);
 
     /**
      * @brief Returns total boot count across Deep Sleep cycles.

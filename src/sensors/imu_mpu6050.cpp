@@ -223,3 +223,29 @@ bool ImuMpu6050::enableWakeOnMotion(uint8_t threshold, uint8_t duration) {
     log_i("MPU-6050 configured for Wake-On-Motion (WOM): Thr=%u, Dur=%u, 1.25 Hz cycle mode", threshold, duration);
     return true;
 }
+
+bool ImuMpu6050::setSleepEnabled(bool enable) {
+    if (enable) {
+        // 1. Disable all interrupts
+        if (!writeRegister(MPU_REG_INT_ENABLE, 0x00)) {
+            return false;
+        }
+
+        // 2. Clear interrupt status register
+        readRegister(MPU_REG_INT_STATUS);
+
+        // 3. Set SLEEP bit (bit 6 = 1) in MPU_REG_PWR_MGMT_1 to enter ultra-low power sleep (~5 uA) with no WOM
+        if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x40)) {
+            return false;
+        }
+
+        log_i("MPU-6050 entered full low-power sleep mode (interrupts disabled)");
+        return true;
+    } else {
+        // Wake up chip and select Auto X-Gyro clock source (0x01)
+        if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x01)) {
+            return false;
+        }
+        return true;
+    }
+}

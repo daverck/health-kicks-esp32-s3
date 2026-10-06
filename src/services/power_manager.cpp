@@ -86,9 +86,14 @@ void PowerManager::enterDeepSleep(ImuMpu6050& imu,
                                  HealthKicksBleServer& bleServer,
                                  HapticDriver& haptic,
                                  StepDetector& stepDetector,
-                                 ImuCalibrator& imuCalibrator) {
-    Serial.printf("\n[POWER] Inactivity timeout (%u s) reached without connection. Entering Deep Sleep (~10 uA)...\n",
-                  _inactivityTimeoutSec);
+                                 ImuCalibrator& imuCalibrator,
+                                 DeepSleepReason reason) {
+    if (reason == SLEEP_REASON_MANUAL_POWER_OFF) {
+        Serial.println("\n[POWER] Manual Power-OFF initiated. Entering Deep Sleep (~10 uA)...");
+    } else {
+        Serial.printf("\n[POWER] Inactivity timeout (%u s) reached without connection. Entering Deep Sleep (~10 uA)...\n",
+                      _inactivityTimeoutSec);
+    }
 
     // 1. Snapshot state to RTC Fast Memory
     rtc_total_steps = stepDetector.getTotalSteps();
@@ -109,19 +114,30 @@ void PowerManager::enterDeepSleep(ImuMpu6050& imu,
     NimBLEDevice::deinit(true);
     Serial.println("[POWER] BLE stack stopped and de-initialized.");
 
-    // 3. Put MPU-6050 in ultra-low power Wake-On-Motion mode
-    imu.enableWakeOnMotion(IMU_WOM_THRESHOLD, IMU_WOM_DURATION);
-    Serial.printf("[POWER] MPU-6050 WOM mode configured on GPIO %d (Thresh=%u, Dur=%u).\n",
-                  PIN_IMU_INT, IMU_WOM_THRESHOLD, IMU_WOM_DURATION);
+    // 3. Configure IMU mode and arm wakeup sources based on shutdown reason
+    if (reason == SLEEP_REASON_INACTIVITY) {
+        // Put MPU-6050 in ultra-low power Wake-On-Motion mode
+        imu.enableWakeOnMotion(IMU_WOM_THRESHOLD, IMU_WOM_DURATION);
+        Serial.printf("[POWER] MPU-6050 WOM mode configured on GPIO %d (Thresh=%u, Dur=%u).\n",
+                      PIN_IMU_INT, IMU_WOM_THRESHOLD, IMU_WOM_DURATION);
 
-    // 4. Arm wakeup sources: EXT0 (MPU-6050 INT GPIO 6 HIGH) and EXT1 (GPIO 14 LOW)
-    esp_sleep_enable_ext0_wakeup(PIN_IMU_INT, 1);
-    esp_sleep_enable_ext1_wakeup(1ULL << PIN_BTN_PAIRING, ESP_EXT1_WAKEUP_ANY_LOW);
-    Serial.println("[POWER] Wakeup sources armed: EXT0 (GPIO 6 HIGH - Motion) & EXT1 (GPIO 14 LOW - Button).");
+        // Arm EXT0 (MPU-6050 INT GPIO 6 HIGH) and EXT1 (GPIO 14 LOW)
+        esp_sleep_enable_ext0_wakeup(PIN_IMU_INT, 1);
+        esp_sleep_enable_ext1_wakeup(1ULL << PIN_BTN_PAIRING, ESP_EXT1_WAKEUP_ANY_LOW);
+        Serial.println("[POWER] Auto-Standby: armed EXT0 (Motion) & EXT1 (Button).");
+    } else if (reason == SLEEP_REASON_MANUAL_POWER_OFF) {
+        // Put MPU-6050 into full low-power sleep mode (interrupts disabled, no WOM)
+        imu.setSleepEnabled(true);
+
+        // Arm ONLY EXT1: Button wakeup. Do NOT arm EXT0 (motion wakeup stays disabled)
+        esp_sleep_enable_ext1_wakeup(1ULL << PIN_BTN_PAIRING, ESP_EXT1_WAKEUP_ANY_LOW);
+        Serial.println("[POWER] Manual Power-OFF: armed ONLY EXT1 (Button). Motion wakeup DISABLED.");
+    }
+
     Serial.println("[POWER] Entering Deep Sleep now. Goodbye!\n");
     Serial.flush();
 
-    // 5. Enter Deep Sleep
+    // 4. Enter Deep Sleep
     esp_deep_sleep_start();
 }
 

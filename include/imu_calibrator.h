@@ -116,6 +116,15 @@ public:
      */
     void restoreFromMatrix(const float matrix9[9]);
 
+    /**
+     * @brief Returns calculated gyroscope bias offsets in deg/s.
+     */
+    void getGyroBias(float& gbx, float& gby, float& gbz) const {
+        gbx = _gyroBiasX;
+        gby = _gyroBiasY;
+        gbz = _gyroBiasZ;
+    }
+
 private:
     CalibrationPhase _phase;
     bool _isCalibrated;
@@ -124,11 +133,19 @@ private:
     float _durationSec;
     uint32_t _requiredSamples;
 
-    // Accumulation ring for gravity alignment
+    // Accumulation ring for gravity alignment and gyro zero-rate bias
     uint32_t _stillnessSampleCount;
     double _sumAx;
     double _sumAy;
     double _sumAz;
+    double _sumGx;
+    double _sumGy;
+    double _sumGz;
+
+    // Calibrated gyroscope zero-rate bias (deg/s)
+    float _gyroBiasX;
+    float _gyroBiasY;
+    float _gyroBiasZ;
 
     // 3x3 Rotation matrix aligning measured gravity to target vertical [0, 0, 1]
     float _r[3][3];

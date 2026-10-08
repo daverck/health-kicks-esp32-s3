@@ -53,8 +53,8 @@ bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
         return false;
     }
 
-    // 6. Configure hardware low-pass filter (DLPF ~21 Hz) (0x1A = 0x03)
-    if (!writeRegister(MPU_REG_CONFIG, 0x03)) {
+    // 6. Configure hardware low-pass filter (DLPF ~21 Hz Accel / 20 Hz Gyro) (0x1A = 0x04)
+    if (!writeRegister(MPU_REG_CONFIG, 0x04)) {
         return false;
     }
 

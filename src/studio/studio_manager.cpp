@@ -150,26 +150,23 @@ void StudioManager::update() {
             } else if (now - _lastSampleTimeMs >= IMU_SAMPLE_PERIOD_MS) {
                 _lastSampleTimeMs = now;
                 if (_imu) {
-                    ImuRawFrame frame;
-                    if (_imu->readFrame(frame, (uint16_t)elapsed)) {
+                    float ax_g = 0.0f, ay_g = 0.0f, az_g = 0.0f;
+                    float gx_dps = 0.0f, gy_dps = 0.0f, gz_dps = 0.0f;
+                    if (_imu->readRawMetrics(ax_g, ay_g, az_g, gx_dps, gy_dps, gz_dps)) {
                         if (_calibrator && _calibrator->isCalibrated()) {
-                            // Scale from milli-g and tenths dps to physical units, rotate, and convert back
-                            float ax_g = (float)frame.ax / 1000.0f;
-                            float ay_g = (float)frame.ay / 1000.0f;
-                            float az_g = (float)frame.az / 1000.0f;
-                            float gx_dps = (float)frame.gx / 10.0f;
-                            float gy_dps = (float)frame.gy / 10.0f;
-                            float gz_dps = (float)frame.gz / 10.0f;
-
                             _calibrator->applyCalibration(ax_g, ay_g, az_g, gx_dps, gy_dps, gz_dps);
-
-                            frame.ax = (int16_t)roundf(ax_g * 1000.0f);
-                            frame.ay = (int16_t)roundf(ay_g * 1000.0f);
-                            frame.az = (int16_t)roundf(az_g * 1000.0f);
-                            frame.gx = (int16_t)roundf(gx_dps * 10.0f);
-                            frame.gy = (int16_t)roundf(gy_dps * 10.0f);
-                            frame.gz = (int16_t)roundf(gz_dps * 10.0f);
                         }
+
+                        // Encode in standard network byte order (Big-Endian)
+                        ImuRawFrame frame;
+                        frame.delta_ms = htons((uint16_t)elapsed);
+                        frame.ax = htons((int16_t)roundf(ax_g * 1000.0f));
+                        frame.ay = htons((int16_t)roundf(ay_g * 1000.0f));
+                        frame.az = htons((int16_t)roundf(az_g * 1000.0f));
+                        frame.gx = htons((int16_t)roundf(gx_dps * 10.0f));
+                        frame.gy = htons((int16_t)roundf(gy_dps * 10.0f));
+                        frame.gz = htons((int16_t)roundf(gz_dps * 10.0f));
+
                         _frames.push_back(frame);
                     }
                 }

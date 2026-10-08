@@ -13,6 +13,12 @@ ImuCalibrator::ImuCalibrator()
       _sumAx(0.0),
       _sumAy(0.0),
       _sumAz(0.0),
+      _sumGx(0.0),
+      _sumGy(0.0),
+      _sumGz(0.0),
+      _gyroBiasX(0.0f),
+      _gyroBiasY(0.0f),
+      _gyroBiasZ(0.0f),
       _onComplete(nullptr) {
     // Initialize rotation matrix to identity
     for (int i = 0; i < 3; ++i) {
@@ -30,7 +36,8 @@ void ImuCalibrator::begin(uint16_t sampleRateHz, float durationSec) {
     if (loadFromNvs()) {
         _isCalibrated = true;
         _phase = CALIB_FIRST_DONE_WAITING_WALK;
-        Serial.println("[CALIB] Restored existing sensor orientation matrix from NVS.");
+        Serial.printf("[CALIB] Restored existing calibration from NVS (Gyro Bias: [%.2f, %.2f, %.2f] dps).\n",
+                      _gyroBiasX, _gyroBiasY, _gyroBiasZ);
     } else {
         _isCalibrated = false;
         _phase = CALIB_WAITING_INITIAL_IDLE;
@@ -41,6 +48,9 @@ void ImuCalibrator::begin(uint16_t sampleRateHz, float durationSec) {
     _sumAx = 0.0;
     _sumAy = 0.0;
     _sumAz = 0.0;
+    _sumGx = 0.0;
+    _sumGy = 0.0;
+    _sumGz = 0.0;
     _manualCalibrationPending = false;
 }
 
@@ -86,6 +96,9 @@ void ImuCalibrator::update(float ax_raw, float ay_raw, float az_raw, float gx_ra
         _sumAx += (double)ax_raw;
         _sumAy += (double)ay_raw;
         _sumAz += (double)az_raw;
+        _sumGx += (double)gx_raw;
+        _sumGy += (double)gy_raw;
+        _sumGz += (double)gz_raw;
         _stillnessSampleCount++;
 
         // Log progress every second (or every 19 samples)
@@ -117,6 +130,9 @@ void ImuCalibrator::update(float ax_raw, float ay_raw, float az_raw, float gx_ra
             _sumAx = 0.0;
             _sumAy = 0.0;
             _sumAz = 0.0;
+            _sumGx = 0.0;
+            _sumGy = 0.0;
+            _sumGz = 0.0;
 
             // Notify completion listener (e.g. main.cpp for haptic feedback and BLE notification)
             if (_onComplete) {
@@ -136,6 +152,9 @@ void ImuCalibrator::update(float ax_raw, float ay_raw, float az_raw, float gx_ra
             _sumAx = 0.0;
             _sumAy = 0.0;
             _sumAz = 0.0;
+            _sumGx = 0.0;
+            _sumGy = 0.0;
+            _sumGz = 0.0;
         }
     }
 }
@@ -143,11 +162,15 @@ void ImuCalibrator::update(float ax_raw, float ay_raw, float az_raw, float gx_ra
 void ImuCalibrator::computeAndApplyAlignment(int step) {
     if (_stillnessSampleCount == 0) return;
 
-    // Compute averaged gravity vector in raw sensor frame
+    // Compute averaged gravity vector and gyro zero-rate bias in raw sensor frame
     double invN = 1.0 / (double)_stillnessSampleCount;
     double vx = _sumAx * invN;
     double vy = _sumAy * invN;
     double vz = _sumAz * invN;
+
+    _gyroBiasX = (float)(_sumGx * invN);
+    _gyroBiasY = (float)(_sumGy * invN);
+    _gyroBiasZ = (float)(_sumGz * invN);
 
     double mag = sqrt(vx * vx + vy * vy + vz * vz);
     if (mag < 1e-4) return;
@@ -192,6 +215,8 @@ void ImuCalibrator::computeAndApplyAlignment(int step) {
     Serial.printf("        [ %.4f, %.4f, %.4f ]\n", _r[0][0], _r[0][1], _r[0][2]);
     Serial.printf("        [ %.4f, %.4f, %.4f ]\n", _r[1][0], _r[1][1], _r[1][2]);
     Serial.printf("        [ %.4f, %.4f, %.4f ]\n", _r[2][0], _r[2][1], _r[2][2]);
+    Serial.printf("[CALIB] Calculated Gyro Zero-Rate Bias: [%.2f, %.2f, %.2f] dps\n",
+                  _gyroBiasX, _gyroBiasY, _gyroBiasZ);
 }
 
 void ImuCalibrator::applyCalibration(float& ax, float& ay, float& az, float& gx, float& gy, float& gz) const {
@@ -199,7 +224,12 @@ void ImuCalibrator::applyCalibration(float& ax, float& ay, float& az, float& gx,
         return;
     }
 
-    // Apply rotation matrix R to linear acceleration vector
+    // 1. Subtract zero-rate bias in sensor body frame before rotation
+    gx -= _gyroBiasX;
+    gy -= _gyroBiasY;
+    gz -= _gyroBiasZ;
+
+    // 2. Apply rotation matrix R to linear acceleration vector
     float rx = _r[0][0] * ax + _r[0][1] * ay + _r[0][2] * az;
     float ry = _r[1][0] * ax + _r[1][1] * ay + _r[1][2] * az;
     float rz = _r[2][0] * ax + _r[2][1] * ay + _r[2][2] * az;
@@ -207,7 +237,7 @@ void ImuCalibrator::applyCalibration(float& ax, float& ay, float& az, float& gx,
     ay = ry;
     az = rz;
 
-    // Apply the exact same rotation matrix R to angular velocity vector (gyroscope)
+    // 3. Apply the exact same rotation matrix R to angular velocity vector (gyroscope)
     float rgx = _r[0][0] * gx + _r[0][1] * gy + _r[0][2] * gz;
     float rgy = _r[1][0] * gx + _r[1][1] * gy + _r[1][2] * gz;
     float rgz = _r[2][0] * gx + _r[2][1] * gy + _r[2][2] * gz;
@@ -223,6 +253,9 @@ void ImuCalibrator::notifyWalkDetected() {
         _sumAx = 0.0;
         _sumAy = 0.0;
         _sumAz = 0.0;
+        _sumGx = 0.0;
+        _sumGy = 0.0;
+        _sumGz = 0.0;
         Serial.println("[CALIB] Walking activity detected. Next resting stop will trigger step 2 refinement calibration.");
     }
 }
@@ -233,6 +266,9 @@ void ImuCalibrator::triggerManualCalibration() {
     _sumAx = 0.0;
     _sumAy = 0.0;
     _sumAz = 0.0;
+    _sumGx = 0.0;
+    _sumGy = 0.0;
+    _sumGz = 0.0;
     Serial.println("[CALIB] Manual calibration sequence triggered via BLE. Keep shoe flat and still for 4 seconds...");
 }
 
@@ -253,9 +289,13 @@ void ImuCalibrator::saveToNvs(int step) {
     _prefs.putFloat("r20", _r[2][0]);
     _prefs.putFloat("r21", _r[2][1]);
     _prefs.putFloat("r22", _r[2][2]);
+    _prefs.putFloat("gbx", _gyroBiasX);
+    _prefs.putFloat("gby", _gyroBiasY);
+    _prefs.putFloat("gbz", _gyroBiasZ);
     _prefs.end();
 
-    log_i("Saved calibration matrix (step %d) to NVS namespace %s", step, NVS_NAMESPACE);
+    log_i("Saved calibration matrix (step %d) and gyro bias [%.2f, %.2f, %.2f] to NVS namespace %s",
+          step, _gyroBiasX, _gyroBiasY, _gyroBiasZ, NVS_NAMESPACE);
 }
 
 bool ImuCalibrator::loadFromNvs() {
@@ -281,6 +321,10 @@ bool ImuCalibrator::loadFromNvs() {
     _r[2][1] = _prefs.getFloat("r21", 0.0f);
     _r[2][2] = _prefs.getFloat("r22", 1.0f);
 
+    _gyroBiasX = _prefs.getFloat("gbx", 0.0f);
+    _gyroBiasY = _prefs.getFloat("gby", 0.0f);
+    _gyroBiasZ = _prefs.getFloat("gbz", 0.0f);
+
     _prefs.end();
     return true;
 }
@@ -297,6 +341,9 @@ void ImuCalibrator::reset() {
         }
     }
 
+    _gyroBiasX = 0.0f;
+    _gyroBiasY = 0.0f;
+    _gyroBiasZ = 0.0f;
     _isCalibrated = false;
     _phase = CALIB_WAITING_INITIAL_IDLE;
     _manualCalibrationPending = false;
@@ -304,6 +351,9 @@ void ImuCalibrator::reset() {
     _sumAx = 0.0;
     _sumAy = 0.0;
     _sumAz = 0.0;
+    _sumGx = 0.0;
+    _sumGy = 0.0;
+    _sumGz = 0.0;
     Serial.println("[CALIB] NVS calibration cleared. Calibrator reset to initial identity state.");
 }
 

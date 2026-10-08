@@ -1,6 +1,6 @@
 #include "imu_calibrator.h"
 
-static const char* NVS_NAMESPACE = "hk_calib";
+static const char* NVS_NAMESPACE = "hk_calib_v2";
 
 ImuCalibrator::ImuCalibrator()
     : _phase(CALIB_WAITING_INITIAL_IDLE),
@@ -32,17 +32,19 @@ void ImuCalibrator::begin(uint16_t sampleRateHz, float durationSec) {
     _sampleRateHz = sampleRateHz > 0 ? sampleRateHz : DEFAULT_SAMPLE_RATE_HZ;
     setStillnessDurationSec(durationSec);
 
-    // Try loading persistent calibration from NVS
+    // Try loading persistent calibration from NVS as initial fallback
     if (loadFromNvs()) {
         _isCalibrated = true;
-        _phase = CALIB_FIRST_DONE_WAITING_WALK;
-        Serial.printf("[CALIB] Restored existing calibration from NVS (Gyro Bias: [%.2f, %.2f, %.2f] dps).\n",
+        Serial.printf("[CALIB] Restored existing calibration from NVS v2 (Gyro Bias: [%.2f, %.2f, %.2f] dps).\n",
                       _gyroBiasX, _gyroBiasY, _gyroBiasZ);
     } else {
         _isCalibrated = false;
-        _phase = CALIB_WAITING_INITIAL_IDLE;
-        Serial.println("[CALIB] No stored calibration found in NVS. Waiting for initial level rest...");
+        Serial.println("[CALIB] No stored calibration found in NVS v2.");
     }
+
+    // Always wait for initial idle at boot to automatically zero gyro bias and gravity orientation
+    _phase = CALIB_WAITING_INITIAL_IDLE;
+    Serial.println("[CALIB] Calibrator armed: waiting for 4s of level stillness to auto-zero baseline...");
 
     _stillnessSampleCount = 0;
     _sumAx = 0.0;
@@ -304,7 +306,7 @@ bool ImuCalibrator::loadFromNvs() {
     }
 
     bool isValid = _prefs.getBool("valid", false);
-    if (!isValid) {
+    if (!isValid || !_prefs.isKey("gbx") || !_prefs.isKey("gby") || !_prefs.isKey("gbz")) {
         _prefs.end();
         return false;
     }

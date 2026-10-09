@@ -183,14 +183,19 @@ void OtaBleService::handleControlWrite(const uint8_t* data, size_t len) {
             _onStateChange(false);
         }
 
-        Serial.printf("[OTA] *** OTA SUCCESS! Boot partition switched to %s. Restarting in 500ms... ***\n",
+        Serial.printf("[OTA] *** OTA SUCCESS! Boot partition switched to %s. Restarting in 1.5s... ***\n",
                       _updatePartition->label);
 
         notifyStatus(OTA_RESP_SUCCESS);
 
-        // Schedule delayed device reboot
-        delay(500);
-        esp_restart();
+        // Schedule delayed device reboot in a dedicated FreeRTOS task so that
+        // this onWrite handler exits cleanly and NimBLE transmits the GATT ATT_WRITE_RSP
+        // and the OTA_RESP_SUCCESS notification to Android before the hardware restarts.
+        xTaskCreate([](void* param) {
+            vTaskDelay(pdMS_TO_TICKS(1500));
+            Serial.println("[OTA] Rebooting into new firmware partition now...");
+            esp_restart();
+        }, "ota_reboot_task", 2048, NULL, 5, NULL);
         return;
     }
 

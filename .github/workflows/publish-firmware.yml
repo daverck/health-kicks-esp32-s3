@@ -1,6 +1,14 @@
 name: Build & Publish Firmware to S3
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'platformio.ini'
+      - '.github/workflows/publish-firmware.yml'
   workflow_dispatch:
     inputs:
       version:
@@ -71,8 +79,9 @@ jobs:
           echo "size=$FILE_SIZE" >> $GITHUB_OUTPUT
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
           
+          VERSION="${{ inputs.version || 'v1.2.1-esp32s3' }}"
           echo "=========================================="
-          echo "Firmware Version: ${{ inputs.version }}"
+          echo "Firmware Version: $VERSION"
           echo "Binary Size:      $FILE_SIZE bytes"
           echo "SHA-256 Digest:   $SHA256_HASH"
           echo "UTC Build Date:   $BUILD_DATE"
@@ -88,12 +97,13 @@ jobs:
       - name: Upload Single Latest Firmware to S3
         run: |
           BIN_PATH=".pio/build/esp32-s3-devkitc-1/firmware.bin"
+          VERSION="${{ inputs.version || 'v1.2.1-esp32s3' }}"
           
           echo "Uploading firmware to s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}..."
           
           # Overwrite destination key so strictly ONE latest firmware file is retained on S3
           aws s3 cp "$BIN_PATH" "s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}" \
-            --metadata "version=${{ inputs.version }},sha256=${{ steps.checksum.outputs.sha256 }},built_at=${{ steps.checksum.outputs.build_date }}" \
+            --metadata "version=$VERSION,sha256=${{ steps.checksum.outputs.sha256 }},built_at=${{ steps.checksum.outputs.build_date }}" \
             --content-type "application/octet-stream"
           
           echo "Upload complete! Verified single latest firmware in S3:"

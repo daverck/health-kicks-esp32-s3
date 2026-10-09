@@ -89,7 +89,9 @@ void StudioManager::startCountdown() {
     _stepTimestampMs = millis();
     Serial.println("[STUDIO] Countdown: 1/3");
     _bleServer->notifyStudioControl("COUNTDOWN 1/3");
-    _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
+    if (_haptic) {
+        _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 220, 200);
+    }
 }
 
 void StudioManager::startRecording() {
@@ -100,6 +102,11 @@ void StudioManager::startRecording() {
     _state = StudioState::RECORDING;
     _recordingStartTimeMs = millis();
     _lastSampleTimeMs = 0;
+
+    // Trigger clear start-of-recording haptic pulse
+    if (_haptic) {
+        _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 255, 350);
+    }
 
     char buf[64];
     snprintf(buf, sizeof(buf), "RECORDING %.1f", _durationSec);
@@ -120,7 +127,9 @@ void StudioManager::update() {
                 _stepTimestampMs = now;
                 Serial.println("[STUDIO] Countdown: 2/3");
                 _bleServer->notifyStudioControl("COUNTDOWN 2/3");
-                _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
+                if (_haptic) {
+                    _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 220, 200);
+                }
             }
             break;
 
@@ -130,7 +139,9 @@ void StudioManager::update() {
                 _stepTimestampMs = now;
                 Serial.println("[STUDIO] Countdown: 3/3");
                 _bleServer->notifyStudioControl("COUNTDOWN 3/3");
-                _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 180, 100);
+                if (_haptic) {
+                    _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 220, 200);
+                }
             }
             break;
 
@@ -181,6 +192,11 @@ void StudioManager::update() {
 
 void StudioManager::finishRecordingAndStreamBurst() {
     _state = StudioState::TRANSMITTING_BURST;
+
+    // Trigger discrete double pulse to signal end of physical recording window
+    if (_haptic) {
+        _haptic->play(HAPTIC_PATTERN_DOUBLE_PULSE, 200, 250);
+    }
 
     Serial.printf("[STUDIO] Recording finished. Samples collected: %u\n", (unsigned int)_frames.size());
 

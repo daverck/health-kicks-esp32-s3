@@ -45,11 +45,16 @@ STATE_CODE_MAP = {
     "walk": "0x01",
     "run": "0x02",
     "stairs": "0x03",
+    "stairs_up": "0x03",
+    "stairs_down": "0x03",
+    "jump": "0x02",
+    "custom": "0x00",
     "fall_forward": "0x10",
     "fall_backward": "0x11",
     "fall_lateral": "0x12",
     "stumble_recover": "0x1E",
     "fall_generic": "0x1F",
+    "inactivity_alert": "0x20",
 }
 
 

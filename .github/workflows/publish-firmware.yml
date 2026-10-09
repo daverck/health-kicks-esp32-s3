@@ -22,7 +22,7 @@ env:
 jobs:
   build-and-publish:
     name: Compile ESP32-S3 Firmware & Upload to S3
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Checkout repository

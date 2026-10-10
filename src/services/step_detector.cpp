@@ -184,7 +184,8 @@ bool StepDetector::processSample(float ax, float ay, float az, float gy, uint8_t
         case STATE_CODE_RUN:
             _runSteps++;
             break;
-        case STATE_CODE_STAIRS:
+        case STATE_CODE_STAIRS_UP:
+        case STATE_CODE_STAIRS_DOWN:
             _stairsSteps++;
             break;
         default:

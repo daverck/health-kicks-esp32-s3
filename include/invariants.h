@@ -43,10 +43,13 @@
 #define STATE_CODE_IDLE                 0x00
 #define STATE_CODE_WALK                 0x01
 #define STATE_CODE_RUN                  0x02
-#define STATE_CODE_STAIRS               0x03
+#define STATE_CODE_STAIRS_UP            0x03
+#define STATE_CODE_STAIRS_DOWN          0x04
+#define STATE_CODE_STAIRS               0x03  // Legacy alias for compatibility
 #define STATE_CODE_FALL_FORWARD         0x10
 #define STATE_CODE_FALL_BACKWARD        0x11
 #define STATE_CODE_FALL_LATERAL         0x12
+#define STATE_CODE_FALL_RECOVERY        0x13
 #define STATE_CODE_STUMBLE_RECOVER      0x1E
 #define STATE_CODE_FALL_GENERIC         0x1F
 #define STATE_CODE_INACTIVITY_ALERT     0x20

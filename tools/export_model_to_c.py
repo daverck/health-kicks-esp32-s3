@@ -46,12 +46,13 @@ STATE_CODE_MAP = {
     "run": "0x02",
     "stairs": "0x03",
     "stairs_up": "0x03",
-    "stairs_down": "0x03",
+    "stairs_down": "0x04",
     "jump": "0x02",
     "custom": "0x00",
     "fall_forward": "0x10",
     "fall_backward": "0x11",
     "fall_lateral": "0x12",
+    "fall_recovery": "0x13",
     "stumble_recover": "0x1E",
     "fall_generic": "0x1F",
     "inactivity_alert": "0x20",
@@ -133,7 +134,7 @@ def generate_c_header(
 
     class_names_c = ", ".join([f'"{c}"' for c in classes])
     state_codes_c = ", ".join([STATE_CODE_MAP.get(c, "0x00") for c in classes])
-    fall_flags_c = ", ".join(["true" if c.startswith("fall") else "false" for c in classes])
+    fall_flags_c = ", ".join(["true" if (c.startswith("fall") and c != "fall_recovery") else "false" for c in classes])
     feature_names_c = ", ".join([f'"{f}"' for f in feature_names])
 
     scaler = metadata.get("scaler")

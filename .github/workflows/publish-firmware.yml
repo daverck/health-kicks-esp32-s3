@@ -18,6 +18,9 @@ env:
   AWS_REGION: eu-north-1
   S3_BUCKET: healthkicks-firmware-releases
   S3_DESTINATION_KEY: firmware/esp32s3/latest/firmware.bin
+  # Silence Node.js runtime deprecation warnings (DEP0040 punycode, DEP0169 url.parse) from actions dependencies
+  NODE_OPTIONS: "--no-deprecation"
+  NODE_NO_WARNINGS: "1"
 
 jobs:
   build-and-publish:
@@ -33,6 +36,9 @@ jobs:
 
       - name: Cache PlatformIO & packages
         uses: actions/cache@v4
+        env:
+          NODE_OPTIONS: "--no-deprecation"
+          NODE_NO_WARNINGS: "1"
         with:
           path: |
             ~/.platformio

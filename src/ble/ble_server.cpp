@@ -170,6 +170,31 @@ void HealthKicksBleServer::begin(const char* deviceName) {
         this->notifyOtaControl(data, len);
     });
 
+    // Create standard Bluetooth SIG Device Information Service (0x180A)
+    NimBLEService* pDisService = _pServer->createService(NimBLEUUID((uint16_t)0x180A));
+    if (pDisService != nullptr) {
+        // Firmware Revision String (0x2A26)
+        NimBLECharacteristic* pCharFwRev = pDisService->createCharacteristic(
+            NimBLEUUID((uint16_t)0x2A26),
+            NIMBLE_PROPERTY::READ
+        );
+        if (pCharFwRev != nullptr) {
+            pCharFwRev->setValue(FIRMWARE_VERSION);
+        }
+
+        // Software Revision String (0x2A28) - Build Date / Timestamp
+        NimBLECharacteristic* pCharSwRev = pDisService->createCharacteristic(
+            NimBLEUUID((uint16_t)0x2A28),
+            NIMBLE_PROPERTY::READ
+        );
+        if (pCharSwRev != nullptr) {
+            pCharSwRev->setValue(FIRMWARE_BUILD_DATE);
+        }
+
+        pDisService->start();
+        log_i("NimBLE server configured with Device Information service: 0x180A");
+    }
+
     _lastActivityTime = millis();
     startAdvertising();
 }

@@ -28,14 +28,18 @@ public:
 
     /**
      * @brief Initializes the sliding window buffer and inference parameters.
-     * @param confidenceThreshold Minimum probability required to confirm an activity (default: 0.75f).
+     * @param confidenceThreshold Minimum probability required to confirm a nominal activity (default: 0.75f).
      * @param fallCooldownMs Minimum interval in ms between consecutive fall alerts (default: 5000 ms).
-     * @param minFallImpactMs2 Minimum peak acceleration in m/s^2 to confirm impact (default: 18.0 m/s^2).
+     * @param minFallImpactMs2 Minimum peak acceleration in m/s^2 for backward/lateral falls (default: 17.0 m/s^2).
+     * @param fallConfidenceThreshold Cumulative probability threshold required for falls (default: 0.65f).
+     * @param minForwardFallImpactMs2 Minimum peak acceleration in m/s^2 for forward falls (default: 12.0 m/s^2).
      */
     void begin(
         float confidenceThreshold = 0.75f,
         uint32_t fallCooldownMs = 5000,
-        float minFallImpactMs2 = 18.0f
+        float minFallImpactMs2 = 17.0f,
+        float fallConfidenceThreshold = 0.65f,
+        float minForwardFallImpactMs2 = 12.0f
     );
 
     /**
@@ -73,6 +77,12 @@ public:
     bool detect(ActivityDetectionResult& result);
 
     /**
+     * @brief Evaluates whether the end of the current window corresponds to a nominal sitting/standing posture on a flat floor.
+     * Checks the last 12 samples (~0.63s at 19 Hz): avg az in [0.80g, 1.15g], avg horizontal xy < 0.35g, and acc_min >= 0.60g.
+     */
+    bool isSittingDownNominalPosture(float accMinG) const;
+
+    /**
      * @brief Resets the sliding window buffer (e.g. when transitioning from Studio recording mode).
      */
     void reset();
@@ -80,6 +90,8 @@ public:
     // Getters / Configuration
     void setConfidenceThreshold(float threshold) { _confidenceThreshold = threshold; }
     float getConfidenceThreshold() const { return _confidenceThreshold; }
+    void setFallConfidenceThreshold(float threshold) { _fallConfidenceThreshold = threshold; }
+    float getFallConfidenceThreshold() const { return _fallConfidenceThreshold; }
     void setFallCooldown(uint32_t cooldownMs) { _fallCooldownMs = cooldownMs; }
     uint32_t getSampleCount() const { return _sampleCount; }
 
@@ -99,11 +111,12 @@ private:
     uint32_t _samplesSinceLastEval;
 
     float _confidenceThreshold;
-    uint32_t _fallCooldownMs;
+    float _fallConfidenceThreshold;
     float _minFallImpactMs2;
+    float _minForwardFallImpactMs2;
+    uint32_t _fallCooldownMs;
     uint32_t _lastFallTimestampMs;
 
     // Feature extraction routine
     void computeFeatures(double* featureVector);
 };
-

@@ -141,9 +141,11 @@ void setup() {
     studioManager.begin(&bleServer, &haptic, &imu, &imuCalibrator);
 
     // Configure Edge AI activity detection engine
-    activityDetector.begin(0.75f, 5000, 18.0f);
-    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%).\n",
-                  MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT, activityDetector.getConfidenceThreshold() * 100.0f);
+    activityDetector.begin(0.75f, 5000, 17.0f, 0.65f, 12.0f);
+    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%% / Fall: %.0f%%).\n",
+                  MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT,
+                  activityDetector.getConfidenceThreshold() * 100.0f,
+                  activityDetector.getFallConfidenceThreshold() * 100.0f);
 
     // Configure Dynamic IMU Tilt Calibrator (4.0s stillness window @ 19 Hz)
     imuCalibrator.begin(IMU_SAMPLE_FREQ_HZ, 4.0f);
@@ -329,42 +331,40 @@ void loop() {
                 if (activityDetector.isEvaluationDue()) {
                     ActivityDetectionResult result;
                     if (activityDetector.detect(result)) {
-                        if (result.confidence >= activityDetector.getConfidenceThreshold()) {
-                            uint32_t epochSec = (uint32_t)(now / 1000);
-                            currentActivityState = result.stateCode;
+                        uint32_t epochSec = (uint32_t)(now / 1000);
+                        currentActivityState = result.stateCode;
 
-                            // Notify calibrator if walking activity detected (triggers step 2 refinement on next rest)
-                            if (result.stateCode == STATE_CODE_WALK) {
-                                imuCalibrator.notifyWalkDetected();
-                            }
+                        // Notify calibrator if walking activity detected (triggers step 2 refinement on next rest)
+                        if (result.stateCode == STATE_CODE_WALK) {
+                            imuCalibrator.notifyWalkDetected();
+                        }
 
-                            if (result.isFall) {
-                                Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Latency: %u us) ***\n",
-                                              result.className, result.confidence * 100.0f, result.inferenceTimeUs);
+                        if (result.isFall) {
+                            Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Latency: %u us) ***\n",
+                                          result.className, result.confidence * 100.0f, result.inferenceTimeUs);
 
-                                // Trigger emergency haptic feedback alert
-                                haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 255, 500);
+                            // Trigger emergency haptic feedback alert
+                            haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 255, 500);
 
-                                // Notify connected mobile client over BLE with critical fall flags
-                                bleServer.notifyActivity(
-                                    result.stateCode,
-                                    (uint8_t)(result.confidence * 100.0f),
-                                    epochSec,
-                                    DETECTION_FLAG_CRITICAL_FALL | DETECTION_FLAG_LOCAL_HAPTIC
-                                );
-                                lastReportedActivityState = result.stateCode;
-                            } else if (result.stateCode != lastReportedActivityState) {
-                                Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Latency: %u us)\n",
-                                              result.className, result.confidence * 100.0f, result.inferenceTimeUs);
+                            // Notify connected mobile client over BLE with critical fall flags
+                            bleServer.notifyActivity(
+                                result.stateCode,
+                                (uint8_t)(result.confidence * 100.0f),
+                                epochSec,
+                                DETECTION_FLAG_CRITICAL_FALL | DETECTION_FLAG_LOCAL_HAPTIC
+                            );
+                            lastReportedActivityState = result.stateCode;
+                        } else if (result.stateCode != lastReportedActivityState) {
+                            Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Latency: %u us)\n",
+                                          result.className, result.confidence * 100.0f, result.inferenceTimeUs);
 
-                                bleServer.notifyActivity(
-                                    result.stateCode,
-                                    (uint8_t)(result.confidence * 100.0f),
-                                    epochSec,
-                                    0
-                                );
-                                lastReportedActivityState = result.stateCode;
-                            }
+                            bleServer.notifyActivity(
+                                result.stateCode,
+                                (uint8_t)(result.confidence * 100.0f),
+                                epochSec,
+                                0
+                            );
+                            lastReportedActivityState = result.stateCode;
                         }
                     }
                 }

@@ -7,9 +7,11 @@ ActivityDetector::ActivityDetector()
     : _writeIndex(0),
       _sampleCount(0),
       _samplesSinceLastEval(0),
-      _confidenceThreshold(0.40f),
-      _fallCooldownMs(5000),
+      _confidenceThreshold(0.50f),
+      _fallConfidenceThreshold(0.65f),
       _minFallImpactMs2(18.0f),
+      _minForwardFallImpactMs2(12.0f),
+      _fallCooldownMs(5000),
       _lastFallTimestampMs(0) {
     memset(_buffer, 0, sizeof(_buffer));
 }
@@ -185,6 +187,37 @@ void ActivityDetector::computeFeatures(double* featureVector) {
     featureVector[15] = gyro_energy;
 }
 
+bool ActivityDetector::isUprightFlatFootStillness() const {
+    if (_sampleCount < 15) {
+        return false;
+    }
+
+    float sum_az = 0.0f;
+    float sum_h = 0.0f;
+    float sum_gyro = 0.0f;
+    const int K = 15; // ~0.79s at 19 Hz
+
+    for (int i = 0; i < K; ++i) {
+        int idx = (_writeIndex - K + i + MODEL_WINDOW_SAMPLES) % MODEL_WINDOW_SAMPLES;
+        const Sample& s = _buffer[idx];
+        sum_az += s.az;
+        sum_h += sqrtf(s.ax * s.ax + s.ay * s.ay);
+        sum_gyro += sqrtf(s.gx * s.gx + s.gy * s.gy + s.gz * s.gz);
+    }
+
+    float avg_az = sum_az / (float)K;
+    float avg_h = sum_h / (float)K;
+    float avg_gyro = sum_gyro / (float)K;
+
+    // Upright flat foot on floor: vertical acceleration along Z is approximately 1g (0.78g to 1.20g),
+    // horizontal components are small (< 0.40g), and gyroscope indicates no rotational movement (< 35 deg/s).
+    bool isVerticalUpright = (avg_az >= 0.78f && avg_az <= 1.20f);
+    bool isHorizontalFlat = (avg_h <= 0.40f);
+    bool isStill = (avg_gyro <= 35.0f);
+
+    return isVerticalUpright && isHorizontalFlat && isStill;
+}
+
 bool ActivityDetector::detect(ActivityDetectionResult& result) {
     if (!isWindowReady()) {
         return false;
@@ -248,6 +281,38 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     if (confidence > 1.0f) confidence = 1.0f;
     if (confidence < 0.0f) confidence = 0.0f;
 
+    uint32_t nowMs = millis();
+
+    // Contextual gating for "fall_recovery" (0x13):
+    // A recovery from a fall can ONLY physically occur if a fall actually occurred in the recent past (< 45s).
+    // Without a preceding fall, standing up or shifting weight must not emit spurious "Chute relevée" alerts.
+    if (MODEL_CLASS_STATE_CODES[bestIdx] == STATE_CODE_FALL_RECOVERY) {
+        bool hasRecentFall = (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs <= 45000));
+        if (!hasRecentFall) {
+            // Find best alternative nominal class (excluding fall classes and fall_recovery)
+            int altIdx = -1;
+            double altProb = 0.0;
+            for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+                if (!MODEL_IS_FALL_CLASS[i] && MODEL_CLASS_STATE_CODES[i] != STATE_CODE_FALL_RECOVERY) {
+                    if (probs[i] > altProb) {
+                        altProb = probs[i];
+                        altIdx = i;
+                    }
+                }
+            }
+            if (altIdx >= 0 && altProb >= _confidenceThreshold) {
+                bestIdx = altIdx;
+                bestProb = altProb;
+                confidence = (float)altProb;
+            } else {
+                return false;
+            }
+        } else {
+            // Valid recovery confirmed: clear fall context
+            _lastFallTimestampMs = 0;
+        }
+    }
+
     bool isFallClass = MODEL_IS_FALL_CLASS[bestIdx];
 
     // Additional biomechanical confirmation for fall:
@@ -258,6 +323,24 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     float gyroMaxDps = (float)features[5];     // gyro_mag_max
 
     if (isFallClass) {
+        // Biomechanical Sitting Guard:
+        // When sitting down, the user moves backwards into a chair, but at the end of the window,
+        // the foot is resting flat on the floor, upright, and stationary.
+        // If the foot is upright on the floor and peak impact is below extreme shock (< 26.0 m/s2 = 2.65g),
+        // this is a sitting transition, NOT a dangerous backward fall!
+        if (isUprightFlatFootStillness() && peakImpactMs2 < 26.0f) {
+            result.classIndex = -1;
+            result.className = "sit_down";
+            result.stateCode = STATE_CODE_SIT_DOWN;
+            result.confidence = confidence;
+            result.isFall = false;
+            result.inferenceTimeUs = micros() - startUs;
+            for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+                result.classScores[i] = probs[i];
+            }
+            return true;
+        }
+
         // Forward falls (state code 0x10) often involve knees/hands absorbing impact first (~12-16 m/s2 at foot)
         float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? 12.0f : _minFallImpactMs2;
         if (peakImpactMs2 < requiredImpactMs2) {
@@ -269,14 +352,7 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
             return false;
         }
 
-        // Anti-sitting false positive guard: genuine falls exhibit a free-fall weightlessness trough (acc_mag_min < 0.65g)
-        // Gentle sitting down on a chair keeps feet grounded without free fall (acc_mag_min >= 0.65g)
-        if (accMinG >= 0.65f && peakImpactMs2 < 20.0f) {
-            return false;
-        }
-
         // Debouncing / Cooldown logic for falls
-        uint32_t nowMs = millis();
         if (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs < _fallCooldownMs)) {
             return false;
         }

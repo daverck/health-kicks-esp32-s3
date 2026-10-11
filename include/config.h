@@ -69,7 +69,7 @@
 #define BLE_PREFERRED_MTU       247
 
 // Firmware Version and Identification
-#define FIRMWARE_VERSION        "v1.2.2-esp32s3"
+#define FIRMWARE_VERSION        "v1.2.3-esp32s3"
 #define FIRMWARE_BUILD_DATE     __DATE__ " " __TIME__
 
 // Deep Sleep & Power Management Configuration

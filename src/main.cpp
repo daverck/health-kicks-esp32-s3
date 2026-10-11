@@ -140,8 +140,8 @@ void setup() {
     // Configure Studio capture manager with dynamic tilt calibrator
     studioManager.begin(&bleServer, &haptic, &imu, &imuCalibrator);
 
-    // Configure Edge AI activity detection engine (0.40f threshold for 9-class ensemble)
-    activityDetector.begin(0.40f, 5000, 18.0f);
+    // Configure Edge AI activity detection engine (0.50f threshold for 9-class ensemble)
+    activityDetector.begin(0.50f, 5000, 18.0f);
     Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%).\n",
                   MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT,
                   activityDetector.getConfidenceThreshold() * 100.0f);

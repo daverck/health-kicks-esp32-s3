@@ -105,6 +105,7 @@ private:
     uint32_t _fallCooldownMs;
     uint32_t _lastFallTimestampMs;
 
-    // Feature extraction routine
+    // Feature extraction and biomechanical verification routines
     void computeFeatures(double* featureVector);
+    bool isUprightFlatFootStillness() const;
 };

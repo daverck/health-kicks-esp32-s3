@@ -247,34 +247,58 @@ Le serveur BLE implémente les spécifications contractuelles définies dans `co
 
 ---
 
-## 4. Edge AI : Export et Transpilation du Modèle (`tools/export_model_to_c.py`)
+## 4. Edge AI : Export et Transpilation du Modèle (`activity_model_generated.h`)
 
-Le firmware embarque directement le modèle d'inférence d'activité (Random Forest scikit-learn) transpilé en C pur header-only (`include/activity_model_generated.h`) via `m2cgen`.
+Le firmware embarque directement le modèle d'inférence d'activité et de détection de chute (Random Forest scikit-learn) transpilé en C pur header-only (`include/activity_model_generated.h`) via `m2cgen`.
 
-### A. Prérequis Python
+### A. Méthode Recommandée : Pipeline Automatisé MLOps (`update_edge_model.py`)
+
+La manière la plus simple et sécurisée de mettre à jour le modèle embarqué est d'exécuter le script d'orchestration MLOps depuis le dossier `health-kicks/` :
+
+```powershell
+cd ../health-kicks
+
+# Ingestion DynamoDB/Postgres + Entraînement 5-Fold CV + Quality Gate + Transpilation C + Build firmware PlatformIO
+uv run python -m scripts.update_edge_model
+
+# En mode démonstration hors-ligne (synthétique, sans identifiants AWS)
+uv run python -m scripts.update_edge_model --synthetic
+
+# Pour re-transpiler un modèle existant sans ré-entraîner
+uv run python -m scripts.update_edge_model --skip-train
+```
+
+Ce script vérifie automatiquement la compilation du firmware via PlatformIO (`pio run`) et s'assure que la mémoire Flash et la RAM de l'ESP32-S3 restent dans les limites autorisées.
+
+---
+
+### B. Méthode Manuelle : Script d'Export Dédié (`tools/export_model_to_c.py`)
+
+Si vous disposez déjà d'un fichier de modèle entraîné `.joblib` et souhaitez uniquement générer le header C++ :
+
+#### 1. Prérequis Python
 ```bash
 pip install m2cgen joblib scikit-learn numpy
+# (ou avec uv dans le projet backend: uv run ...)
 ```
-*(ou utiliser l'environnement virtuel avec `uv run`)*
 
-### B. Utilisation du script d'export
-Pour convertir un modèle entraîné `.joblib` en header C++ :
-
+#### 2. Utilisation du script d'export
 ```bash
-# Export standard (chemins par défaut : scripts/models/activity_classifier.joblib -> include/activity_model_generated.h)
+# Export standard (cherche automatiquement activity_classifier.joblib -> include/activity_model_generated.h)
 python tools/export_model_to_c.py
 
 # Export avec chemins personnalisés
 python tools/export_model_to_c.py --model path/to/model.joblib --output include/activity_model_generated.h
 ```
 
-### C. Options disponibles
+#### 3. Options disponibles
 * `--model <chemin>` : Chemin vers le fichier `.joblib` du modèle entraîné (Recherche automatique par défaut dans `scripts/models/`, `../health-kicks/scripts/models/`, `../health-kicks-edge-script/models/`).
 * `--output <chemin>` : Chemin du fichier header C généré (Défaut : `include/activity_model_generated.h`).
 
-### D. Workflow après mise à jour du modèle
-1. Entraîner ou ajuster le modèle scikit-learn (Random Forest / Decision Tree).
-2. Lancer `python tools/export_model_to_c.py --model <chemin_modele.joblib>`.
-3. Recompiler le firmware avec `pio run`.
+### C. Workflow après mise à jour du modèle
+1. Entraîner et exporter le modèle (automatique via `update_edge_model.py` ou manuel via `export_model_to_c.py`).
+2. Vérifier la compilation du firmware avec `pio run`.
+3. Flasher l'ESP32-S3 via USB CDC avec `pio run --target upload`.
+
 
 

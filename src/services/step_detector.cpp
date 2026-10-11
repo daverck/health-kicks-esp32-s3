@@ -165,8 +165,9 @@ bool StepDetector::processSample(float ax, float ay, float az, float gy, uint8_t
     }
 
     // 3. Activity Context Gating (Edge AI)
-    // If state is idle or any fall variant, dismiss step
+    // If state is idle, seated, or any fall variant, dismiss step
     if (currentActivityState == STATE_CODE_IDLE ||
+        currentActivityState == STATE_CODE_SIT_DOWN ||
         currentActivityState == STATE_CODE_FALL_FORWARD ||
         currentActivityState == STATE_CODE_FALL_BACKWARD ||
         currentActivityState == STATE_CODE_FALL_LATERAL ||

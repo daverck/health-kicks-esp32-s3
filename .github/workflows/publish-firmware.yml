@@ -4,15 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Firmware semantic version (e.g. v1.2.1-esp32s3)'
-        required: true
-        default: 'v1.2.1-esp32s3'
+        description: 'Firmware semantic version (leave empty to auto-extract from include/config.h)'
+        required: false
+        default: ''
         type: string
       changelog:
         description: 'Changelog / Release notes summary'
         required: false
-        default: 'Manual release build via GitHub Actions'
+        default: 'Automated release build via GitHub Actions'
         type: string
+  push:
+    branches:
+      - main
+    paths:
+      - 'include/config.h'
+      - 'include/activity_model_generated.h'
+      - 'src/**'
+      - 'platformio.ini'
 
 env:
   AWS_REGION: eu-north-1
@@ -73,7 +81,17 @@ jobs:
           echo "size=$FILE_SIZE" >> $GITHUB_OUTPUT
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
           
-          VERSION="${{ inputs.version || 'v1.2.1-esp32s3' }}"
+          # Extract semantic version from include/config.h if not explicitly provided
+          EXTRACTED_VERSION=$(grep '#define FIRMWARE_VERSION' include/config.h | awk -F'"' '{print $2}')
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            VERSION="$EXTRACTED_VERSION"
+          fi
+          if [ -z "$VERSION" ]; then
+            VERSION="v1.2.1-esp32s3"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
           echo "=========================================="
           echo "Firmware Version: $VERSION"
           echo "Binary Size:      $FILE_SIZE bytes"
@@ -90,7 +108,7 @@ jobs:
       - name: Upload Single Latest Firmware to S3
         run: |
           BIN_PATH=".pio/build/esp32-s3-devkitc-1/firmware.bin"
-          VERSION="${{ inputs.version || 'v1.2.1-esp32s3' }}"
+          VERSION="${{ steps.checksum.outputs.version }}"
           
           echo "Uploading firmware to s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}..."
           

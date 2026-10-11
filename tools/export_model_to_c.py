@@ -47,6 +47,7 @@ STATE_CODE_MAP = {
     "stairs": "0x03",
     "stairs_up": "0x03",
     "stairs_down": "0x04",
+    "sit_down": "0x05",
     "jump": "0x02",
     "custom": "0x00",
     "fall_forward": "0x10",

@@ -7,27 +7,17 @@ ActivityDetector::ActivityDetector()
     : _writeIndex(0),
       _sampleCount(0),
       _samplesSinceLastEval(0),
-      _confidenceThreshold(0.75f),
-      _fallConfidenceThreshold(0.65f),
-      _minFallImpactMs2(17.0f),
-      _minForwardFallImpactMs2(12.0f),
+      _confidenceThreshold(0.40f),
       _fallCooldownMs(5000),
+      _minFallImpactMs2(18.0f),
       _lastFallTimestampMs(0) {
     memset(_buffer, 0, sizeof(_buffer));
 }
 
-void ActivityDetector::begin(
-    float confidenceThreshold,
-    uint32_t fallCooldownMs,
-    float minFallImpactMs2,
-    float fallConfidenceThreshold,
-    float minForwardFallImpactMs2
-) {
+void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs, float minFallImpactMs2) {
     _confidenceThreshold = confidenceThreshold;
     _fallCooldownMs = fallCooldownMs;
     _minFallImpactMs2 = minFallImpactMs2;
-    _fallConfidenceThreshold = fallConfidenceThreshold;
-    _minForwardFallImpactMs2 = minForwardFallImpactMs2;
     reset();
 }
 
@@ -83,29 +73,6 @@ bool ActivityDetector::isEvaluationDue() const {
     // 50% overlap evaluation step (e.g. every 19 samples for a 38-sample window at 19 Hz)
     const uint32_t stepSamples = (MODEL_WINDOW_SAMPLES > 1) ? (MODEL_WINDOW_SAMPLES / 2) : 1;
     return _samplesSinceLastEval >= stepSamples;
-}
-
-bool ActivityDetector::isSittingDownNominalPosture(float accMinG) const {
-    if (_sampleCount < 12) {
-        return false;
-    }
-
-    float sum_az = 0.0f;
-    float sum_xy = 0.0f;
-
-    for (int i = 0; i < 12; ++i) {
-        uint16_t idx = (uint16_t)(((int)_writeIndex - 12 + i + MODEL_WINDOW_SAMPLES) % MODEL_WINDOW_SAMPLES);
-        const Sample& s = _buffer[idx];
-        sum_az += s.az;
-        sum_xy += sqrtf(s.ax * s.ax + s.ay * s.ay);
-    }
-
-    float avg_az = sum_az / 12.0f;
-    float avg_xy = sum_xy / 12.0f;
-
-    bool isFlatFloor = (avg_az >= 0.80f && avg_az <= 1.15f) && (avg_xy < 0.35f);
-    bool hasNoFreeFall = (accMinG >= 0.60f);
-    return isFlatFloor && hasNoFreeFall;
 }
 
 void ActivityDetector::computeFeatures(double* featureVector) {
@@ -248,96 +215,56 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
         sum += probs[i];
     }
 
+    int bestIdx = 0;
+    double bestProb = 0.0;
     for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
         if (sum > 0.0) {
             probs[i] /= sum;
         }
-    }
-
-    // Compute cumulative fall probability and determine best fall and non-fall candidates
-    double fallProb = 0.0;
-    int bestFallIdx = -1;
-    double bestFallScore = -1.0;
-    int bestNonFallIdx = -1;
-    double bestNonFallScore = -1.0;
-
-    for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-        if (MODEL_IS_FALL_CLASS[i]) {
-            fallProb += probs[i];
-            if (probs[i] > bestFallScore) {
-                bestFallScore = probs[i];
-                bestFallIdx = i;
-            }
-        } else {
-            if (probs[i] > bestNonFallScore) {
-                bestNonFallScore = probs[i];
-                bestNonFallIdx = i;
-            }
+        if (probs[i] > bestProb) {
+            bestProb = probs[i];
+            bestIdx = i;
         }
     }
 
-    bool isFallConfirmed = false;
-    int selectedClassIdx = -1;
-    float finalConfidence = 0.0f;
+    float confidence = (float)bestProb;
+    if (confidence > 1.0f) confidence = 1.0f;
+    if (confidence < 0.0f) confidence = 0.0f;
 
-    // 1. Check if cumulative fall probability meets the fall threshold
-    if (fallProb >= _fallConfidenceThreshold && bestFallIdx >= 0) {
-        float peakImpactMs2 = (float)features[0] * GRAVITY_MS2;
-        float accMinG = (float)features[1];
-        float gyroMaxDps = (float)features[5];
+    bool isFallClass = MODEL_IS_FALL_CLASS[bestIdx];
 
-        // Determine adaptive impact threshold based on fall class
-        // Forward falls (fall_forward, state code 0x10) often involve knees/hands absorbing the primary impact,
-        // resulting in attenuated foot impact (12-16 m/s2) accompanied by pitch rotation.
-        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestFallIdx] == 0x10) ? _minForwardFallImpactMs2 : _minFallImpactMs2;
-
-        bool impactSufficient = (peakImpactMs2 >= requiredImpactMs2);
-        // For forward fall with lower impact, also verify rotational dynamics
-        if (MODEL_CLASS_STATE_CODES[bestFallIdx] == 0x10 && peakImpactMs2 < _minFallImpactMs2) {
-            if (gyroMaxDps < 80.0f) {
-                impactSufficient = false; // Discard if no significant rotation occurred
-            }
-        }
-
-        // Check anti-sitting posture guard
-        bool isSittingTransition = isSittingDownNominalPosture(accMinG);
-
-        if (impactSufficient && !isSittingTransition) {
-            isFallConfirmed = true;
-            selectedClassIdx = bestFallIdx;
-            finalConfidence = (float)fallProb;
-        }
+    // Additional biomechanical confirmation for fall:
+    // Peak acceleration must exceed the minimum physical impact threshold (in m/s^2)
+    // features[0] is acc_mag_max in g -> convert to m/s^2
+    float peakImpactMs2 = (float)features[0] * GRAVITY_MS2;
+    if (isFallClass && peakImpactMs2 < _minFallImpactMs2) {
+        // Fall dismissed due to insufficient physical impact peak.
+        // Suppress output so no spurious BLE notification is emitted.
+        return false;
     }
 
-    // 2. If fall not confirmed, evaluate nominal activity
-    if (!isFallConfirmed) {
-        if (bestNonFallIdx >= 0 && probs[bestNonFallIdx] >= _confidenceThreshold) {
-            selectedClassIdx = bestNonFallIdx;
-            finalConfidence = (float)probs[bestNonFallIdx];
-        } else {
-            // Confidence insufficient for any activity
-            return false;
-        }
-    }
-
-    // 3. Fall Cooldown check
+    // Debouncing / Cooldown logic for falls
     uint32_t nowMs = millis();
-    if (isFallConfirmed) {
+    if (isFallClass) {
         if (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs < _fallCooldownMs)) {
+            // Cooldown active, suppress repeating emergency fall alert and BLE notification
             return false;
         }
         _lastFallTimestampMs = nowMs;
     }
 
-    // 4. Fill result
-    result.classIndex = selectedClassIdx;
-    result.className = MODEL_CLASS_NAMES[selectedClassIdx];
-    result.stateCode = MODEL_CLASS_STATE_CODES[selectedClassIdx];
-    result.confidence = finalConfidence > 1.0f ? 1.0f : (finalConfidence < 0.0f ? 0.0f : finalConfidence);
-    result.isFall = isFallConfirmed;
-    result.inferenceTimeUs = micros() - startUs;
+    uint32_t elapsedUs = micros() - startUs;
+
+    result.classIndex = bestIdx;
+    result.className = MODEL_CLASS_NAMES[bestIdx];
+    result.stateCode = MODEL_CLASS_STATE_CODES[bestIdx];
+    result.confidence = confidence;
+    result.isFall = isFallClass;
+    result.inferenceTimeUs = elapsedUs;
+
     for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
         result.classScores[i] = probs[i];
     }
+
     return true;
 }

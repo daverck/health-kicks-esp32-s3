@@ -200,30 +200,47 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     memset(scores, 0, sizeof(scores));
     evaluate_model(features, scores);
 
-    // Numerically stable Softmax calculation over raw model scores/logits
-    double max_val = scores[0];
-    for (int i = 1; i < MODEL_CLASS_COUNT; ++i) {
-        if (scores[i] > max_val) {
-            max_val = scores[i];
-        }
-    }
-
+    // Sum scores to check if model outputs normalized probabilities (RandomForest/ExtraTrees sum to 1.0)
+    // or unnormalized logits (MLP/Linear models)
     double sum = 0.0;
-    double probs[MODEL_CLASS_COUNT];
     for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-        probs[i] = exp(scores[i] - max_val);
-        sum += probs[i];
+        sum += scores[i];
     }
 
+    double probs[MODEL_CLASS_COUNT];
     int bestIdx = 0;
     double bestProb = 0.0;
-    for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-        if (sum > 0.0) {
-            probs[i] /= sum;
+
+    if (sum >= 0.85 && sum <= 1.15) {
+        // Model directly outputs normalized class probabilities from tree voting (RandomForest)
+        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+            probs[i] = scores[i] / sum;
+            if (probs[i] > bestProb) {
+                bestProb = probs[i];
+                bestIdx = i;
+            }
         }
-        if (probs[i] > bestProb) {
-            bestProb = probs[i];
-            bestIdx = i;
+    } else {
+        // Unbounded logits: compute numerically stable Softmax
+        double max_val = scores[0];
+        for (int i = 1; i < MODEL_CLASS_COUNT; ++i) {
+            if (scores[i] > max_val) {
+                max_val = scores[i];
+            }
+        }
+        double exp_sum = 0.0;
+        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+            probs[i] = exp(scores[i] - max_val);
+            exp_sum += probs[i];
+        }
+        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+            if (exp_sum > 0.0) {
+                probs[i] /= exp_sum;
+            }
+            if (probs[i] > bestProb) {
+                bestProb = probs[i];
+                bestIdx = i;
+            }
         }
     }
 
@@ -234,20 +251,33 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     bool isFallClass = MODEL_IS_FALL_CLASS[bestIdx];
 
     // Additional biomechanical confirmation for fall:
-    // Peak acceleration must exceed the minimum physical impact threshold (in m/s^2)
+    // Peak acceleration must exceed the physical impact threshold (in m/s^2)
     // features[0] is acc_mag_max in g -> convert to m/s^2
     float peakImpactMs2 = (float)features[0] * GRAVITY_MS2;
-    if (isFallClass && peakImpactMs2 < _minFallImpactMs2) {
-        // Fall dismissed due to insufficient physical impact peak.
-        // Suppress output so no spurious BLE notification is emitted.
-        return false;
-    }
+    float accMinG = (float)features[1];        // acc_mag_min
+    float gyroMaxDps = (float)features[5];     // gyro_mag_max
 
-    // Debouncing / Cooldown logic for falls
-    uint32_t nowMs = millis();
     if (isFallClass) {
+        // Forward falls (state code 0x10) often involve knees/hands absorbing impact first (~12-16 m/s2 at foot)
+        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? 12.0f : _minFallImpactMs2;
+        if (peakImpactMs2 < requiredImpactMs2) {
+            return false;
+        }
+
+        // For forward fall with lower impact (12-17 m/s2), verify accompanying pitch/rotational motion
+        if (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10 && peakImpactMs2 < _minFallImpactMs2 && gyroMaxDps < 60.0f) {
+            return false;
+        }
+
+        // Anti-sitting false positive guard: genuine falls exhibit a free-fall weightlessness trough (acc_mag_min < 0.65g)
+        // Gentle sitting down on a chair keeps feet grounded without free fall (acc_mag_min >= 0.65g)
+        if (accMinG >= 0.65f && peakImpactMs2 < 20.0f) {
+            return false;
+        }
+
+        // Debouncing / Cooldown logic for falls
+        uint32_t nowMs = millis();
         if (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs < _fallCooldownMs)) {
-            // Cooldown active, suppress repeating emergency fall alert and BLE notification
             return false;
         }
         _lastFallTimestampMs = nowMs;

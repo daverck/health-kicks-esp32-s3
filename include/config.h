@@ -69,11 +69,11 @@
 #define BLE_PREFERRED_MTU       247
 
 // Firmware Version and Identification
-#define FIRMWARE_VERSION        "v1.2.1-esp32s3"
+#define FIRMWARE_VERSION        "v1.2.2-esp32s3"
 #define FIRMWARE_BUILD_DATE     __DATE__ " " __TIME__
 
 // Deep Sleep & Power Management Configuration
-#define DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC   30      // 15 minutes of stillness and disconnection before Deep Sleep
+#define DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC   900     // 15 minutes of stillness and disconnection before Deep Sleep
 #define DEEP_SLEEP_TIMEOUT_MS               (DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC * 1000UL)
 
 // MPU-6050 Wake-On-Motion (WOM) Parameters

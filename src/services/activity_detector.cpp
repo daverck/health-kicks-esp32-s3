@@ -238,19 +238,19 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     // features[0] is acc_mag_max in g -> convert to m/s^2
     float peakImpactMs2 = (float)features[0] * GRAVITY_MS2;
     if (isFallClass && peakImpactMs2 < _minFallImpactMs2) {
-        // Fall dismissed due to insufficient physical impact peak
-        isFallClass = false;
+        // Fall dismissed due to insufficient physical impact peak.
+        // Suppress output so no spurious BLE notification is emitted.
+        return false;
     }
 
     // Debouncing / Cooldown logic for falls
     uint32_t nowMs = millis();
     if (isFallClass) {
         if (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs < _fallCooldownMs)) {
-            // Cooldown active, suppress repeating emergency fall alert
-            isFallClass = false;
-        } else {
-            _lastFallTimestampMs = nowMs;
+            // Cooldown active, suppress repeating emergency fall alert and BLE notification
+            return false;
         }
+        _lastFallTimestampMs = nowMs;
     }
 
     uint32_t elapsedUs = micros() - startUs;

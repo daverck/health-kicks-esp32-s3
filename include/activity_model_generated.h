@@ -37,23 +37,8471 @@ static const bool MODEL_IS_FALL_CLASS[MODEL_CLASS_COUNT] = {
 };
 #define MODEL_CLASS_IS_FALL MODEL_IS_FALL_CLASS
 
-#define MODEL_HAS_SCALER        1
-
-static const double MODEL_SCALER_MEAN[MODEL_FEATURE_COUNT] = {
-    4.71319678, 0.60502697, 1.74918591, 0.80366416, 4.10816980, 273.92005339, 102.17310227, 72.70703389, 0.55218012, 0.45031281, 0.93458843, 60.39662844, 89.96852684, 56.27478238, 5.71451730, 22680.41789427
-};
-
-static const double MODEL_SCALER_SCALE[MODEL_FEATURE_COUNT] = {
-    3.39772222, 0.44282629, 1.22520450, 0.71264565, 3.35602838, 126.13837745, 75.92790458, 34.49225414, 0.64106497, 0.45719360, 0.80086954, 41.42280671, 65.01259392, 33.53264075, 8.12181705, 23963.76773732
-};
+#define MODEL_HAS_SCALER        0
 
 // ----------------------------------------------------------------------------
 // Core transpiled decision logic (m2cgen)
 // ----------------------------------------------------------------------------
 namespace generated_model {
 #include <string.h>
+inline void add_vectors(double *v1, double *v2, int size, double *result) {
+    for(int i = 0; i < size; ++i)
+        result[i] = v1[i] + v2[i];
+}
+inline void mul_vector_number(double *v1, double num, int size, double *result) {
+    for(int i = 0; i < size; ++i)
+        result[i] = v1[i] * num;
+}
 inline void raw_predict_activity(double * input, double * output) {
-    { const double _tmp[] = {1.1388258782327412 + input[0] * -0.17909907688414736 + input[1] * 0.17203626303460562 + input[2] * -1.9801055955548759 + input[3] * 1.6701730677680235 + input[4] * -0.20402422627180994 + input[5] * 2.3008986631879096 + input[6] * -2.3637225373215047 + input[7] * -1.5891773601800685 + input[8] * 0.2290885370690395 + input[9] * 0.3719061868809024 + input[10] * 0.7784304447792386 + input[11] * -1.7094170072325376 + input[12] * 0.1856922082770584 + input[13] * 1.4674902121185596 + input[14] * -0.7506928111699696 + input[15] * -1.6377059656739572, 2.5578796741569367 + input[0] * 0.21232046757437786 + input[1] * -0.0998596605400286 + input[2] * -0.39926611809164647 + input[3] * -2.323426322772002 + input[4] * 0.22813467786714572 + input[5] * 0.8456382216257716 + input[6] * -0.09494579476630384 + input[7] * 1.5511019165209696 + input[8] * -0.23547793160319716 + input[9] * 0.3668219565825354 + input[10] * 3.5528263084505842 + input[11] * -0.7241099291386772 + input[12] * -0.06434476120149674 + input[13] * 0.07633934949308821 + input[14] * -0.9621854465422006 + input[15] * 0.04064525568749326, -0.6634855785503914 + input[0] * -0.4872107585681035 + input[1] * -0.9126301916297811 + input[2] * 0.036498441852393315 + input[3] * 0.8128980877215204 + input[4] * -0.37284254817427376 + input[5] * 0.21339139480635244 + input[6] * -1.9872946231726791 + input[7] * -0.07604171594645119 + input[8] * -2.722355058552743 + input[9] * 1.9967360822271438 + input[10] * 1.6833790270522664 + input[11] * 2.703365258711477 + input[12] * -5.2148887970576885 + input[13] * 1.1134161442485164 + input[14] * 1.0760964300399336 + input[15] * -1.2369875113024067, 1.693686694394374 + input[0] * 0.055686214489228045 + input[1] * 0.4764011778292749 + input[2] * -0.47190312016385166 + input[3] * -2.130423406956477 + input[4] * -0.006482865360830425 + input[5] * 0.5868485089517251 + input[6] * 2.334303975429857 + input[7] * -2.6525870547432886 + input[8] * 0.8573116868792762 + input[9] * 1.7210776787626136 + input[10] * 0.3809407538964682 + input[11] * -0.32498581781508257 + input[12] * -1.7294640123894585 + input[13] * -0.21341937603383881 + input[14] * -0.25180750337827973 + input[15] * 0.0024528862752871143, -8.91748697928057 + input[0] * -0.46972103744364074 + input[1] * 1.238630232340203 + input[2] * -0.20433757477588155 + input[3] * -0.5067987248389053 + input[4] * -0.6389932975341722 + input[5] * -2.3268654021544104 + input[6] * -0.9251757675666351 + input[7] * -2.0005263401407736 + input[8] * -1.0718135445632204 + input[9] * -0.9194627974159478 + input[10] * -0.779173664302297 + input[11] * -0.822935047666905 + input[12] * -1.2859078075726933 + input[13] * -0.9915135357176187 + input[14] * -0.0689152507148655 + input[15] * -0.25503861498032177, -1.1535878220997797 + input[0] * 0.06522397876159597 + input[1] * 0.6306561383304885 + input[2] * 0.7283226904597583 + input[3] * 0.717259676670778 + input[4] * -0.017180474243130472 + input[5] * 1.063106789099647 + input[6] * 2.0478529040634856 + input[7] * 0.19360589933292208 + input[8] * 0.2074106534311865 + input[9] * -1.7864155660158865 + input[10] * -0.6785573254339342 + input[11] * 2.1182325710958483 + input[12] * 1.6730300464828143 + input[13] * 0.2950631317113947 + input[14] * 0.7002651515738445 + input[15] * 2.634164222005571, 0.19765840034716797 + input[0] * 0.4335768782708673 + input[1] * -1.6436884950606043 + input[2] * -0.12348969655795375 + input[3] * -0.11369627147536798 + input[4] * 0.6558473376414432 + input[5] * 0.17474628939590045 + input[6] * -0.27647130589029223 + input[7] * 1.2911871843431892 + input[8] * 1.4164901990180623 + input[9] * 1.8267133498766956 + input[10] * -1.5603075569194882 + input[11] * 2.363793483229771 + input[12] * 0.9529971248423242 + input[13] * -2.823618504616799 + input[14] * -0.2717930369713905 + input[15] * -0.5987706575454803, 1.995442025474307 + input[0] * 0.58593546976519 + input[1] * -1.2079597474592283 + input[2] * 0.08525605395858056 + input[3] * 0.8528403014596433 + input[4] * 0.7526045720404396 + input[5] * -3.014563615834877 + input[6] * -0.400917471596884 + input[7] * 1.6989454480760193 + input[8] * 3.3117532051846563 + input[9] * -2.005347757371105 + input[10] * -0.8199552571839259 + input[11] * -1.1558676443553548 + input[12] * 2.327546083754906 + input[13] * 1.3508947341056454 + input[14] * -0.7835237874271432 + input[15] * 0.4145409907668968, 3.151067707325212 + input[0] * -0.21671213596537028 + input[1] * 1.3464142831550718 + input[2] * 2.3290249188734884 + input[3] * 1.0211735924227805 + input[4] * -0.39706317596480833 + input[5] * 0.15679915092197697 + input[6] * 1.6663706208209614 + input[7] * 1.5834920227374811 + input[8] * -1.992407746863062 + input[9] * -1.5720291335269614 + input[10] * -2.55758273033892 + input[11] * -2.4480758668285243 + input[12] * 3.1553399148642534 + input[13] * -0.27465215530895226 + input[14] * 1.3125562545900753 + input[15] * 0.636699394766921}; memcpy(output, _tmp, sizeof(_tmp)); }
+    static double var0[9];
+    static double var1[9];
+    static double var2[9];
+    static double var3[9];
+    static double var4[9];
+    static double var5[9];
+    static double var6[9];
+    static double var7[9];
+    static double var8[9];
+    static double var9[9];
+    static double var10[9];
+    static double var11[9];
+    static double var12[9];
+    static double var13[9];
+    static double var14[9];
+    static double var15[9];
+    static double var16[9];
+    static double var17[9];
+    static double var18[9];
+    static double var19[9];
+    static double var20[9];
+    static double var21[9];
+    static double var22[9];
+    static double var23[9];
+    static double var24[9];
+    static double var25[9];
+    static double var26[9];
+    static double var27[9];
+    static double var28[9];
+    static double var29[9];
+    static double var30[9];
+    static double var31[9];
+    static double var32[9];
+    static double var33[9];
+    static double var34[9];
+    static double var35[9];
+    static double var36[9];
+    static double var37[9];
+    static double var38[9];
+    static double var39[9];
+    static double var40[9];
+    if (input[5] <= 94.92239379882812) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[14] <= 1.6309139132499695) {
+            if (input[5] <= 274.3537902832031) {
+                if (input[8] <= 0.141972154378891) {
+                    if (input[1] <= 0.13392920419573784) {
+                        if (input[9] <= 0.11153544485569) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[2] <= 0.9002898931503296) {
+                            if (input[11] <= 43.076162338256836) {
+                                if (input[7] <= 63.404537200927734) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 0.5956307649612427) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 0.9252133071422577) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[0] <= 1.9483581185340881) {
+                                    { const double _tmp[] = {0.7102803738317758, 0.2897196261682243, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 1.2179415822029114) {
+                        if (input[5] <= 132.73373413085938) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[10] <= 0.3101598918437958) {
+                                if (input[5] <= 256.66937255859375) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 1.6674120426177979) {
+                                    { const double _tmp[] = {0.047508391427833724, 0.0, 0.0, 0.9524916085721663, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 36.537689208984375) {
+                            if (input[7] <= 68.5090217590332) {
+                                if (input[0] <= 2.16518235206604) {
+                                    { const double _tmp[] = {0.4803517449848859, 0.19593294861225613, 0.0, 0.3237153064028579, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.47911351919174194) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.3488391786813736) {
+                                if (input[1] <= 0.6488420367240906) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.4696758985519409) {
+                                    { const double _tmp[] = {0.0, 0.4153846153846154, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5846153846153846, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.06808908451732903, 0.04860306361927764, 0.0, 0.8833078518633934, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[12] <= 75.97350692749023) {
+                    if (input[15] <= 12019.59912109375) {
+                        if (input[12] <= 43.535099029541016) {
+                            if (input[3] <= 0.41537605226039886) {
+                                if (input[1] <= 0.08119686879217625) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 30.608397483825684) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.0756530724465847) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[14] <= 1.3614964485168457) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.837166607170177, 0.042684481615584684, 0.0, 0.0, 0.0, 0.0, 0.12014891121423837, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.12207702919840813) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[8] <= 0.42294172942638397) {
+                                if (input[8] <= 0.26693469285964966) {
+                                    { const double _tmp[] = {0.43246788816962617, 0.3324487460170355, 0.1304618142717454, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10462155154159294}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.04485497507661894, 0.8965093044918971, 0.05863572043148379, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 0.5313985347747803) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 1.0018918812274933) {
+                        if (input[1] <= 0.06037995219230652) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[11] <= 67.12463760375977) {
+                            if (input[1] <= 0.7121197879314423) {
+                                if (input[6] <= 64.40175437927246) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[10] <= 0.48168398439884186) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[3] <= 0.4872281104326248) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[2] <= 1.9181393384933472) {
+                if (input[12] <= 76.30248260498047) {
+                    if (input[12] <= 51.5771427154541) {
+                        if (input[0] <= 7.735678434371948) {
+                            if (input[10] <= 0.8844620883464813) {
+                                if (input[10] <= 0.29010961949825287) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.9664646464646465, 0.03353535353535353, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[8] <= 0.3394908905029297) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[8] <= 0.5310418456792831) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.2794313579797745) {
+                            if (input[7] <= 75.63142776489258) {
+                                if (input[0] <= 3.8731714487075806) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[11] <= 69.24126243591309) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 1.2137056589126587) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 3.164890766143799) {
+                        if (input[2] <= 1.1913366317749023) {
+                            if (input[11] <= 55.27528953552246) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[12] <= 107.34719848632812) {
+                                if (input[13] <= 60.780317306518555) {
+                                    { const double _tmp[] = {0.0, 0.3278775079197466, 0.0, 0.0, 0.0, 0.0, 0.23072861668426614, 0.057682154171066535, 0.38371172122492075}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.92, 0.08}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.3782877177000046) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.28421052631578947, 0.7157894736842105, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.40976682305336) {
+                            if (input[8] <= 0.5253914892673492) {
+                                if (input[11] <= 83.77735137939453) {
+                                    { const double _tmp[] = {0.2893504492362524, 0.13769527957076047, 0.0, 0.0, 0.0, 0.0, 0.0, 0.19379335643292211, 0.379160914760065}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 31.607770919799805) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.013740458015267187, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9862595419847328, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[6] <= 158.6992416381836) {
+                                if (input[8] <= 0.7668999135494232) {
+                                    { const double _tmp[] = {0.010087106986255583, 0.05760268989519635, 0.0, 0.0, 0.0, 0.0, 0.8917749768960024, 0.04053522622254559, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.1477024070021882, 0.0, 0.0, 0.0, 0.0, 0.5612691466083151, 0.29102844638949676, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 197.10906219482422) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[11] <= 110.62379837036133) {
+                    if (input[2] <= 3.973426342010498) {
+                        if (input[15] <= 23071.7470703125) {
+                            if (input[12] <= 61.78625297546387) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[11] <= 32.50200080871582) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 10.877302169799805) {
+                                if (input[5] <= 309.88316345214844) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 1.6750174164772034) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 19.772538661956787) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 169.04763793945312) {
+                        if (input[3] <= 2.2997034788131714) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[12] <= 157.4469451904297) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var40, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    static double var41[9];
+    if (input[10] <= 0.14173002541065216) {
+        if (input[12] <= 16.46157693862915) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+        } else {
+            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+        }
+    } else {
+        if (input[6] <= 194.9134750366211) {
+            if (input[11] <= 61.52087593078613) {
+                if (input[4] <= 1.9611130356788635) {
+                    if (input[11] <= 34.54769325256348) {
+                        if (input[8] <= 0.14263872802257538) {
+                            if (input[12] <= 60.32102966308594) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[4] <= 1.6244876980781555) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 278.5101623535156) {
+                                if (input[12] <= 28.32750701904297) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.10105866107502681, 0.055490206106479825, 0.0, 0.8434511328184934, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 0.9203173965215683) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.3221255838871002) {
+                            if (input[1] <= 0.37629857659339905) {
+                                if (input[15] <= 7598.697998046875) {
+                                    { const double _tmp[] = {0.3170067546062171, 0.0, 0.5920005658308872, 0.0, 0.0, 0.0, 0.09099267956289565, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7573141272255525, 0.19657555694730255, 0.0, 0.0, 0.0, 0.0, 0.046110315827145025, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 11495.5625) {
+                                    { const double _tmp[] = {0.18357313716298249, 0.0, 0.5999302825958915, 0.21649658024112609, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 281.9555206298828) {
+                                if (input[6] <= 61.218448638916016) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.258994221687317) {
+                                    { const double _tmp[] = {0.9332923455272056, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06670765447279434}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 78.29835510253906) {
+                        if (input[12] <= 42.715850830078125) {
+                            if (input[6] <= 76.32044219970703) {
+                                if (input[15] <= 4450.9801025390625) {
+                                    { const double _tmp[] = {0.18181345398757054, 0.3893439425852251, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.42884260342720437}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.02334739803094233, 0.0, 0.9766526019690577, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[3] <= 0.8661132752895355) {
+                                if (input[9] <= 0.10731200501322746) {
+                                    { const double _tmp[] = {0.15968736518892584, 0.3799578755043521, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4603547593067222}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7372377957278103, 0.11440260417114896, 0.020950838354234506, 0.037802599639162264, 0.0, 0.0, 0.021468143004956346, 0.04293628600991269, 0.025201733092774837}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 1.2046293020248413) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 119.28167343139648) {
+                            if (input[2] <= 1.0433738827705383) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[1] <= 0.41765013337135315) {
+                                    { const double _tmp[] = {0.0, 0.05450236966824646, 0.0, 0.0, 0.0, 0.0, 0.0, 0.862954186413902, 0.0825434439178515}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.07360604535681164, 0.1751371912546944, 0.0, 0.0, 0.0, 0.0, 0.0, 0.17254256619906924, 0.5787141971894246}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.048637691885232925) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[8] <= 0.5309869349002838) {
+                    if (input[9] <= 0.14755048602819443) {
+                        if (input[3] <= 0.38273416459560394) {
+                            if (input[5] <= 297.28294372558594) {
+                                if (input[7] <= 58.83988571166992) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[15] <= 12320.60693359375) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[1] <= 0.33078525960445404) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 21828.009765625) {
+                            if (input[12] <= 59.84317207336426) {
+                                if (input[11] <= 72.25217819213867) {
+                                    { const double _tmp[] = {0.0, 0.26688102893890675, 0.7331189710610932, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 86.87576293945312) {
+                                    { const double _tmp[] = {0.09297583851564889, 0.06636762157202569, 0.0, 0.0, 0.0, 0.0, 0.8406565399123254, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.0397247672080994) {
+                                if (input[9] <= 0.2660975754261017) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4334203655352481, 0.0, 0.566579634464752, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.4357599020004272) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.08445532435740515, 0.0, 0.0, 0.9155446756425949}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.1896792189679219, 0.0, 0.0, 0.8103207810320782, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[10] <= 1.5904058814048767) {
+                        if (input[5] <= 317.09136962890625) {
+                            if (input[4] <= 3.0658727884292603) {
+                                if (input[3] <= 0.5316590070724487) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.915929203539823, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.08407079646017697}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 17088.15625) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.3195266272189349, 0.0, 0.0, 0.5443786982248521, 0.13609467455621302, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.035222052067381326, 0.9509954058192956, 0.013782542113323125}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 138.9390106201172) {
+                                if (input[5] <= 377.8385772705078) {
+                                    { const double _tmp[] = {0.0, 0.04885404101326904, 0.0, 0.0, 0.0, 0.0, 0.9511459589867309, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.04575437127002408, 0.5225630823997487, 0.0, 0.4316825463302271, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 9.398914337158203) {
+                            if (input[8] <= 0.5579835176467896) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[1] <= 0.43121112883090973) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[3] <= 2.456979274749756) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[15] <= 65751.955078125) {
+                    if (input[11] <= 113.49626541137695) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var41, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var40, var41, 9, var39);
+    static double var42[9];
+    if (input[12] <= 17.602185249328613) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[3] <= 0.32491961121559143) {
+            if (input[5] <= 274.41575622558594) {
+                if (input[1] <= 0.2764238268136978) {
+                    if (input[0] <= 1.4519042372703552) {
+                        if (input[5] <= 222.20191955566406) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[7] <= 71.79322052001953) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 0.1231006495654583) {
+                        if (input[14] <= 1.0148100554943085) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[15] <= 5575.56201171875) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 58.90472412109375) {
+                            if (input[0] <= 2.489624857902527) {
+                                if (input[14] <= 1.2229671478271484) {
+                                    { const double _tmp[] = {0.03158256093374527, 0.0, 0.0, 0.9684174390662548, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.3685741998060135, 0.6314258001939864, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 2.644176721572876) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 57.01471710205078) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[13] <= 62.36423683166504) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[5] <= 309.54681396484375) {
+                    if (input[10] <= 0.5562436878681183) {
+                        if (input[0] <= 1.5406454205513) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[12] <= 77.8328914642334) {
+                                if (input[2] <= 1.0732906460762024) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[15] <= 11068.2998046875) {
+                        if (input[11] <= 43.95172119140625) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[13] <= 78.16967010498047) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[6] <= 194.9134750366211) {
+                if (input[8] <= 0.5194364488124847) {
+                    if (input[9] <= 0.44718441367149353) {
+                        if (input[13] <= 40.99440956115723) {
+                            if (input[14] <= 1.3312373161315918) {
+                                if (input[8] <= 0.500347301363945) {
+                                    { const double _tmp[] = {0.9010487916096671, 0.09895120839033288, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.3453694134950638) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.2837508792814242, 0.2700611438774958, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.44618797684107997}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 57.8269100189209) {
+                                if (input[10] <= 0.559428870677948) {
+                                    { const double _tmp[] = {0.47861604997597307, 0.0, 0.5213839500240269, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.984418997559602, 0.0, 0.0, 0.0, 0.0, 0.0, 0.01558100244039797}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 94.20940399169922) {
+                                    { const double _tmp[] = {0.3875262486485478, 0.34339326842586815, 0.0, 0.015759594444665445, 0.0, 0.0, 0.04027451913636725, 0.1342483971212242, 0.07879797222332724}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03569534867960783, 0.5350779734637267, 0.0, 0.0, 0.0, 0.0854326176118555, 0.0, 0.0, 0.3437940602448099}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[3] <= 0.5559727549552917) {
+                            if (input[12] <= 44.23113441467285) {
+                                if (input[10] <= 0.3678653836250305) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 68.40600204467773) {
+                                    { const double _tmp[] = {0.8325664630249789, 0.034958769829028714, 0.06402087968689596, 0.0, 0.0, 0.0, 0.049201231611225596, 0.0, 0.019252655847870885}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.060741746469650776, 0.7804515187843948, 0.15880673474595444, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 241.38880157470703) {
+                                if (input[1] <= 0.6593985706567764) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 88.28436279296875) {
+                                    { const double _tmp[] = {0.0, 0.03629208570179274, 0.9637079142982072, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.8087557603686636, 0.0, 0.0, 0.0, 0.19124423963133638, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[10] <= 1.5901685953140259) {
+                        if (input[5] <= 304.33238220214844) {
+                            if (input[12] <= 77.73892593383789) {
+                                if (input[5] <= 201.03499603271484) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.9678661335702651, 0.03213386642973493, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 13.185295104980469) {
+                                    { const double _tmp[] = {0.022641395384649717, 0.07542166576597131, 0.0, 0.0, 0.0, 0.0, 0.015164144439719099, 0.8036996553051118, 0.08307313910454811}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 59.5047607421875) {
+                                if (input[7] <= 85.18307113647461) {
+                                    { const double _tmp[] = {0.21886249100071994, 0.7811375089992801, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.04227768473510073, 0.0, 0.0, 0.0, 0.0, 0.8687281292975505, 0.023800770665686335, 0.06519341530166256}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 0.8292343616485596) {
+                                    { const double _tmp[] = {0.31840227667927307, 0.22728057249803374, 0.0, 0.12516901094094612, 0.0, 0.0, 0.10662545376450965, 0.15993818064676446, 0.06258450547047305}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03227861541728605, 0.09216394138882991, 0.0, 0.0, 0.0, 0.0, 0.097284160354876, 0.7782732828390081, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[10] <= 3.0194220542907715) {
+                            if (input[4] <= 9.150118350982666) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[8] <= 1.4279881715774536) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 128.46012496948242) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[9] <= 0.856282114982605) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[4] <= 13.41245698928833) {
+                    if (input[9] <= 2.2154510021209717) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[7] <= 101.1341552734375) {
+                            if (input[12] <= 229.55725860595703) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var42, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var39, var42, 9, var38);
+    static double var43[9];
+    if (input[7] <= 20.34731101989746) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[6] <= 189.79827117919922) {
+            if (input[7] <= 70.04368591308594) {
+                if (input[4] <= 1.8060863614082336) {
+                    if (input[1] <= 0.2764238268136978) {
+                        if (input[0] <= 1.4519042372703552) {
+                            if (input[1] <= 0.23087771981954575) {
+                                if (input[10] <= 0.37515920400619507) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[9] <= 0.15097954124212265) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 0.839061439037323) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 293.56996154785156) {
+                            if (input[2] <= 1.0731989741325378) {
+                                if (input[7] <= 32.08885383605957) {
+                                    { const double _tmp[] = {0.2593856655290102, 0.7406143344709898, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.02110253077452404, 0.0, 0.0, 0.9706017279608533, 0.0, 0.0, 0.0, 0.0, 0.008295741264622675}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 0.28847046196460724) {
+                                    { const double _tmp[] = {0.21985808169211904, 0.2615636169253829, 0.0, 0.5185783013824982, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.42053554952144623) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 53.3380126953125) {
+                        if (input[12] <= 69.87297058105469) {
+                            if (input[5] <= 241.17017364501953) {
+                                if (input[1] <= 0.4130755811929703) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.3930053761804893, 0.037404459048757104, 0.13699946446773684, 0.1235973429437191, 0.0, 0.0, 0.0, 0.0, 0.3089933573592977}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 69.91868591308594) {
+                                    { const double _tmp[] = {0.9291384756052654, 0.0250276873394169, 0.0458338370553177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 1.296261727809906) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 5.196531534194946) {
+                            if (input[13] <= 45.45592498779297) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[0] <= 2.592253565788269) {
+                                    { const double _tmp[] = {0.13269384492406075, 0.0, 0.8673061550759392, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 42.66241455078125) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[14] <= 18.714862823486328) {
+                    if (input[8] <= 0.46635758876800537) {
+                        if (input[12] <= 52.685462951660156) {
+                            if (input[9] <= 0.1555209457874298) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[3] <= 0.46393154561519623) {
+                                    { const double _tmp[] = {0.0, 0.25841530547784497, 0.6704268567818789, 0.07115783774027613, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.012385286876072519, 0.0, 0.9876147131239275, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 111.57215881347656) {
+                                if (input[12] <= 75.72698211669922) {
+                                    { const double _tmp[] = {0.47049676215549113, 0.3568385188305111, 0.03844043576345689, 0.06935991670362875, 0.0, 0.0, 0.014771093372069085, 0.04431328011620725, 0.005779993058635728}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.018591944613369504, 0.756459746456472, 0.0, 0.0, 0.0, 0.0, 0.056034055293071976, 0.037356036862047984, 0.13155821677503854}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 76.4276351928711) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.2462216624685139, 0.0, 0.0, 0.0, 0.5503778337531486, 0.0, 0.0, 0.20340050377833752}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 306.13897705078125) {
+                            if (input[13] <= 41.85526084899902) {
+                                if (input[3] <= 1.0371168851852417) {
+                                    { const double _tmp[] = {0.1246740896303047, 0.7119546697309507, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16337124063874467}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.5033541917800903) {
+                                    { const double _tmp[] = {0.0613163174963321, 0.015915838393186683, 0.007286769384832456, 0.0, 0.0, 0.0, 0.011200034424835073, 0.8736026851371349, 0.030678355163678672}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.7840909090909092, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.21590909090909086}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.4042193740606308) {
+                                if (input[10] <= 0.8448188900947571) {
+                                    { const double _tmp[] = {0.03273874638542625, 0.0, 0.0, 0.04633244325415759, 0.0, 0.0, 0.8551481810489578, 0.0657806293114583, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.1202137132680321, 0.0, 0.0, 0.0, 0.0, 0.5075690115761353, 0.3722172751558325, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.4583873599767685) {
+                                    { const double _tmp[] = {0.0, 0.08496374333014094, 0.0, 0.0, 0.0, 0.0, 0.11957860172390207, 0.0, 0.7954576549459571}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1601214433491841, 0.2095448932426001, 0.12210063877882063, 0.0, 0.0, 0.0, 0.26810457721275427, 0.187673204048928, 0.05245524336771279}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 5.437526702880859) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[6] <= 216.62584686279297) {
+                if (input[6] <= 215.17762756347656) {
+                    if (input[3] <= 2.404305577278137) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[4] <= 11.596989631652832) {
+                        if (input[10] <= 2.3119160532951355) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var43, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var38, var43, 9, var37);
+    static double var44[9];
+    if (input[10] <= 0.16705777496099472) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.8725700378418) {
+            if (input[7] <= 70.04368591308594) {
+                if (input[8] <= 0.23570825159549713) {
+                    if (input[12] <= 41.230491638183594) {
+                        if (input[13] <= 37.222092628479004) {
+                            if (input[4] <= 2.3713343143463135) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[10] <= 0.4000800848007202) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[13] <= 37.77505874633789) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[1] <= 0.3177163004875183) {
+                                if (input[10] <= 0.6075707674026489) {
+                                    { const double _tmp[] = {0.9538199616939774, 0.0, 0.046180038306022554, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1479424452997856, 0.0, 0.38678928469943946, 0.0, 0.0, 0.0, 0.0, 0.0, 0.465268270000775}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 1.988763153553009) {
+                        if (input[2] <= 1.1258826851844788) {
+                            if (input[7] <= 60.38347625732422) {
+                                if (input[14] <= 1.2497588992118835) {
+                                    { const double _tmp[] = {0.0484125592001403, 0.0, 0.0, 0.9515874407998597, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.41192411924119243, 0.5880758807588077, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 2.0606011152267456) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.8756756756756757, 0.0, 0.0, 0.12432432432432435, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.4117085039615631) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[13] <= 55.71357536315918) {
+                            if (input[14] <= 6.35153591632843) {
+                                if (input[6] <= 75.0841064453125) {
+                                    { const double _tmp[] = {0.9156626506024097, 0.08433734939759037, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 1.1284680366516113) {
+                                    { const double _tmp[] = {0.0, 0.6209476309226933, 0.3790523690773067, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 2.556213140487671) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[12] <= 36.196319580078125) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.2423171228307298, 0.04324244708410228, 0.0, 0.714440430085168, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[9] <= 0.16816625744104385) {
+                    if (input[1] <= 0.2851233333349228) {
+                        if (input[12] <= 75.72591781616211) {
+                            if (input[14] <= 0.8533957302570343) {
+                                if (input[0] <= 1.725275695323944) {
+                                    { const double _tmp[] = {0.0, 0.5671981776765376, 0.43280182232346237, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8750719631548648, 0.12492803684513527, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 62.484601974487305) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 84.91168594360352) {
+                                if (input[12] <= 116.14260864257812) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 16993.6396484375) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 1.0592853724956512) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 19.032766342163086) {
+                        if (input[9] <= 0.4087393283843994) {
+                            if (input[8] <= 0.2931087017059326) {
+                                if (input[8] <= 0.11469138786196709) {
+                                    { const double _tmp[] = {0.040766208251473465, 0.0, 0.9592337917485265, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.62364845445626, 0.04946334598574869, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3268881995579913}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.5329844951629639) {
+                                    { const double _tmp[] = {0.01952333864878303, 0.04180820217222945, 0.0, 0.0, 0.0, 0.04283291300978409, 0.07845489790344293, 0.7943558412723588, 0.023024806993401724}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.4207317073170732, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5792682926829268}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 60.350852966308594) {
+                                if (input[12] <= 51.957427978515625) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03713889787275232, 0.07574380487206067, 0.0, 0.0, 0.0, 0.0, 0.7675372227035473, 0.03198071761264783, 0.0875993569389919}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 96.41542434692383) {
+                                    { const double _tmp[] = {0.2700753762795092, 0.20563633913211746, 0.43935153581641173, 0.08493674877196156, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.07678041543026709, 0.0, 0.0, 0.0, 0.0, 0.16209198813056383, 0.7294139465875371, 0.03171364985163205}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 77.02674865722656) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[4] <= 2.69731867313385) {
+                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[9] <= 2.2028732299804688) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[14] <= 29.22317409515381) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[9] <= 2.5883456468582153) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var44, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var37, var44, 9, var36);
+    static double var45[9];
+    if (input[12] <= 17.602185249328613) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[15] <= 47585.828125) {
+            if (input[3] <= 0.29753103852272034) {
+                if (input[2] <= 1.0062006711959839) {
+                    if (input[9] <= 0.07585083320736885) {
+                        if (input[14] <= 0.9201146960258484) {
+                            if (input[0] <= 1.23896324634552) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 17.290894985198975) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 43.03078842163086) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[6] <= 67.089599609375) {
+                                if (input[8] <= 0.233062244951725) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 57.51942253112793) {
+                        if (input[5] <= 284.5794219970703) {
+                            if (input[8] <= 0.26664072275161743) {
+                                if (input[14] <= 1.217186152935028) {
+                                    { const double _tmp[] = {0.16365253483545805, 0.0, 0.0, 0.7720130447672695, 0.0, 0.0, 0.0, 0.0, 0.06433442039727245}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 16.367775917053223) {
+                                    { const double _tmp[] = {0.33720219914477706, 0.0, 0.0, 0.662797800855223, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.011866877799332317, 0.008470764744918135, 0.0, 0.9796623574557496, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[2] <= 1.0541552305221558) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[8] <= 0.5328758358955383) {
+                    if (input[2] <= 1.1906498074531555) {
+                        if (input[15] <= 15262.619140625) {
+                            if (input[12] <= 49.71782875061035) {
+                                if (input[13] <= 47.675031661987305) {
+                                    { const double _tmp[] = {0.2716562560853218, 0.3324214712623017, 0.3043859254931919, 0.0915363471591845, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05165911797194059, 0.07375018815730992, 0.8441286596318607, 0.030462034238888876, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.103409793227911) {
+                                    { const double _tmp[] = {0.12410197557176816, 0.767744897122715, 0.10815312730551682, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.579467273797734, 0.0737167525877393, 0.007499964118699045, 0.09472780767313359, 0.0, 0.0, 0.09222178101511419, 0.05763861313444637, 0.09472780767313359}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 54.56365394592285) {
+                                if (input[6] <= 92.8245735168457) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 2.2466617822647095) {
+                                    { const double _tmp[] = {0.0, 0.3499114070996518, 0.595030069215931, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05505852368441724}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.012627469402353396, 0.9013687040495681, 0.016506993134401727, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06949683341367684}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.4115733653306961) {
+                            if (input[1] <= 0.3782877177000046) {
+                                if (input[13] <= 60.36824607849121) {
+                                    { const double _tmp[] = {0.0, 0.16788321167883213, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8321167883211678}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.30646487909195597, 0.0, 0.6431978943905248, 0.050337226517519325}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.36899256706237793) {
+                                    { const double _tmp[] = {0.0, 0.019150707743547046, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9808492922564529}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.679324894514768, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3206751054852321}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 2.874717593193054) {
+                                if (input[11] <= 70.09048843383789) {
+                                    { const double _tmp[] = {0.6048791741161543, 0.12336351577368937, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.27175731011015625}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 53.90190887451172) {
+                                    { const double _tmp[] = {0.0, 0.4241656667999823, 0.15535706350264408, 0.4204772696973737, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.013216950252130575, 0.9681814160596857, 0.0, 0.0, 0.0, 0.018601633688183773, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 68.20757675170898) {
+                        if (input[14] <= 19.1534366607666) {
+                            if (input[12] <= 75.59819030761719) {
+                                if (input[12] <= 46.98073196411133) {
+                                    { const double _tmp[] = {0.09583333333333333, 0.0, 0.0, 0.9041666666666667, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.5711852312088013) {
+                                    { const double _tmp[] = {0.006482366879769649, 0.09254431663881674, 0.0, 0.0, 0.0, 0.0, 0.1172228010758345, 0.7684605848304702, 0.015289930575108844}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.4252100840336135, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5747899159663865}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 28.492335319519043) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 31002.244140625) {
+                            if (input[13] <= 56.68475341796875) {
+                                if (input[7] <= 85.78197479248047) {
+                                    { const double _tmp[] = {0.0, 0.8325991189427313, 0.0, 0.0, 0.0, 0.0, 0.16740088105726875, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.018595041322314067, 0.0, 0.0, 0.0, 0.0, 0.981404958677686, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 129.04132843017578) {
+                                    { const double _tmp[] = {0.022290995351319565, 0.28640996000741525, 0.0, 0.2628883690889318, 0.0, 0.0, 0.0, 0.3583071104619515, 0.0701035650903818}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0888920698539937, 0.0, 0.0, 0.0, 0.0, 0.8131978242198683, 0.0, 0.09791010592613797}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 1.751360297203064) {
+                                if (input[1] <= 1.418099731206894) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.055555555555555546, 0.9444444444444444, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[9] <= 2.2440990209579468) {
+                if (input[10] <= 2.797757863998413) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[10] <= 3.0509049892425537) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                if (input[9] <= 2.485594153404236) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var45, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var36, var45, 9, var35);
+    static double var46[9];
+    if (input[7] <= 21.743024826049805) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[15] <= 54009.19140625) {
+            if (input[12] <= 75.6610336303711) {
+                if (input[11] <= 61.92302322387695) {
+                    if (input[3] <= 0.32585595548152924) {
+                        if (input[9] <= 0.16731815785169601) {
+                            if (input[15] <= 9496.04638671875) {
+                                if (input[15] <= 6273.975830078125) {
+                                    { const double _tmp[] = {0.14232446307845717, 0.0, 0.09302532677116025, 0.33570009226114356, 0.0, 0.0, 0.28596674525949267, 0.14298337262974634, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.9462205700123916, 0.0, 0.05377942998760842, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[0] <= 2.510144352912903) {
+                                if (input[1] <= 0.778164803981781) {
+                                    { const double _tmp[] = {0.030555202502138393, 0.006231653141883489, 0.005706092033531869, 0.9575070523224462, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.2860586047172546) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[7] <= 49.86267280578613) {
+                            if (input[11] <= 42.40656280517578) {
+                                if (input[5] <= 150.2762908935547) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 9534.54931640625) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[3] <= 0.8653728365898132) {
+                                if (input[12] <= 45.099342346191406) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.7782724844167409, 0.2217275155832591, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7108387265059594, 0.12501354224258593, 0.04040125815919147, 0.060748268608929214, 0.0, 0.0, 0.0, 0.010349705022262012, 0.05264849946107198}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 9062.84765625) {
+                                    { const double _tmp[] = {0.04255753943557571, 0.0, 0.7232217996852957, 0.0, 0.0, 0.0, 0.0, 0.0, 0.23422066087912863}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.10440588407509943, 0.7452656856676507, 0.06824119531414631, 0.0, 0.0, 0.0, 0.0, 0.0, 0.08208723494310353}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 2.0154861211776733) {
+                        if (input[4] <= 4.242236614227295) {
+                            if (input[0] <= 2.9613126516342163) {
+                                if (input[10] <= 0.34685564041137695) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.020964890123768624, 0.9790351098762313, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 85.36914825439453) {
+                                    { const double _tmp[] = {0.13501064803382956, 0.06424848820908118, 0.5294694690965244, 0.0, 0.0, 0.0, 0.27127139466056494, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.923154701718908, 0.07684529828109199, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.0548061728477478) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                if (input[11] <= 68.34341049194336) {
+                    if (input[2] <= 1.0129801034927368) {
+                        if (input[9] <= 0.16071540117263794) {
+                            if (input[9] <= 0.06172038987278938) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[1] <= 0.08069359883666039) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 0.8076385259628296) {
+                                if (input[6] <= 96.37548446655273) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 109.52420806884766) {
+                            if (input[9] <= 0.17668059468269348) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[1] <= 0.4305756539106369) {
+                                    { const double _tmp[] = {0.022036161355102234, 0.06291903965864717, 0.0, 0.0, 0.0, 0.0, 0.11807029664338728, 0.7969745023428634, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.11349480192236087, 0.4320767020553037, 0.0, 0.0, 0.0, 0.0, 0.0, 0.038006746940049865, 0.41642174908228546}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 10.027321815490723) {
+                                if (input[12] <= 119.32588577270508) {
+                                    { const double _tmp[] = {0.0, 0.11321786690975388, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2788514129443938, 0.6079307201458524}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 122.84767150878906) {
+                        if (input[9] <= 0.3276152014732361) {
+                            if (input[5] <= 341.2478332519531) {
+                                if (input[10] <= 1.1261945962905884) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[14] <= 10.560449600219727) {
+                                if (input[13] <= 70.90076446533203) {
+                                    { const double _tmp[] = {0.0, 0.028371278458844157, 0.0, 0.0, 0.0, 0.0, 0.9450087565674256, 0.02661996497373032, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.22538305233675657, 0.3217639628755012, 0.0, 0.0, 0.0, 0.0, 0.0, 0.45285298478774233, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 128.60736083984375) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[13] <= 70.57730484008789) {
+                            if (input[13] <= 67.06877899169922) {
+                                if (input[2] <= 1.283020794391632) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.21690534404470835, 0.0, 0.0, 0.0, 0.0, 0.15263709395738734, 0.15263709395738734, 0.47782046804051687}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.8798695653676987) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 77.81758117675781) {
+                                if (input[12] <= 129.53680419921875) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.8966570496559143) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.8765880217785844, 0.0, 0.0, 0.1234119782214156}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.02454642475987194, 0.9082177161152616, 0.06723585912486661}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[15] <= 57191.009765625) {
+                if (input[3] <= 2.2997034788131714) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[8] <= 2.1134601831436157) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var46, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var35, var46, 9, var34);
+    static double var47[9];
+    if (input[10] <= 0.14173002541065216) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[7] <= 68.39014053344727) {
+            if (input[0] <= 2.332269310951233) {
+                if (input[8] <= 0.14428001642227173) {
+                    if (input[14] <= 0.6946693956851959) {
+                        if (input[15] <= 7197.422119140625) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[12] <= 86.00941467285156) {
+                            if (input[6] <= 50.201704025268555) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[8] <= 0.06517643481492996) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[9] <= 0.6124085187911987) {
+                        if (input[10] <= 0.7110148370265961) {
+                            if (input[2] <= 1.0746198892593384) {
+                                if (input[14] <= 0.7156492918729782) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.024770877518150793, 0.007072737396629898, 0.0, 0.9582021620825549, 0.0, 0.0, 0.009954223002664301, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.40649326145648956) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7317470508753942, 0.0, 0.0956560903855184, 0.17259685873908753, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[2] <= 1.1218078136444092) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[12] <= 40.79109573364258) {
+                    if (input[13] <= 39.53064155578613) {
+                        if (input[5] <= 176.6810760498047) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[9] <= 0.2856382802128792) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 1.106683075428009) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 3.3308701515197754) {
+                        if (input[11] <= 17.146801948547363) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[13] <= 75.18599319458008) {
+                                if (input[7] <= 62.94827842712402) {
+                                    { const double _tmp[] = {0.9695096248419278, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.030490375158072205}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6015134698819493, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2014327514882454, 0.19705377862980528}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.43649810552597046) {
+                            if (input[9] <= 0.2940298020839691) {
+                                if (input[2] <= 4.111314296722412) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[3] <= 1.1127790808677673) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[12] <= 176.52151489257812) {
+                if (input[12] <= 52.82260513305664) {
+                    if (input[4] <= 3.6966599225997925) {
+                        if (input[8] <= 0.3033865839242935) {
+                            if (input[9] <= 0.14755048602819443) {
+                                if (input[4] <= 3.073199987411499) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.6244343891402715, 0.0, 0.0, 0.0, 0.0, 0.0, 0.37556561085972845}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[11] <= 69.30032730102539) {
+                                if (input[4] <= 2.669317841529846) {
+                                    { const double _tmp[] = {0.08541725203708907, 0.914582747962911, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.2977346278317152, 0.0, 0.0, 0.7022653721682848, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 70.94898223876953) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 1.1862105131149292) {
+                            if (input[0] <= 4.5041422843933105) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[14] <= 1.7109467387199402) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 0.4193681478500366) {
+                        if (input[6] <= 77.28829956054688) {
+                            if (input[1] <= 0.21964822709560394) {
+                                if (input[13] <= 65.28275680541992) {
+                                    { const double _tmp[] = {0.9071652910671244, 0.0, 0.0, 0.0, 0.0, 0.0, 0.052078007450149726, 0.0, 0.040756701482725866}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.12614381685853004) {
+                                    { const double _tmp[] = {0.0, 0.8331503841931943, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16684961580680566}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.40530331086586174, 0.2893119028220132, 0.0, 0.0, 0.0, 0.0, 0.0, 0.30538478631212496, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.0682599544525146) {
+                                if (input[13] <= 83.3030776977539) {
+                                    { const double _tmp[] = {0.05909530226072943, 0.9280295164234289, 0.012875181315841653, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 67.83454513549805) {
+                                    { const double _tmp[] = {0.0, 0.06688206785137321, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9331179321486267}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.47795932443859707, 0.03126067870682735, 0.05640513766666673, 0.0, 0.13354745829901976, 0.0, 0.0, 0.30082740088888915}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.3969658315181732) {
+                            if (input[13] <= 43.79803276062012) {
+                                if (input[3] <= 0.43307578563690186) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.33120000000000005, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6688000000000001}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 4.10269570350647) {
+                                    { const double _tmp[] = {0.005794251982109144, 0.0, 0.0, 0.0, 0.0, 0.004622620147491486, 0.03492646333660234, 0.9546566645337969, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.3571455756422455, 0.0, 0.0, 0.0, 0.24947668886774502, 0.0, 0.0, 0.3933777354900095}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 136.48839569091797) {
+                                if (input[12] <= 102.34082794189453) {
+                                    { const double _tmp[] = {0.2123038615677467, 0.3125633126411665, 0.0520368275152873, 0.031297512201223524, 0.0, 0.0, 0.27993885913316596, 0.10664337490787275, 0.005216252033537253}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.02430623507769386, 0.0, 0.0, 0.0, 0.0, 0.8096076819705924, 0.04561170039270946, 0.12047438255900435}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 82.87456130981445) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.09871244635193137, 0.0, 0.9012875536480686}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.02704821638573109, 0.23842501851125922, 0.6812143386035978, 0.053312426499411994}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[11] <= 107.62634658813477) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var47, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var34, var47, 9, var33);
+    static double var48[9];
+    if (input[12] <= 17.602185249328613) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.8725700378418) {
+            if (input[3] <= 0.3004706799983978) {
+                if (input[9] <= 0.14983823150396347) {
+                    if (input[1] <= 0.2745564579963684) {
+                        if (input[0] <= 1.3357484936714172) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[12] <= 41.56526565551758) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.515180379152298) {
+                            if (input[13] <= 16.639485836029053) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[15] <= 9835.073486328125) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 1.2310736179351807) {
+                        if (input[2] <= 1.0062006711959839) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[11] <= 15.34575891494751) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 1.021281123161316) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.8244274809160306, 0.0, 0.0, 0.17557251908396948, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.01836083022884512, 0.0, 0.0, 0.9816391697711548, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.5212546139955521) {
+                            if (input[2] <= 1.0871503353118896) {
+                                if (input[2] <= 1.0821783542633057) {
+                                    { const double _tmp[] = {0.4334203655352481, 0.0, 0.566579634464752, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[8] <= 0.5237489938735962) {
+                    if (input[3] <= 1.1410489082336426) {
+                        if (input[11] <= 61.17160415649414) {
+                            if (input[15] <= 14872.81787109375) {
+                                if (input[3] <= 0.6193743646144867) {
+                                    { const double _tmp[] = {0.528350532103717, 0.13538536745370194, 0.1003545007172593, 0.09586293099206226, 0.0, 0.0, 0.009073446143281613, 0.0635141230029713, 0.06745909958700676}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03731905992669679, 0.23975040801591724, 0.3414918796906772, 0.13203645658847613, 0.0, 0.0, 0.0, 0.0, 0.24940219577823264}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.21389365941286087) {
+                                    { const double _tmp[] = {0.031479708374478874, 0.9437699412006592, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.024750350424862008}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.05317548746518108, 0.024345403899721455, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9224791086350975}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[6] <= 111.90720748901367) {
+                                if (input[12] <= 59.18229675292969) {
+                                    { const double _tmp[] = {0.0, 0.03934270816874703, 0.9606572918312529, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.12356440205818495, 0.529213327236042, 0.0, 0.0, 0.0, 0.0, 0.3310305586003226, 0.0, 0.016191712105450562}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 86.68073272705078) {
+                                    { const double _tmp[] = {0.0, 0.063013698630137, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.936986301369863}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.10229409552463332, 0.0, 0.0, 0.0, 0.0, 0.8977059044753667, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 4.170977592468262) {
+                            if (input[8] <= 0.4682031273841858) {
+                                if (input[8] <= 0.41380496323108673) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.35319148936170214, 0.6468085106382978, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[9] <= 0.4014965742826462) {
+                        if (input[3] <= 0.5454704463481903) {
+                            if (input[15] <= 13982.37890625) {
+                                if (input[12] <= 66.7772159576416) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.8789808917197452, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.12101910828025476}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 2.466222405433655) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[3] <= 1.1787480115890503) {
+                                if (input[1] <= 0.5478977560997009) {
+                                    { const double _tmp[] = {0.02480063008748307, 0.011802054230227689, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9633973156822893, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 6.924500226974487) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 4.164144515991211) {
+                            if (input[13] <= 63.37318420410156) {
+                                if (input[11] <= 61.12102508544922) {
+                                    { const double _tmp[] = {0.32189735469342695, 0.15318360957998614, 0.0, 0.12654298182694504, 0.0, 0.0, 0.0, 0.21559174681627674, 0.18278430708336504}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0695472454973988, 0.0, 0.0, 0.0, 0.0, 0.8987283778418057, 0.01779660154142191, 0.013927775119373667}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 159.78043365478516) {
+                                    { const double _tmp[] = {0.30274861790065577, 0.16465275710386543, 0.056537392499520056, 0.1700218687485567, 0.0, 0.0, 0.0869000662492623, 0.17380013249852463, 0.045339164999615114}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.6005708277225494) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[4] <= 2.795532703399658) {
+                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[9] <= 2.2028732299804688) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[3] <= 2.863293766975403) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[15] <= 90725.125) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var48, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var33, var48, 9, var32);
+    static double var49[9];
+    if (input[6] <= 20.541714191436768) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[15] <= 47470.9296875) {
+            if (input[15] <= 12062.4716796875) {
+                if (input[5] <= 197.97303771972656) {
+                    if (input[14] <= 1.235200047492981) {
+                        if (input[11] <= 12.662237644195557) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[5] <= 132.73373413085938) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[11] <= 17.42197608947754) {
+                                    { const double _tmp[] = {0.07156748346946715, 0.0, 0.0, 0.9284325165305328, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 173.82386016845703) {
+                            if (input[1] <= 0.5403994619846344) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 39.95948600769043) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 0.3341960161924362) {
+                        if (input[1] <= 0.2745564579963684) {
+                            if (input[11] <= 60.593454360961914) {
+                                if (input[12] <= 45.93985366821289) {
+                                    { const double _tmp[] = {0.14083710407239822, 0.0, 0.8591628959276018, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8584271291559629, 0.09427059060062946, 0.0, 0.0, 0.0, 0.0, 0.026535425502399405, 0.0, 0.020766854741008228}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 69.02540588378906) {
+                                    { const double _tmp[] = {0.23429781227946364, 0.0, 0.7657021877205363, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.3407575339078903) {
+                                if (input[3] <= 0.29832467436790466) {
+                                    { const double _tmp[] = {0.04562479608482871, 0.8467601957585645, 0.0, 0.10761500815660685, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 50.60125541687012) {
+                                    { const double _tmp[] = {0.21121658007352392, 0.10051315323674276, 0.2454297075017654, 0.442840559187968, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.025945608002500776, 0.9740543919974992, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.8238329887390137) {
+                            if (input[4] <= 1.8060863614082336) {
+                                if (input[2] <= 1.0814412832260132) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.41192411924119243, 0.5880758807588077, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.3340436816215515) {
+                                    { const double _tmp[] = {0.3112155911124592, 0.06347160081898841, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6253128080685525, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6035924151060575, 0.07493109501030573, 0.10291740760451629, 0.12379920045180945, 0.0, 0.0, 0.03515285938755083, 0.05272928908132624, 0.006877733358433858}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 55.8282585144043) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[14] <= 18.139042377471924) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[5] <= 302.5747833251953) {
+                    if (input[8] <= 0.555973470211029) {
+                        if (input[12] <= 84.08419418334961) {
+                            if (input[12] <= 58.98417282104492) {
+                                if (input[3] <= 0.32115763425827026) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 15109.68115234375) {
+                                    { const double _tmp[] = {0.07220902612826603, 0.927790973871734, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 97.31122207641602) {
+                                if (input[10] <= 0.4419924318790436) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.15813598166539347, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6676852559205501, 0.17417876241405653}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 118.14959335327148) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.3770491803278689, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6229508196721311}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[13] <= 41.81548500061035) {
+                            if (input[5] <= 283.6756134033203) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[1] <= 0.643623560667038) {
+                                if (input[1] <= 0.0698462575674057) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.010478315707771422, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9895216842922285, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 6.698960542678833) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 1.1127315759658813) {
+                        if (input[0] <= 2.379359245300293) {
+                            if (input[13] <= 64.02336692810059) {
+                                if (input[6] <= 76.43223190307617) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.1711447313427925) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 0.9977841377258301) {
+                                if (input[9] <= 0.15461937338113785) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.45668502754131196, 0.5433149724586881, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 67.63324928283691) {
+                                    { const double _tmp[] = {0.0, 0.6448598130841121, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3551401869158878}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.3377416073245168, 0.0, 0.6622583926754831, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.4124324470758438) {
+                            if (input[12] <= 77.86490249633789) {
+                                if (input[14] <= 2.508991003036499) {
+                                    { const double _tmp[] = {0.4134342478713339, 0.1686376537369915, 0.0, 0.41792809839167455, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 63.395334243774414) {
+                                    { const double _tmp[] = {0.0, 0.030174194018609872, 0.0, 0.0, 0.0, 0.0, 0.9130487597483053, 0.03185053813075486, 0.024926508102329888}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.10412954134473121, 0.0, 0.0, 0.0, 0.11638007562058193, 0.14655268781851058, 0.5373598553345389, 0.09557783988163732}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.8290187418460846) {
+                                if (input[15] <= 16939.5546875) {
+                                    { const double _tmp[] = {0.20133997828020747, 0.574878622194803, 0.19739808111508295, 0.0, 0.0, 0.0, 0.0, 0.0, 0.026383318409906414}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.01374523336706541, 0.15698503371858916, 0.0089840832549795, 0.0, 0.0, 0.01096586632593086, 0.2899862428412827, 0.15189755577400527, 0.36743598471814704}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.7241223454475403) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[4] <= 13.30628252029419) {
+                if (input[9] <= 2.2167344093322754) {
+                    if (input[12] <= 179.16234588623047) {
+                        if (input[4] <= 9.257540225982666) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[6] <= 247.9373321533203) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[7] <= 94.81655883789062) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var49, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var32, var49, 9, var31);
+    static double var50[9];
+    if (input[7] <= 21.743024826049805) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[6] <= 193.87268829345703) {
+            if (input[8] <= 0.5189551711082458) {
+                if (input[12] <= 52.83121109008789) {
+                    if (input[5] <= 274.41575622558594) {
+                        if (input[15] <= 7659.2138671875) {
+                            if (input[1] <= 0.8177283108234406) {
+                                if (input[10] <= 0.4925386607646942) {
+                                    { const double _tmp[] = {0.32294736041984085, 0.04769481207652367, 0.029114905363982316, 0.5778675782025186, 0.0, 0.0, 0.02237534393713456, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.03157172271791352, 0.9684282772820865, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 1.5132752656936646) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 1.7807374596595764) {
+                                if (input[9] <= 0.2589636296033859) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 7.610851526260376) {
+                                    { const double _tmp[] = {0.0, 0.049434187016080995, 0.9505658129839191, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 3.418642044067383) {
+                            if (input[5] <= 395.9272155761719) {
+                                if (input[10] <= 0.4738501310348511) {
+                                    { const double _tmp[] = {0.33233101601437776, 0.05930578164072366, 0.5430408921319275, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06532231021297098}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.048523823443437586, 0.0, 0.9514761765565625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 2.6875253915786743) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[1] <= 0.3104105591773987) {
+                        if (input[12] <= 75.72591781616211) {
+                            if (input[9] <= 0.18441056460142136) {
+                                if (input[10] <= 0.8974433243274689) {
+                                    { const double _tmp[] = {0.9123468088814206, 0.03888045120331268, 0.0, 0.0, 0.0, 0.0, 0.0, 0.027360317513442253, 0.021412422401824373}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.2546897530555725) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.4505305160061666, 0.2032284392853904, 0.0, 0.0, 0.3462410447084429, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5421409755615431, 0.3869887884764962, 0.07087023596196074, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[6] <= 79.25028228759766) {
+                                if (input[0] <= 2.8134361505508423) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6301369863013699, 0.3698630136986301}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.15083798882681565, 0.0, 0.0, 0.0, 0.0, 0.8491620111731844, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.2105815410614014) {
+                                    { const double _tmp[] = {0.0779854518367626, 0.8906759499251309, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03133859823810645, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.2887029288702929, 0.0, 0.0, 0.7112970711297071}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 84.08419418334961) {
+                            if (input[14] <= 1.244301199913025) {
+                                if (input[14] <= 0.9848401248455048) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.23832202702760696) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.08098591549295775, 0.9190140845070423}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.35822821177925274, 0.3092294325058971, 0.021780757062509898, 0.15720024662507145, 0.0, 0.0, 0.08369457574945932, 0.050216745449675596, 0.01965003082813393}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.4875945448875427) {
+                                if (input[5] <= 386.48057556152344) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.3033251240849495) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.359375, 0.359375, 0.28124999999999994}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 4.11699104309082) {
+                    if (input[12] <= 77.42752456665039) {
+                        if (input[7] <= 55.20823669433594) {
+                            if (input[15] <= 5321.466796875) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[10] <= 1.5654576420783997) {
+                                if (input[15] <= 12491.94873046875) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4658746196427958, 0.10232266443571529, 0.09369304213390797, 0.33810967378758094, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 11.467944145202637) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[13] <= 59.14104080200195) {
+                            if (input[7] <= 84.43778228759766) {
+                                if (input[15] <= 16491.32421875) {
+                                    { const double _tmp[] = {0.039007013799280746, 0.08353146705043345, 0.0, 0.0, 0.0, 0.0, 0.0, 0.862127240174844, 0.015334278975441885}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 70.18050765991211) {
+                                    { const double _tmp[] = {0.0, 0.2210121716848174, 0.0, 0.0, 0.0, 0.0, 0.15552708377820484, 0.4043704178233326, 0.21909032671364503}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.032232391563867924, 0.0, 0.0, 0.0, 0.0, 0.9677676084361322, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 1.0247472822666168) {
+                                if (input[5] <= 365.6270294189453) {
+                                    { const double _tmp[] = {0.0, 0.1256355960778497, 0.0, 0.0, 0.0, 0.0, 0.011788031236934043, 0.8487382490592503, 0.013838123625966049}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.8325991189427313, 0.0, 0.0, 0.0, 0.0, 0.1674008810572687, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 116.64180374145508) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[13] <= 29.23232364654541) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[10] <= 2.672009229660034) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[13] <= 109.81209564208984) {
+                    if (input[7] <= 111.07878494262695) {
+                        if (input[13] <= 104.06925201416016) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var50, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var31, var50, 9, var30);
+    static double var51[9];
+    if (input[5] <= 90.0564079284668) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.44841766357422) {
+            if (input[5] <= 240.43409729003906) {
+                if (input[8] <= 0.23717333376407623) {
+                    if (input[12] <= 40.80230712890625) {
+                        if (input[3] <= 0.22885021567344666) {
+                            if (input[5] <= 132.73373413085938) {
+                                if (input[3] <= 0.13448623940348625) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[5] <= 227.16268920898438) {
+                                if (input[11] <= 28.065117835998535) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5834932821497121, 0.41650671785028787, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.4106198847293854) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[6] <= 41.13662528991699) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[3] <= 0.2979324460029602) {
+                        if (input[2] <= 1.0643411874771118) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[15] <= 4071.1971435546875) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[4] <= 1.4605093598365784) {
+                                    { const double _tmp[] = {0.019789201978920194, 0.0, 0.0, 0.9802107980210798, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.6448598130841121, 0.0, 0.35514018691588783, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[10] <= 0.8810599744319916) {
+                            if (input[1] <= 0.5294473767280579) {
+                                if (input[12] <= 65.23174285888672) {
+                                    { const double _tmp[] = {0.023758069996602103, 0.13567108392796465, 0.0, 0.8405708460754332, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 2.673494577407837) {
+                                    { const double _tmp[] = {0.0, 0.21447028423772613, 0.7855297157622739, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[14] <= 18.61250591278076) {
+                    if (input[8] <= 0.529208242893219) {
+                        if (input[12] <= 52.83121109008789) {
+                            if (input[5] <= 274.41575622558594) {
+                                if (input[9] <= 0.19176798313856125) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.12002137625349722, 0.0, 0.31379082707239636, 0.5661877966741065, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 53.54677772521973) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.027192490059148387, 0.048526071898315794, 0.8975569346782459, 0.01603470201857391, 0.0, 0.0, 0.0, 0.0, 0.01068980134571594}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.7195148766040802) {
+                                if (input[7] <= 86.4581298828125) {
+                                    { const double _tmp[] = {0.5601156587586189, 0.09052514743094855, 0.0345377068511651, 0.049854429019942664, 0.0, 0.0, 0.0637028815254823, 0.08493717536730973, 0.11632700104653287}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.032850457563323034, 0.18759340240108152, 0.028628712013016457, 0.0, 0.0, 0.0, 0.044003390686673444, 0.044003390686673444, 0.6629206466492322}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 12003.798828125) {
+                                    { const double _tmp[] = {0.6513122656668452, 0.34868773433315486, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.07166825575730484, 0.7746772645345519, 0.0, 0.0, 0.0, 0.04900843959874523, 0.0, 0.0, 0.10464604010939799}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 73.91929244995117) {
+                            if (input[1] <= 0.20173204690217972) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 84.59879684448242) {
+                                    { const double _tmp[] = {0.9484927605032044, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.051507239496795636, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.41192411924119243, 0.5880758807588077, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[7] <= 85.34687423706055) {
+                                if (input[5] <= 277.5512237548828) {
+                                    { const double _tmp[] = {0.021785269509392923, 0.0, 0.0, 0.10276964094648401, 0.0, 0.0, 0.0, 0.8754450895441231, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1954580188472981, 0.2092815300486695, 0.09581564026324627, 0.40339773183294264, 0.0, 0.0, 0.0, 0.0, 0.09604707900784348}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 61.15174102783203) {
+                                    { const double _tmp[] = {0.012072893200709544, 0.0861782179129596, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6549544561384929, 0.24679443274783786}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.061005191448845, 0.0, 0.0, 0.0, 0.0, 0.6142232096302509, 0.3170184307769038, 0.007753168144000368}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[9] <= 0.9501993060112) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[9] <= 2.1755086183547974) {
+                if (input[12] <= 104.45660972595215) {
+                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[5] <= 355.14215087890625) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                if (input[8] <= 2.8370931148529053) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[7] <= 94.81655883789062) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var51, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var30, var51, 9, var29);
+    static double var52[9];
+    if (input[10] <= 0.08098096400499344) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[6] <= 189.79827117919922) {
+            if (input[2] <= 3.9826518297195435) {
+                if (input[12] <= 77.42752456665039) {
+                    if (input[11] <= 60.77095603942871) {
+                        if (input[4] <= 1.8060863614082336) {
+                            if (input[8] <= 0.20985005795955658) {
+                                if (input[8] <= 0.08155880495905876) {
+                                    { const double _tmp[] = {0.22891635492680035, 0.2723401810258535, 0.49874346404734615, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8764873289063558, 0.06763789131318607, 0.0, 0.055874779780458045, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.0824556350708008) {
+                                    { const double _tmp[] = {0.03881037755747732, 0.0, 0.0, 0.9611896224425227, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5193173534659308, 0.22241815599100062, 0.1357733321712132, 0.1224911583718554, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 40.82094192504883) {
+                                if (input[15] <= 4226.70703125) {
+                                    { const double _tmp[] = {0.5834932821497121, 0.41650671785028787, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.8858321870701513, 0.11416781292984868, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.10790495201945305) {
+                                    { const double _tmp[] = {0.11296915644741733, 0.8870308435525828, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6952177534655289, 0.13322346564996437, 0.018298162751922815, 0.06603250036563452, 0.0, 0.0, 0.0, 0.04687492309906152, 0.040353194667887754}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 59.84317207336426) {
+                            if (input[11] <= 68.66402435302734) {
+                                if (input[12] <= 46.652936935424805) {
+                                    { const double _tmp[] = {0.0, 0.0678659035159444, 0.9321340964840557, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.5893794380981785, 0.21586909539981472, 0.19475146650200675, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.164167046546936) {
+                                    { const double _tmp[] = {0.0, 0.04729344729344729, 0.9527065527065527, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.1440143659710884) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[10] <= 0.48343053460121155) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.629059829059829, 0.0, 0.0, 0.3709401709401709, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[5] <= 300.16307067871094) {
+                        if (input[4] <= 3.080355405807495) {
+                            if (input[9] <= 0.11664256080985069) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 1.2207260131835938) {
+                                    { const double _tmp[] = {0.0, 0.4876963350785341, 0.0, 0.0, 0.0, 0.0, 0.0, 0.40039267015706803, 0.11191099476439789}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16974169741697417, 0.8302583025830259}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.686937540769577) {
+                                if (input[7] <= 72.94791793823242) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.030448452755254023, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9635666611506426, 0.005984886094103372}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.0846801400184631) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 1.041814386844635) {
+                            if (input[9] <= 0.16254625469446182) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[13] <= 82.90247344970703) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.2918265163898468) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[13] <= 54.429317474365234) {
+                                    { const double _tmp[] = {0.0, 0.0652139669204516, 0.0, 0.0, 0.0, 0.0, 0.8719348910475189, 0.0, 0.06285114203202942}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.006544185946585554, 0.22422447638037876, 0.0, 0.0, 0.0, 0.02088365221189802, 0.21038345931986155, 0.4865117496771796, 0.05145247646409656}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+            }
+        } else {
+            if (input[9] <= 2.2440990209579468) {
+                if (input[15] <= 59691.673828125) {
+                    if (input[0] <= 11.872947216033936) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[4] <= 11.34773874282837) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[9] <= 2.5309563875198364) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var52, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var29, var52, 9, var28);
+    static double var53[9];
+    if (input[8] <= 0.047485409304499626) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[13] <= 86.44357681274414) {
+            if (input[3] <= 0.2979431450366974) {
+                if (input[8] <= 0.14800087362527847) {
+                    if (input[1] <= 0.2745564579963684) {
+                        if (input[2] <= 0.5443337112665176) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[12] <= 44.156951904296875) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 37.738914489746094) {
+                            if (input[12] <= 59.30290412902832) {
+                                if (input[11] <= 14.01679015159607) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 14.184441089630127) {
+                        { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[1] <= 0.22072552889585495) {
+                            if (input[2] <= 0.7822280824184418) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[15] <= 4061.4368896484375) {
+                                if (input[9] <= 0.26848171651363373) {
+                                    { const double _tmp[] = {0.11698880976602238, 0.0, 0.0, 0.8830111902339777, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.2403212785720825) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.5476190476190477, 0.0, 0.4523809523809524, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 3.973426342010498) {
+                    if (input[11] <= 61.17160415649414) {
+                        if (input[4] <= 3.4746437072753906) {
+                            if (input[15] <= 15236.3115234375) {
+                                if (input[2] <= 0.9629755616188049) {
+                                    { const double _tmp[] = {0.8005118470381084, 0.14965709421052345, 0.04983105875136815, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4201614229177204, 0.1090610392023269, 0.07846388018342966, 0.11583501679253354, 0.0, 0.0, 0.0, 0.1863847389542412, 0.0900939019497483}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.24824857711792) {
+                                    { const double _tmp[] = {0.13469206911829862, 0.8653079308817014, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.030048811172738346, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.060375852078557606, 0.9095753367487042}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.9153857827186584) {
+                                if (input[3] <= 0.6038842797279358) {
+                                    { const double _tmp[] = {0.21006091408726926, 0.05997791889070715, 0.16475862056724372, 0.29728185884959196, 0.0, 0.0, 0.16882673465532383, 0.0, 0.09909395294986396}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.12718136585796636, 0.13378704621762527, 0.04375135762710637, 0.06315413361825789, 0.0, 0.0, 0.0, 0.6321260966790441, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.3372197598218918) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.867595818815331, 0.13240418118466896, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 13059.810546875) {
+                            if (input[11] <= 67.02716445922852) {
+                                if (input[12] <= 56.07806396484375) {
+                                    { const double _tmp[] = {0.0, 0.048952483524373674, 0.627535451444983, 0.3235120650306434, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5988909426987061, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4011090573012939, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[14] <= 1.3710150122642517) {
+                                if (input[2] <= 0.6673304438591003) {
+                                    { const double _tmp[] = {0.0, 0.09845788849347568, 0.9015421115065243, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.8255547054322877, 0.17444529456771232, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 80.38285446166992) {
+                                    { const double _tmp[] = {0.0, 0.22428479116489458, 0.5904364683075839, 0.18527874052752155, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.08412183442493047, 0.0, 0.0, 0.0, 0.07991574270368396, 0.5505306719587112, 0.23678738578869304, 0.04864436512398153}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 116.17525100708008) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[11] <= 109.44841766357422) {
+                if (input[15] <= 35947.45703125) {
+                    if (input[1] <= 0.42403513193130493) {
+                        if (input[3] <= 0.46668294072151184) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[13] <= 93.51768493652344) {
+                                if (input[9] <= 0.404244989156723) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 73.58626937866211) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 3.223349690437317) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[5] <= 362.8841094970703) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 1.0046838819980621) {
+                        if (input[9] <= 0.564722552895546) {
+                            if (input[3] <= 0.8492376208305359) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[5] <= 334.31309509277344) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[0] <= 3.086633563041687) {
+                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[9] <= 2.2440990209579468) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[11] <= 132.9390754699707) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var53, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var28, var53, 9, var27);
+    static double var54[9];
+    if (input[3] <= 0.1169169694185257) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.40346908569336) {
+            if (input[12] <= 76.3385009765625) {
+                if (input[11] <= 62.08592224121094) {
+                    if (input[4] <= 1.8060863614082336) {
+                        if (input[8] <= 0.1545465588569641) {
+                            if (input[1] <= 0.2745564579963684) {
+                                if (input[8] <= 0.07151319086551666) {
+                                    { const double _tmp[] = {0.27666666666666667, 0.0, 0.7233333333333333, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 71.20722961425781) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.1287798881530762) {
+                                if (input[0] <= 2.214996337890625) {
+                                    { const double _tmp[] = {0.04347877167676243, 0.015517916864897115, 0.007104588444169763, 0.9229787074425765, 0.0, 0.0, 0.010920015571594267, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.33093525179856115, 0.0, 0.0, 0.6690647482014389, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.44041554629802704) {
+                                    { const double _tmp[] = {0.18929016189290163, 0.8107098381070984, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 4.797767877578735) {
+                            if (input[3] <= 0.42358799278736115) {
+                                if (input[9] <= 0.5636456310749054) {
+                                    { const double _tmp[] = {0.6790874373009995, 0.146337610619977, 0.01674948555288893, 0.06044379569086005, 0.0, 0.0, 0.0, 0.07723373893832118, 0.02014793189695335}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.49258160237388726, 0.5074183976261127, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 242.44268035888672) {
+                                    { const double _tmp[] = {0.10246446806354345, 0.14628151032755876, 0.2678890309613124, 0.48336499064758537, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8732099158235974, 0.026809076363005172, 0.03682210488412758, 0.022146628299873836, 0.0, 0.0, 0.018865646329522156, 0.0, 0.022146628299873832}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 3.9656537771224976) {
+                                if (input[1] <= 0.6246351599693298) {
+                                    { const double _tmp[] = {0.216962636738173, 0.0, 0.6806875976701235, 0.10234976559170335, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.6529621015186756, 0.23915720344780406, 0.10788069503352031, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 60.538631439208984) {
+                        if (input[15] <= 7449.34228515625) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[3] <= 0.2684852331876755) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[8] <= 0.5779174566268921) {
+                                    { const double _tmp[] = {0.0, 0.049064039408867, 0.9509359605911331, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.31385599076747894) {
+                            if (input[1] <= 0.09007356222718954) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[14] <= 1.2085092067718506) {
+                    if (input[10] <= 0.35121428966522217) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[13] <= 83.65201568603516) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[5] <= 316.0234375) {
+                        if (input[13] <= 43.79803276062012) {
+                            if (input[13] <= 39.128835678100586) {
+                                if (input[0] <= 8.777470111846924) {
+                                    { const double _tmp[] = {0.0, 0.1000483325277912, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8999516674722088}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 79.27680206298828) {
+                                    { const double _tmp[] = {0.0, 0.2621359223300971, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7378640776699029, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7540983606557378, 0.0, 0.2459016393442623}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 2.320944607257843) {
+                                if (input[0] <= 3.362963557243347) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10849056603773585, 0.48820754716981135, 0.40330188679245277}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.005858874200116757, 0.008364313825166687, 0.0, 0.0, 0.0, 0.0, 0.011771997235419782, 0.9417597788335818, 0.03224503590571505}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 18.280577182769775) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 77.77005386352539) {
+                            if (input[12] <= 112.67529296875) {
+                                if (input[5] <= 322.3583221435547) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.06167404335059568, 0.4695883300729567, 0.0, 0.0, 0.0, 0.0, 0.3304510470883769, 0.041306380886047114, 0.09698019860202364}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 1.1623770594596863) {
+                                    { const double _tmp[] = {0.0, 0.07226476132846144, 0.0, 0.0, 0.0, 0.0, 0.0, 0.020341192077640995, 0.9073940465938977}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 70.28504943847656) {
+                                if (input[11] <= 79.64990234375) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6571428571428571, 0.0, 0.34285714285714286}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9811320754716981, 0.018867924528301893, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 95.52404403686523) {
+                                    { const double _tmp[] = {0.0, 0.1346561847626903, 0.0, 0.0, 0.0, 0.20066411846989146, 0.1895161118882308, 0.25268814918430776, 0.22247543569487965}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.1296, 0.0, 0.8704, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[3] <= 2.456979274749756) {
+                if (input[14] <= 1.8584758937358856) {
+                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[12] <= 183.6836929321289) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var54, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var27, var54, 9, var26);
+    static double var55[9];
+    if (input[15] <= 44899.458984375) {
+        if (input[7] <= 20.34731101989746) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+        } else {
+            if (input[12] <= 75.61248397827148) {
+                if (input[3] <= 0.2923149913549423) {
+                    if (input[0] <= 1.9090484976768494) {
+                        if (input[10] <= 0.7142488956451416) {
+                            if (input[3] <= 0.23380853980779648) {
+                                if (input[2] <= 0.9871199131011963) {
+                                    { const double _tmp[] = {0.0, 0.8137254901960784, 0.18627450980392155, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.032386763670499884, 0.0, 0.0, 0.9676132363295001, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 44.156951904296875) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6848168177405805, 0.19553322296013945, 0.0, 0.06461097802161128, 0.0, 0.0, 0.055038981277668875, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 270.5646514892578) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 1.9436051845550537) {
+                            if (input[13] <= 36.99642086029053) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 60.03933334350586) {
+                        if (input[12] <= 45.010555267333984) {
+                            if (input[3] <= 0.31020718812942505) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[13] <= 41.539405822753906) {
+                                    { const double _tmp[] = {0.24125874125874128, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7587412587412588}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.023487651757728992, 0.0, 0.9211121261615407, 0.05540022208073034, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 1.2046293020248413) {
+                                if (input[7] <= 47.22243690490723) {
+                                    { const double _tmp[] = {0.1080446271285966, 0.0, 0.0, 0.8919553728714034, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7127184121365225, 0.12871979248993856, 0.039287968792109766, 0.030381069034892332, 0.0, 0.0, 0.0, 0.051760339837223966, 0.037132417709312845}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 16.746495723724365) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.5525959432125092) {
+                            if (input[9] <= 0.12347707524895668) {
+                                if (input[4] <= 2.5428696274757385) {
+                                    { const double _tmp[] = {0.5343347639484979, 0.0, 0.4656652360515021, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 3.4862455129623413) {
+                                    { const double _tmp[] = {0.04716471041968301, 0.17506795801832342, 0.7398608791135818, 0.0, 0.0, 0.0, 0.0379064524484119, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.010965057137195321, 0.0, 0.9890349428628047, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 12244.81005859375) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[1] <= 0.545059472322464) {
+                    if (input[9] <= 0.18460845202207565) {
+                        if (input[2] <= 1.041814386844635) {
+                            if (input[5] <= 256.0741500854492) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[13] <= 85.40658569335938) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.2870384082198143) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 62.656023025512695) {
+                            if (input[9] <= 0.4237077385187149) {
+                                if (input[10] <= 0.3747652918100357) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05531370038412295, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9446862996158771, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 4.411798000335693) {
+                                    { const double _tmp[] = {0.04241290575943283, 0.7871500470221057, 0.0, 0.0, 0.0, 0.0, 0.17043704721846156, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.359375, 0.359375, 0.28125}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 132.12163543701172) {
+                                if (input[13] <= 55.08191680908203) {
+                                    { const double _tmp[] = {0.0, 0.05818965517241384, 0.0, 0.0, 0.0, 0.0, 0.9418103448275861, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.00998591168891841, 0.3278926660486302, 0.0, 0.0, 0.0, 0.0, 0.341092853892778, 0.3210285683696734, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 1.0309869349002838) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.08662986508300285, 0.0, 0.7792104266725124, 0.13415970824448473}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[7] <= 82.44111251831055) {
+                        if (input[1] <= 1.2046293020248413) {
+                            if (input[0] <= 5.217386960983276) {
+                                if (input[11] <= 48.03129959106445) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[1] <= 0.6421060264110565) {
+                            if (input[9] <= 0.4010026901960373) {
+                                if (input[5] <= 292.6837921142578) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 78.34144973754883) {
+                                    { const double _tmp[] = {0.0, 0.4153846153846154, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5846153846153846, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        if (input[12] <= 164.79659271240234) {
+            if (input[13] <= 114.50537872314453) {
+                if (input[11] <= 97.44705963134766) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+            }
+        } else {
+            if (input[15] <= 59691.673828125) {
+                if (input[4] <= 11.31161117553711) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[14] <= 16.976688385009766) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var55, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var26, var55, 9, var25);
+    static double var56[9];
+    if (input[5] <= 111.64409637451172) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.44841766357422) {
+            if (input[4] <= 1.803760290145874) {
+                if (input[1] <= 0.2764579802751541) {
+                    if (input[13] <= 48.78281784057617) {
+                        if (input[1] <= 0.16496698558330536) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[9] <= 0.09684809297323227) {
+                            if (input[15] <= 9703.0712890625) {
+                                if (input[7] <= 66.63337898254395) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[0] <= 1.6882022619247437) {
+                                if (input[15] <= 7197.422119140625) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[5] <= 278.1160583496094) {
+                        if (input[2] <= 0.9811882376670837) {
+                            if (input[7] <= 69.21795654296875) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[0] <= 2.442822217941284) {
+                                if (input[2] <= 1.0731989741325378) {
+                                    { const double _tmp[] = {0.035065430059712854, 0.0, 0.0, 0.9649345699402871, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.26413606965513786, 0.05386985631124523, 0.14797984625257724, 0.5340142277810397, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[10] <= 0.440081849694252) {
+                            if (input[10] <= 0.3797936886548996) {
+                                if (input[10] <= 0.34299078583717346) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 54.739418029785156) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[6] <= 74.16103744506836) {
+                    if (input[3] <= 0.7238562405109406) {
+                        if (input[5] <= 188.37452697753906) {
+                            if (input[12] <= 44.61086463928223) {
+                                if (input[13] <= 34.254197120666504) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[7] <= 82.8439826965332) {
+                                if (input[12] <= 42.541574478149414) {
+                                    { const double _tmp[] = {0.031577340204792165, 0.2254040402776283, 0.7430186195175794, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7621236183320179, 0.02789824986134409, 0.0, 0.0, 0.0, 0.0, 0.019632101754279173, 0.09816050877139587, 0.09218552128096306}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.6515152454376221) {
+                                    { const double _tmp[] = {0.14072347213081837, 0.7366379999479463, 0.12263852792123527, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 17.25526714324951) {
+                            if (input[8] <= 0.48693622648715973) {
+                                if (input[2] <= 3.071961760520935) {
+                                    { const double _tmp[] = {0.047032157529395095, 0.0, 0.952967842470605, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.2144702842377261, 0.7855297157622739, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 78.53256607055664) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 59.901241302490234) {
+                        if (input[5] <= 388.5457305908203) {
+                            if (input[7] <= 55.79519844055176) {
+                                if (input[2] <= 0.9366582930088043) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 60.58430290222168) {
+                                    { const double _tmp[] = {0.5350474441383533, 0.25461687582899706, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2103356800326497}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.015148749771856176, 0.9848512502281438, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.602950245141983) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.1613626554608345) {
+                            if (input[14] <= 1.2964757084846497) {
+                                if (input[12] <= 75.67460250854492) {
+                                    { const double _tmp[] = {0.8306010928961749, 0.16939890710382513, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 363.2520294189453) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.6356929242610931) {
+                                if (input[5] <= 300.19219970703125) {
+                                    { const double _tmp[] = {0.044988209512703596, 0.048169941435477044, 0.014702472084723915, 0.0663209338604394, 0.0, 0.0, 0.011299122065111898, 0.7570411783624967, 0.057478142679047474}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.033330130824477326, 0.10309681914018695, 0.0, 0.01310260577701373, 0.0, 0.017727054874783283, 0.5301702522736107, 0.2567140168903801, 0.04585912021954805}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 4.038603782653809) {
+                                    { const double _tmp[] = {0.061779154836657524, 0.6467843973469363, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2914364478164061}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[12] <= 151.15148162841797) {
+                if (input[12] <= 147.01245880126953) {
+                    if (input[11] <= 112.04426574707031) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var56, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var25, var56, 9, var24);
+    static double var57[9];
+    if (input[9] <= 0.037857769057154655) {
+        if (input[1] <= 0.4994504451751709) {
+            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+        } else {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+        }
+    } else {
+        if (input[12] <= 169.39096069335938) {
+            if (input[15] <= 12848.26611328125) {
+                if (input[7] <= 49.9706916809082) {
+                    if (input[2] <= 1.074118733406067) {
+                        if (input[11] <= 48.41452217102051) {
+                            if (input[5] <= 154.38755798339844) {
+                                if (input[12] <= 49.365373611450195) {
+                                    { const double _tmp[] = {0.05032822757111597, 0.0, 0.0, 0.949671772428884, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 34.30737495422363) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[0] <= 3.2088207006454468) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[15] <= 6674.058349609375) {
+                                if (input[2] <= 2.5682965517044067) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[9] <= 0.46852177381515503) {
+                        if (input[1] <= 0.2745564579963684) {
+                            if (input[12] <= 43.869873046875) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[12] <= 78.47589874267578) {
+                                    { const double _tmp[] = {0.8236449461903264, 0.08603864890402796, 0.02626079243657078, 0.0, 0.0, 0.0, 0.020181905298475692, 0.020181905298475692, 0.023691801872123636}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.17322175732217576, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7313807531380753, 0.09539748953974894}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 1.7807374596595764) {
+                                if (input[7] <= 69.28654479980469) {
+                                    { const double _tmp[] = {0.01619518221124151, 0.0924830142063002, 0.0, 0.8785886349598517, 0.0, 0.0, 0.0, 0.0, 0.012733168622606547}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.08050847457627118, 0.9194915254237289, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 37.7697639465332) {
+                                    { const double _tmp[] = {0.49981795983113986, 0.06486871847090753, 0.0, 0.0, 0.0, 0.0, 0.0, 0.030432238294993648, 0.404881083402959}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.07743858839645291, 0.1381922177798543, 0.15184494290991218, 0.2283175772014984, 0.0, 0.0, 0.03889855018988491, 0.3500869517089642, 0.015221171813433224}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 50.18198204040527) {
+                            if (input[0] <= 2.0957359075546265) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[12] <= 48.107051849365234) {
+                                    { const double _tmp[] = {0.010512982900569979, 0.0, 0.98948701709943, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.13495934959349595, 0.865040650406504, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 1.6625344157218933) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[6] <= 85.50304794311523) {
+                                    { const double _tmp[] = {0.9368646742073955, 0.026225443021543438, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03690988277106114, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.3770491803278689, 0.0, 0.6229508196721312, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[12] <= 57.9024543762207) {
+                    if (input[7] <= 88.7265510559082) {
+                        if (input[5] <= 395.9272155761719) {
+                            if (input[8] <= 0.5468701273202896) {
+                                if (input[2] <= 1.1642252206802368) {
+                                    { const double _tmp[] = {0.0, 0.23782234957020057, 0.7621776504297995, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[9] <= 0.15322964638471603) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 1.1222374439239502) {
+                        if (input[10] <= 0.7155732810497284) {
+                            if (input[11] <= 60.13436508178711) {
+                                if (input[14] <= 0.8973084688186646) {
+                                    { const double _tmp[] = {0.7778915046059365, 0.22210849539406347, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.3107330497873405, 0.0, 0.12834625969477106, 0.0, 0.0, 0.0, 0.21866399799849887, 0.3422566925193895}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.10475602746009827) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[1] <= 0.545059472322464) {
+                            if (input[5] <= 300.16307067871094) {
+                                if (input[8] <= 0.42710115015506744) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.04488676418272572, 0.020550566734259968, 0.0, 0.0, 0.0, 0.03158698220265884, 0.8844355016744471, 0.018540185205908447}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 35945.28125) {
+                                    { const double _tmp[] = {0.023231901643821575, 0.13819415177382896, 0.0, 0.01826566179967131, 0.0, 0.003089045745532648, 0.5834864186006108, 0.10891746480544745, 0.1248153556310873}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.2008625336927224, 0.08431266846361186, 0.632345013477089, 0.08247978436657682}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 7.040088891983032) {
+                                if (input[12] <= 79.76040267944336) {
+                                    { const double _tmp[] = {0.2593856655290102, 0.7406143344709898, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0602094240837697, 0.015052356020942424, 0.9247382198952879}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.5443612635135651) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0584776128703925, 0.0, 0.0, 0.24981980204189738, 0.26964677045792096, 0.0, 0.4220558146297893}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[4] <= 13.26915454864502) {
+                if (input[4] <= 6.767570734024048) {
+                    if (input[4] <= 6.5914740562438965) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var57, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var24, var57, 9, var23);
+    static double var58[9];
+    if (input[7] <= 19.84420680999756) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[15] <= 52611.12890625) {
+            if (input[8] <= 0.5511033535003662) {
+                if (input[14] <= 1.3256742358207703) {
+                    if (input[8] <= 0.22615792602300644) {
+                        if (input[12] <= 57.95027542114258) {
+                            if (input[13] <= 48.069711685180664) {
+                                if (input[11] <= 21.704177856445312) {
+                                    { const double _tmp[] = {0.0, 0.15367483296213807, 0.0, 0.7616926503340756, 0.0, 0.0, 0.0, 0.0, 0.08463251670378617}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8426395939086294, 0.0, 0.15736040609137053, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 61.8656120300293) {
+                                    { const double _tmp[] = {0.29063074873659955, 0.0, 0.6332015308819487, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0761677203814518}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.025945608002500776, 0.9740543919974992, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.6884133815765381) {
+                                if (input[10] <= 0.38109879195690155) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6842926339037917, 0.2916172457916784, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.024090120304529953}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 12420.63330078125) {
+                                    { const double _tmp[] = {0.5123595505617977, 0.48764044943820234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.02018592297476759, 0.9798140770252324, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 65.23174285888672) {
+                            if (input[0] <= 2.414651393890381) {
+                                if (input[11] <= 14.460168361663818) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03846323127627758, 0.027455661799184978, 0.012570062028542519, 0.873209417656688, 0.0, 0.0, 0.048301627239306894, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 278.34092712402344) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.7397260273972602, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2602739726027397, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[15] <= 17646.9306640625) {
+                        if (input[11] <= 55.14337348937988) {
+                            if (input[14] <= 16.060438632965088) {
+                                if (input[6] <= 77.28829956054688) {
+                                    { const double _tmp[] = {0.5076561807479675, 0.11503904680692242, 0.2949434838616035, 0.01900645121157848, 0.0, 0.0, 0.0, 0.0, 0.06335483737192828}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03304082430972127, 0.21226555880554496, 0.04319192093499709, 0.2337997459307451, 0.0, 0.0, 0.0, 0.16596895544466475, 0.3117329945743268}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.1410118043422699) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 55.738990783691406) {
+                                if (input[3] <= 0.5150040984153748) {
+                                    { const double _tmp[] = {0.0, 0.261176899806941, 0.6908775823541036, 0.04794551783895534, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 64.09745407104492) {
+                                    { const double _tmp[] = {0.3630503597122302, 0.5183021582733813, 0.11864748201438848, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03671393337956673, 0.052413970680039355, 0.0, 0.0, 0.0, 0.0, 0.6639102952804984, 0.07376781058672205, 0.17319399007317346}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[4] <= 3.358187675476074) {
+                            if (input[5] <= 375.4560546875) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[14] <= 1.7627740502357483) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[9] <= 0.5812096297740936) {
+                                    { const double _tmp[] = {0.0, 0.07749792619454865, 0.0, 0.0, 0.0, 0.1732306585525205, 0.10907115538492032, 0.0, 0.6402002598680105}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 3.9429606199264526) {
+                    if (input[13] <= 50.62971305847168) {
+                        if (input[9] <= 0.3225695490837097) {
+                            if (input[6] <= 81.74988555908203) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[4] <= 5.19758927822113) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 59.37563514709473) {
+                                if (input[14] <= 2.5415918827056885) {
+                                    { const double _tmp[] = {0.41447537416817976, 0.2958590664292599, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2081971208205903, 0.0814684385819701}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 85.81232833862305) {
+                                    { const double _tmp[] = {0.0, 0.7803468208092487, 0.0, 0.0, 0.0, 0.0, 0.21965317919075145, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 88.16881942749023) {
+                            if (input[8] <= 0.6150774657726288) {
+                                if (input[12] <= 73.5464859008789) {
+                                    { const double _tmp[] = {0.25326909841706813, 0.0, 0.0, 0.7467309015829319, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.2370144724845886) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.7397260273972603, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2602739726027397, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 70.57730484008789) {
+                                if (input[11] <= 80.00614166259766) {
+                                    { const double _tmp[] = {0.0, 0.2070690230076692, 0.0, 0.0, 0.0, 0.0, 0.12270756918972991, 0.5981993997999333, 0.07202400800266753}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9166666666666666, 0.08333333333333333, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 106.64558410644531) {
+                                    { const double _tmp[] = {0.0, 0.02172164119066775, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9782783588093323, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 34.459978103637695) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[10] <= 2.797757863998413) {
+                if (input[6] <= 216.62584686279297) {
+                    if (input[3] <= 2.3024916648864746) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[13] <= 113.05530166625977) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[15] <= 72215.904296875) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var58, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var23, var58, 9, var22);
+    static double var59[9];
+    if (input[5] <= 103.67776870727539) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[15] <= 47585.828125) {
+            if (input[15] <= 12864.60205078125) {
+                if (input[4] <= 1.988763153553009) {
+                    if (input[8] <= 0.14491456001996994) {
+                        if (input[1] <= 0.1328601986169815) {
+                            if (input[12] <= 64.94368553161621) {
+                                if (input[10] <= 0.39010386168956757) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 30.99559783935547) {
+                                if (input[0] <= 1.8670814633369446) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 0.6728278994560242) {
+                                    { const double _tmp[] = {0.9655391456249007, 0.03446085437509925, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 293.56996154785156) {
+                            if (input[14] <= 1.2358366250991821) {
+                                if (input[1] <= 0.22072552889585495) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.011237778995703857, 0.008021704085749135, 0.0, 0.980740516918547, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 50.307010650634766) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.09978308026030369, 0.9002169197396964, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 8051.814453125) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 4.0177308320999146) {
+                        if (input[15] <= 12060.45849609375) {
+                            if (input[12] <= 41.166812896728516) {
+                                if (input[11] <= 45.26425552368164) {
+                                    { const double _tmp[] = {0.3314215291273641, 0.4731478409252501, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.19543062994738586}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.9300758213984835, 0.06992417860151641, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 71.5849494934082) {
+                                    { const double _tmp[] = {0.8242167436571494, 0.06921634418483025, 0.010563136863548388, 0.057178719109207576, 0.0, 0.0, 0.032471865173130235, 0.0, 0.006353191012134175}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.32385765313151393, 0.07113067887605115, 0.0, 0.0, 0.0, 0.0, 0.0, 0.35038445520425193, 0.25462721278818307}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 291.0244445800781) {
+                                if (input[5] <= 270.9971160888672) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.819477434679335, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.18052256532066505}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 88.72732925415039) {
+                                    { const double _tmp[] = {0.23121877365632093, 0.0, 0.6908705526116579, 0.0, 0.0, 0.0, 0.0, 0.0, 0.07791067373202118}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.41807568073272705) {
+                            if (input[11] <= 30.443249702453613) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[8] <= 0.5951696932315826) {
+                                    { const double _tmp[] = {0.0, 0.4929545584962924, 0.3009200517728371, 0.0, 0.0, 0.0, 0.0, 0.11563131619048833, 0.09049407354038216}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.31193558871746063) {
+                                if (input[9] <= 0.8934003114700317) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 0.49078434705734253) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[1] <= 0.5992700159549713) {
+                    if (input[13] <= 51.48832702636719) {
+                        if (input[9] <= 0.37414683401584625) {
+                            if (input[5] <= 276.9335479736328) {
+                                if (input[9] <= 0.1623559221625328) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1244956772334294, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8755043227665706, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 89.79718399047852) {
+                                    { const double _tmp[] = {0.0, 0.5732307692307693, 0.0, 0.0, 0.0, 0.0, 0.26892307692307693, 0.0, 0.15784615384615383}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[7] <= 84.75796127319336) {
+                                if (input[3] <= 0.7414223253726959) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 2.0256641507148743) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 1.179985523223877) {
+                            if (input[12] <= 57.9024543762207) {
+                                if (input[1] <= 0.346211239695549) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.8789808917197452, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.12101910828025476}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 0.5040972381830215) {
+                                    { const double _tmp[] = {0.2049707891870482, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16473578242070172, 0.08236789121035086, 0.5479255371818992}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.09846004690524388, 0.8945024596235973, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.007037493471158735}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 1.7108023762702942) {
+                                if (input[5] <= 350.75416564941406) {
+                                    { const double _tmp[] = {0.009766628669354687, 0.02788629501644694, 0.05106887762048114, 0.0, 0.0, 0.0038958794508271457, 0.08830660088541531, 0.7653238743402654, 0.05375184401720932}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.08364317728740693, 0.3184310433573212, 0.14578770659732776, 0.06576293286727285, 0.0, 0.02224334494040111, 0.28010138073097696, 0.08403041421929307, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 7.913798093795776) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.03787278160639142, 0.4769165091175215, 0.0, 0.4852107092760871}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[7] <= 79.74772262573242) {
+                        if (input[13] <= 78.92947387695312) {
+                            if (input[12] <= 57.74597358703613) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[7] <= 89.1900749206543) {
+                            if (input[9] <= 0.5008094757795334) {
+                                if (input[3] <= 1.716213345527649) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.7289445400238037) {
+                                    { const double _tmp[] = {0.17002221639461068, 0.0, 0.7408598585869581, 0.0, 0.0, 0.0, 0.0, 0.0, 0.08911792501843119}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[7] <= 95.923828125) {
+                                if (input[4] <= 6.517317056655884) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.33805117038649973, 0.0, 0.0, 0.0, 0.0, 0.4757757212847033, 0.0, 0.18617310832879694}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[12] <= 188.98512268066406) {
+                if (input[9] <= 1.1453673243522644) {
+                    if (input[15] <= 49231.0625) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[12] <= 172.94831085205078) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var59, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var22, var59, 9, var21);
+    static double var60[9];
+    if (input[3] <= 0.08553562313318253) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.44841766357422) {
+            if (input[8] <= 0.5189551711082458) {
+                if (input[12] <= 48.88340950012207) {
+                    if (input[5] <= 203.07058715820312) {
+                        if (input[12] <= 42.97145652770996) {
+                            if (input[12] <= 27.858431816101074) {
+                                if (input[4] <= 0.7742888331413269) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4488871651799677, 0.0, 0.0, 0.0, 0.37464813401558844, 0.0, 0.0, 0.0, 0.17646470080444382}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 0.29661940038204193) {
+                                    { const double _tmp[] = {0.05032822757111596, 0.0, 0.0, 0.949671772428884, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.717815344603381, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.28218465539661897}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 47.422340393066406) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[7] <= 49.98832702636719) {
+                            if (input[5] <= 230.67195892333984) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[3] <= 0.30194421112537384) {
+                                if (input[1] <= 0.24591771513223648) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4268485263496234, 0.0, 0.0697485920315273, 0.5034028816188493, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 83.46615982055664) {
+                                    { const double _tmp[] = {0.0, 0.01049172038933131, 0.9895082796106687, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05321717269006283, 0.22792354882388757, 0.7188592784860496, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[5] <= 244.2064208984375) {
+                        if (input[14] <= 0.9549871981143951) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[9] <= 0.28337544202804565) {
+                                if (input[4] <= 2.644212484359741) {
+                                    { const double _tmp[] = {0.14852773565696836, 0.28272384769791353, 0.0, 0.35033172432132753, 0.0, 0.0, 0.0, 0.19895381875038354, 0.019462873573407084}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.1629764437675476) {
+                                    { const double _tmp[] = {0.011639676113360324, 0.0, 0.0, 0.9883603238866396, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 14314.22314453125) {
+                            if (input[5] <= 309.54681396484375) {
+                                if (input[3] <= 0.885554701089859) {
+                                    { const double _tmp[] = {0.3692842992978952, 0.1659709771089103, 0.0178792264497196, 0.08065085844166993, 0.0, 0.0, 0.13740516623395616, 0.13740516623395618, 0.09140430623389258}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.927063339731286, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.072936660268714}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 69.77920913696289) {
+                                    { const double _tmp[] = {0.9292468209977177, 0.07075317900228234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.4153846153846154, 0.0, 0.0, 0.0, 0.0, 0.5846153846153846, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 1.2346365451812744) {
+                                if (input[12] <= 58.49669647216797) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05306336184325361, 0.9469366381567464, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.4706004559993744) {
+                                    { const double _tmp[] = {0.03490386320681998, 0.01660995244710512, 0.0, 0.0, 0.0, 0.08353829024867575, 0.0, 0.02337697011074054, 0.8415709239866587}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.6628216503992902, 0.33717834960070986, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 4.287064552307129) {
+                    if (input[12] <= 77.42752456665039) {
+                        if (input[3] <= 0.2792660668492317) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[5] <= 365.88946533203125) {
+                                if (input[4] <= 4.94240140914917) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.717815344603381, 0.0, 0.0, 0.28218465539661897, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 2.00447815656662) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.5220125786163522, 0.47798742138364775, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 3.089194416999817) {
+                            if (input[14] <= 1.8580753207206726) {
+                                if (input[15] <= 15164.79248046875) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 43.96742248535156) {
+                                if (input[11] <= 59.920921325683594) {
+                                    { const double _tmp[] = {0.11663434443533503, 0.58278805656998, 0.0, 0.0, 0.0, 0.0, 0.0, 0.11717431825216529, 0.18340328074251955}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 317.09136962890625) {
+                                    { const double _tmp[] = {0.0066263427027744995, 0.05675985657245, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9053547492790784, 0.03125905144569709}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.01774126489506551, 0.17729593010266123, 0.0, 0.0, 0.0, 0.004717958924300509, 0.3802325414547372, 0.39211480837519774, 0.027897496248037786}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[5] <= 271.86878967285156) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[6] <= 153.00169372558594) {
+                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[9] <= 2.2167344093322754) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[8] <= 2.8370931148529053) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[3] <= 3.098710298538208) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var60, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var21, var60, 9, var20);
+    static double var61[9];
+    if (input[11] <= 107.70023727416992) {
+        if (input[7] <= 21.743024826049805) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+        } else {
+            if (input[15] <= 14441.767578125) {
+                if (input[3] <= 0.3009728491306305) {
+                    if (input[7] <= 70.17444229125977) {
+                        if (input[9] <= 0.11847134307026863) {
+                            if (input[8] <= 0.06127706170082092) {
+                                if (input[13] <= 45.106815338134766) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 84.88737487792969) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.0731989741325378) {
+                                if (input[1] <= 0.22072552889585495) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.04867724867724867, 0.0, 0.0, 0.9513227513227513, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 193.9445343017578) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.4758620689655173, 0.0, 0.5241379310344827, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[1] <= 0.25346463173627853) {
+                            if (input[15] <= 9829.93798828125) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[5] <= 295.0244140625) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 67.19120216369629) {
+                                if (input[1] <= 0.4511030316352844) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.38873239436619716, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6112676056338028}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.5012736469507217) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[1] <= 1.255643904209137) {
+                        if (input[11] <= 60.252389907836914) {
+                            if (input[10] <= 1.0495392382144928) {
+                                if (input[2] <= 0.9141711890697479) {
+                                    { const double _tmp[] = {0.7194017284667029, 0.2114495405458439, 0.06914873098745324, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.3942586255049598, 0.10179311796527128, 0.09320815620916405, 0.1681799340295786, 0.0, 0.0, 0.008427316955730518, 0.15169170520314934, 0.08244114413214637}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 52.5195198059082) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.9523212045169386, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.047678795483061476}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 1.634911596775055) {
+                                if (input[2] <= 1.12115877866745) {
+                                    { const double _tmp[] = {0.08175379251799865, 0.11671429589740599, 0.8015319115845955, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.20941126044760125, 0.5381318311239017, 0.0, 0.0, 0.0, 0.0, 0.25245690842849705, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.5460655689239502) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 19.772538661956787) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[1] <= 0.545059472322464) {
+                    if (input[13] <= 56.06202697753906) {
+                        if (input[11] <= 64.53231811523438) {
+                            if (input[12] <= 110.62714004516602) {
+                                if (input[10] <= 1.0627995133399963) {
+                                    { const double _tmp[] = {0.0, 0.5976900866217517, 0.0, 0.0, 0.0, 0.0, 0.16823869104908565, 0.16823869104908565, 0.06583253128007699}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 55.82796287536621) {
+                                if (input[6] <= 119.34806442260742) {
+                                    { const double _tmp[] = {0.0, 0.032727272727272744, 0.0, 0.0, 0.0, 0.0, 0.9672727272727273, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 2.691559672355652) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.4355848431587219) {
+                            if (input[11] <= 78.00135803222656) {
+                                if (input[14] <= 1.73141348361969) {
+                                    { const double _tmp[] = {0.07359565675177233, 0.7805013071306381, 0.054975068898914264, 0.0, 0.0, 0.0, 0.0, 0.0, 0.09092796721867522}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.1686153411865234) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.11451034097969845, 0.0, 0.748456144355258, 0.0, 0.0, 0.13703351466504357, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 17.974513053894043) {
+                                if (input[0] <= 11.51824426651001) {
+                                    { const double _tmp[] = {0.014803622053340843, 0.08453647330460431, 0.012901148536445632, 0.0232781593157606, 0.0, 0.011810242594025598, 0.07931817248333242, 0.7733521817124905, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 23.958099365234375) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 4.185441255569458) {
+                        if (input[0] <= 4.038748383522034) {
+                            if (input[5] <= 369.4843292236328) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[10] <= 0.5227747112512589) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 67.16958045959473) {
+                                if (input[13] <= 90.54860305786133) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.7921889424324036) {
+                                    { const double _tmp[] = {0.0, 0.8325991189427312, 0.0, 0.0, 0.0, 0.0, 0.1674008810572687, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.4426229508196721, 0.0, 0.5573770491803278, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    } else {
+        if (input[6] <= 209.08658599853516) {
+            if (input[0] <= 9.398914337158203) {
+                if (input[8] <= 0.2461041659116745) {
+                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+            }
+        } else {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var61, _tmp, sizeof(_tmp)); }
+        }
+    }
+    add_vectors(var20, var61, 9, var19);
+    static double var62[9];
+    if (input[6] <= 194.9134750366211) {
+        if (input[8] <= 0.04013144597411156) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+        } else {
+            if (input[12] <= 75.61248397827148) {
+                if (input[15] <= 5884.945556640625) {
+                    if (input[3] <= 0.2831733375787735) {
+                        if (input[2] <= 1.0773140788078308) {
+                            if (input[5] <= 124.76740646362305) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 54.682830810546875) {
+                                    { const double _tmp[] = {0.034124629080118686, 0.0, 0.0, 0.9658753709198813, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 14.41859769821167) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 1.0535492897033691) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[3] <= 0.3840128183364868) {
+                                if (input[9] <= 0.14141665026545525) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 11.656856536865234) {
+                                    { const double _tmp[] = {0.0, 0.5220125786163522, 0.47798742138364775, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[5] <= 244.2064208984375) {
+                        if (input[2] <= 0.9776475131511688) {
+                            if (input[12] <= 39.9924430847168) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[9] <= 0.23797764629125595) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[9] <= 0.5312067568302155) {
+                                    { const double _tmp[] = {0.0, 0.028906577293674074, 0.0, 0.9551738583996648, 0.0, 0.0, 0.0, 0.0, 0.015919564306661083}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.241753078067695, 0.17256716427858493, 0.1580133070502705, 0.42766645060344954, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 4.753057956695557) {
+                            if (input[13] <= 71.10619735717773) {
+                                if (input[8] <= 0.08629502356052399) {
+                                    { const double _tmp[] = {0.15293975027276033, 0.08733664686628682, 0.759723602860953, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.568268068308052, 0.09686894801480528, 0.17185485054433833, 0.10002771805876634, 0.0, 0.0, 0.05964615780541252, 0.0, 0.0033342572686255443}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 53.880428314208984) {
+                                    { const double _tmp[] = {0.07207099323671685, 0.14404715621917488, 0.7725489479844216, 0.0, 0.0, 0.0, 0.0, 0.0, 0.011332902559686634}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.334222571854869, 0.39294433951048463, 0.10280127298725242, 0.13911694007514053, 0.0, 0.0, 0.0, 0.0, 0.030914875572253444}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.6246351599693298) {
+                                if (input[4] <= 8.003495931625366) {
+                                    { const double _tmp[] = {0.11036011080332409, 0.0, 0.8896398891966759, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.41807568073272705) {
+                                    { const double _tmp[] = {0.0, 0.7001127395715897, 0.0, 0.25704622322435167, 0.0, 0.0, 0.0, 0.0, 0.042841037204058616}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.24677898909811696, 0.7532210109018831, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[14] <= 1.2127314805984497) {
+                    if (input[2] <= 0.9322823882102966) {
+                        if (input[1] <= 0.04761721473187208) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[11] <= 79.75447463989258) {
+                        if (input[5] <= 300.0031433105469) {
+                            if (input[4] <= 2.6127123832702637) {
+                                if (input[14] <= 1.3307263255119324) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.10364394993045896, 0.0, 0.0, 0.0, 0.0, 0.0, 0.09724617524339359, 0.7991098748261475}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.1173433661460876) {
+                                    { const double _tmp[] = {0.03891036147903895, 0.055549660795733244, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8443548440951447, 0.06118513363008298}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.05956834532374102, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2515107913669065, 0.6889208633093525}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.41703759133815765) {
+                                if (input[15] <= 18962.697265625) {
+                                    { const double _tmp[] = {0.0, 0.027221321176522168, 0.0, 0.0, 0.0, 0.0, 0.9577872265813352, 0.0, 0.014991452242142642}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03540362711645086, 0.2779883484439744, 0.0, 0.0, 0.0, 0.0, 0.14227013119018217, 0.391242860773001, 0.15309503247639167}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 89.5208854675293) {
+                                    { const double _tmp[] = {0.0, 0.7840909090909092, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.21590909090909088}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.13693495038588768, 0.0, 0.0, 0.0, 0.0, 0.029649732847086788, 0.04447459927063018, 0.7889407174963954}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 1.679010033607483) {
+                            if (input[15] <= 35012.6611328125) {
+                                if (input[10] <= 1.391442894935608) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.28694459795951843) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 23.71736431121826) {
+                                if (input[12] <= 132.12163543701172) {
+                                    { const double _tmp[] = {0.0, 0.16875, 0.0, 0.0, 0.0, 0.0, 0.7124999999999999, 0.11875, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0296377607025247, 0.2239297475301866, 0.7464324917672888, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        if (input[15] <= 59784.369140625) {
+            if (input[5] <= 402.9908905029297) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[12] <= 184.00370025634766) {
+                    if (input[5] <= 408.24510192871094) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[15] <= 58896.673828125) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var62, _tmp, sizeof(_tmp)); }
+        }
+    }
+    add_vectors(var19, var62, 9, var18);
+    static double var63[9];
+    if (input[10] <= 0.16109217703342438) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[6] <= 194.9134750366211) {
+            if (input[12] <= 75.43404006958008) {
+                if (input[7] <= 56.14942169189453) {
+                    if (input[1] <= 0.7660724222660065) {
+                        if (input[1] <= 0.3083730936050415) {
+                            if (input[3] <= 0.42551492154598236) {
+                                if (input[8] <= 0.5041709840297699) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.12037485279142857) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.423375204205513) {
+                                if (input[12] <= 43.17781448364258) {
+                                    { const double _tmp[] = {0.17490494296577946, 0.0, 0.0, 0.8250950570342206, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6009041062926486, 0.2573609034187594, 0.0, 0.1417349902885921, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 54.50853729248047) {
+                                    { const double _tmp[] = {0.01163967611336032, 0.0, 0.0, 0.9883603238866396, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.35751295336787564, 0.0, 0.0, 0.6023316062176166, 0.0, 0.0, 0.0, 0.0, 0.04015544041450777}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 15.23298168182373) {
+                            if (input[12] <= 38.19322204589844) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 3.489000082015991) {
+                        if (input[6] <= 72.16830825805664) {
+                            if (input[3] <= 0.3754872679710388) {
+                                if (input[6] <= 53.19624328613281) {
+                                    { const double _tmp[] = {0.16039395005276116, 0.1144917340837144, 0.0, 0.0, 0.0, 0.0, 0.24170477195450812, 0.48340954390901625, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.3493697981457577, 0.4156427971361262, 0.11417657559883948, 0.06867141865727303, 0.0, 0.0, 0.029248937576245918, 0.0, 0.022890472885757674}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 37.13739776611328) {
+                                    { const double _tmp[] = {0.27666666666666667, 0.0, 0.7233333333333334, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.9207030310081414, 0.0, 0.03167288486505494, 0.028574450476082175, 0.0, 0.0, 0.0, 0.0, 0.01904963365072145}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 55.3143424987793) {
+                                if (input[10] <= 0.4703058451414108) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.75, 0.0, 0.0, 0.0, 0.0, 0.25}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.024991360364214742, 0.05351768288520986, 0.8330704372010982, 0.08842051954947716, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 319.7509002685547) {
+                                    { const double _tmp[] = {0.13086281115478193, 0.560471645143178, 0.0, 0.24693243496163203, 0.0, 0.0, 0.0, 0.0, 0.061733108740408}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7701542775013246, 0.13743707090278573, 0.04194866421129202, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05045998738459765}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 50.47457313537598) {
+                            if (input[4] <= 7.556771993637085) {
+                                if (input[8] <= 0.09502189606428146) {
+                                    { const double _tmp[] = {0.0, 0.35319148936170214, 0.6468085106382978, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.5217953771352768) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.8827673196792603) {
+                                if (input[5] <= 416.9517364501953) {
+                                    { const double _tmp[] = {0.724295531187831, 0.0861689310678505, 0.11835250773174644, 0.07118303001257213, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 4.0209890604019165) {
+                                    { const double _tmp[] = {0.0, 0.7181705809641533, 0.2818294190358467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[13] <= 50.461734771728516) {
+                    if (input[9] <= 0.404572069644928) {
+                        if (input[6] <= 92.2949447631836) {
+                            if (input[4] <= 2.422902226448059) {
+                                if (input[10] <= 0.519518181681633) {
+                                    { const double _tmp[] = {0.0, 0.18818181818181817, 0.0, 0.0, 0.0, 0.0, 0.26484848484848483, 0.13242424242424242, 0.4145454545454545}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.5162177532911301) {
+                                    { const double _tmp[] = {0.2180553085027987, 0.04447180633938657, 0.0, 0.0, 0.0, 0.0, 0.12517989932568072, 0.5633095469655632, 0.04898343886657071}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.11480865224625623, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8851913477537436}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.35411256551742554) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[8] <= 0.6085987389087677) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 59.89775085449219) {
+                            if (input[6] <= 79.06398391723633) {
+                                if (input[3] <= 0.7191837131977081) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5609756097560976, 0.0, 0.43902439024390244}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 2.439064860343933) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 3.2043051719665527) {
+                                if (input[7] <= 85.99080657958984) {
+                                    { const double _tmp[] = {0.0, 0.15083798882681565, 0.0, 0.0, 0.0, 0.0, 0.8491620111731844, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.8297996520996094) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 1.0433738827705383) {
+                        if (input[2] <= 0.5972969830036163) {
+                            if (input[14] <= 0.6366683542728424) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[11] <= 82.28498077392578) {
+                            if (input[5] <= 312.0001220703125) {
+                                if (input[8] <= 0.40314629673957825) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.09999999999999999, 0.9}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.044915376826269365, 0.0, 0.0, 0.0, 0.0, 0.03160711702589326, 0.8533921596991176, 0.07008534644871983}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.4609956294298172) {
+                                    { const double _tmp[] = {0.06307130852485324, 0.47272360682196735, 0.0, 0.0, 0.0, 0.0, 0.06336330532357941, 0.1900899159707382, 0.2107518633588619}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.012346693134081288, 0.03525305802757421, 0.0, 0.0, 0.0, 0.0, 0.0, 0.04961541500177111, 0.9027848338365735}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 70.28504943847656) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 1.5239280462265015) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.04387762311877341, 0.0736710709154714, 0.8103817800701854, 0.07206952589556985}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[4] <= 13.344418048858643) {
+                if (input[15] <= 57064.974609375) {
+                    if (input[10] <= 2.618114709854126) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[3] <= 2.3135364055633545) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var63, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var18, var63, 9, var17);
+    static double var64[9];
+    if (input[13] <= 12.977755069732666) {
+        if (input[12] <= 56.64728021621704) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+        } else {
+            if (input[3] <= 0.263140432536602) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+            }
+        }
+    } else {
+        if (input[6] <= 181.73763275146484) {
+            if (input[15] <= 12864.60205078125) {
+                if (input[3] <= 0.26418641209602356) {
+                    if (input[2] <= 1.0062006711959839) {
+                        if (input[9] <= 0.08466209843754768) {
+                            if (input[12] <= 56.55672073364258) {
+                                if (input[1] <= 0.34363920241594315) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[10] <= 0.3136313855648041) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[10] <= 0.39997462928295135) {
+                                    { const double _tmp[] = {0.604735883424408, 0.0, 0.39526411657559196, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[4] <= 1.0703452229499817) {
+                            if (input[3] <= 0.18756836652755737) {
+                                if (input[1] <= 0.6978219747543335) {
+                                    { const double _tmp[] = {0.5974025974025974, 0.0, 0.0, 0.4025974025974027, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 1.7079328894615173) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.022131860256195) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[15] <= 2310.0948486328125) {
+                                    { const double _tmp[] = {0.2977346278317152, 0.0, 0.0, 0.7022653721682848, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 56.97475814819336) {
+                        if (input[2] <= 3.8641066551208496) {
+                            if (input[12] <= 44.156951904296875) {
+                                if (input[7] <= 49.05788230895996) {
+                                    { const double _tmp[] = {0.3611383709519137, 0.0, 0.0, 0.6388616290480864, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.017006151255862842, 0.0, 0.8225445086344747, 0.16044934010966247, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 74.27264785766602) {
+                                    { const double _tmp[] = {0.6964639041785232, 0.10590112152449817, 0.005387205646493883, 0.12636510636015003, 0.0, 0.0, 0.0, 0.04968200762877691, 0.016200654661557692}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.06236149776075831, 0.28934504141957107, 0.0, 0.0, 0.0, 0.0, 0.15662552099634902, 0.34457614619196786, 0.14709179363135383}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[15] <= 7299.04736328125) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[14] <= 1.0897197127342224) {
+                                if (input[9] <= 0.12492208927869797) {
+                                    { const double _tmp[] = {0.8731735827001753, 0.0, 0.12682641729982463, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.043060959792477295, 0.0, 0.9569390402075226, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 50.826725006103516) {
+                                    { const double _tmp[] = {0.0, 0.018799546998867496, 0.9812004530011326, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.45885286783042395, 0.0, 0.0, 0.5411471321695761, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 4.050215244293213) {
+                    if (input[13] <= 52.23392295837402) {
+                        if (input[3] <= 0.48059016466140747) {
+                            if (input[11] <= 67.8438949584961) {
+                                if (input[10] <= 0.6245297193527222) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05735660847880298, 0.942643391521197}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 118.8963737487793) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 283.13038635253906) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 86.08138275146484) {
+                                    { const double _tmp[] = {0.0, 0.7314487632508835, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2685512367491166}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.017873075262627727, 0.0, 0.0, 0.0, 0.0, 0.9181464958986905, 0.0, 0.06398042883868185}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.517581969499588) {
+                            if (input[10] <= 0.8090977668762207) {
+                                if (input[13] <= 63.51473426818848) {
+                                    { const double _tmp[] = {0.0, 0.1396656421021066, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0655221530849389, 0.7948122048129546}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.11338634444125308, 0.12451840457364337, 0.5700842619034274, 0.04114521194607345, 0.0, 0.0, 0.0, 0.0, 0.15086577713560265}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 2.3443487882614136) {
+                                    { const double _tmp[] = {0.03891019423298101, 0.8517578044596852, 0.01695484367180096, 0.0, 0.0, 0.04138976543410235, 0.0, 0.0, 0.05098739220143042}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 0.5832274556159973) {
+                                if (input[5] <= 397.6443634033203) {
+                                    { const double _tmp[] = {0.034812857654978296, 0.19879973976658658, 0.0, 0.0, 0.0, 0.0, 0.5595844526763177, 0.06994805658453972, 0.13685489331757772}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.5786001682281494) {
+                                    { const double _tmp[] = {0.04088461319805926, 0.11673632978919551, 0.0076350783683122704, 0.0, 0.0, 0.0, 0.04694159293110507, 0.7510654868976805, 0.03673689881564744}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.19898421267603134, 0.07288096464278737, 0.0, 0.0, 0.0, 0.6161140807302303, 0.11202074195095096, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[3] <= 1.1033092141151428) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[9] <= 1.8123473525047302) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[5] <= 409.2832336425781) {
+                    if (input[0] <= 13.084053039550781) {
+                        if (input[14] <= 18.301562309265137) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var64, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var17, var64, 9, var16);
+    static double var65[9];
+    if (input[5] <= 94.92239379882812) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[8] <= 0.5504266023635864) {
+            if (input[7] <= 56.93109703063965) {
+                if (input[1] <= 1.1615951657295227) {
+                    if (input[2] <= 1.078016757965088) {
+                        if (input[2] <= 0.9801802933216095) {
+                            if (input[14] <= 0.8422917127609253) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[2] <= 1.0582663416862488) {
+                                if (input[7] <= 30.727462768554688) {
+                                    { const double _tmp[] = {0.17490494296577946, 0.0, 0.0, 0.8250950570342206, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 44.33991813659668) {
+                                    { const double _tmp[] = {0.3887323943661972, 0.0, 0.0, 0.45845070422535217, 0.0, 0.0, 0.0, 0.0, 0.1528169014084507}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.063013698630137, 0.0, 0.936986301369863, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 76.15390396118164) {
+                            if (input[12] <= 39.20038032531738) {
+                                if (input[2] <= 1.0858051776885986) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.3841762840747833) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 237.23455810546875) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[15] <= 1421.0116577148438) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            } else {
+                if (input[9] <= 0.5023142546415329) {
+                    if (input[11] <= 67.13051223754883) {
+                        if (input[5] <= 328.3625946044922) {
+                            if (input[14] <= 1.260311245918274) {
+                                if (input[15] <= 9556.41455078125) {
+                                    { const double _tmp[] = {0.5123801526508044, 0.040638338130564534, 0.2604770588609679, 0.10071240319313818, 0.0, 0.0, 0.0, 0.08579204716452511, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.25180175549418493, 0.6470642480001884, 0.02194416905310768, 0.03959491372625951, 0.0, 0.0, 0.0, 0.0, 0.03959491372625951}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.15949253737926483) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.24900805955940003, 0.19141864497506508, 0.06259817994021061, 0.09035911191369532, 0.0, 0.0, 0.07697257681537009, 0.09621572101921261, 0.23342770577704625}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 83.33831787109375) {
+                                if (input[10] <= 0.39026735723018646) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.9755658146605112, 0.024434185339488792, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.0893418192863464) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 168.37913513183594) {
+                            if (input[8] <= 0.12905634939670563) {
+                                if (input[3] <= 0.5247406959533691) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.15958837419748306) {
+                                    { const double _tmp[] = {0.0, 0.9640831758034026, 0.0, 0.0, 0.0, 0.03591682419659735, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.09352679042277173, 0.0, 0.1833913872446518, 0.0, 0.0, 0.0, 0.2818793544686315, 0.0, 0.4412024678639449}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 1.095910131931305) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[12] <= 51.58177185058594) {
+                            if (input[11] <= 48.37991523742676) {
+                                if (input[14] <= 2.0708640217781067) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.1919068694114685) {
+                                    { const double _tmp[] = {0.0, 0.2467789890981169, 0.7532210109018831, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[3] <= 0.5988692343235016) {
+                                if (input[15] <= 11077.52783203125) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1160896130346232, 0.8839103869653767, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 6.459087610244751) {
+                                    { const double _tmp[] = {0.1031922364073814, 0.0, 0.06744793765181253, 0.0, 0.0, 0.0, 0.8293598259408062, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[12] <= 184.86614227294922) {
+                if (input[14] <= 21.131868362426758) {
+                    if (input[13] <= 50.64048957824707) {
+                        if (input[11] <= 59.37563514709473) {
+                            if (input[5] <= 276.8480987548828) {
+                                if (input[11] <= 38.184234619140625) {
+                                    { const double _tmp[] = {0.8357305071915215, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1642694928084784}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.09642857142857145, 0.0, 0.0, 0.0, 0.9035714285714286, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.7375807166099548) {
+                                    { const double _tmp[] = {0.25938566552901027, 0.7406143344709898, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.2203592814371258, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7796407185628742}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[0] <= 4.941280364990234) {
+                                if (input[14] <= 2.719635844230652) {
+                                    { const double _tmp[] = {0.0, 0.11756168359941944, 0.0, 0.0, 0.0, 0.0, 0.8824383164005806, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 326.5007019042969) {
+                            if (input[0] <= 3.19251549243927) {
+                                if (input[6] <= 92.0345458984375) {
+                                    { const double _tmp[] = {0.37290298367423536, 0.0, 0.0, 0.4397823231375493, 0.0, 0.0, 0.0, 0.18731469318821545, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.600124716758728) {
+                                    { const double _tmp[] = {0.052298242707682935, 0.031998266919832326, 0.0, 0.0, 0.0, 0.0, 0.015011532629057137, 0.9006919577434276, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.6748166259168704, 0.0, 0.13936430317848408, 0.0, 0.0, 0.0, 0.0, 0.18581907090464544}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 4.407100200653076) {
+                                if (input[7] <= 83.31159591674805) {
+                                    { const double _tmp[] = {0.12382234185733514, 0.0, 0.0, 0.8761776581426649, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.13895480641837182, 0.6234682761666421, 0.0, 0.0, 0.0, 0.0, 0.15954070366553805, 0.0, 0.07803621374944796}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 74.5134048461914) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9583333333333334, 0.04166666666666667, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.035216727642768876, 0.025138256245002783, 0.0, 0.0, 0.0, 0.19666988709325706, 0.24765837633965704, 0.49531675267931413, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[3] <= 2.0235767364501953) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[10] <= 2.3861899375915527) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[4] <= 13.41245698928833) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var65, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var16, var65, 9, var15);
+    static double var66[9];
+    if (input[15] <= 1466.1356811523438) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[15] <= 49782.826171875) {
+            if (input[4] <= 1.5683261156082153) {
+                if (input[14] <= 1.0082477629184723) {
+                    if (input[10] <= 0.6722199022769928) {
+                        if (input[4] <= 1.2801122665405273) {
+                            if (input[10] <= 0.34360918402671814) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[9] <= 0.04897225834429264) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[1] <= 0.3911120295524597) {
+                        { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[7] <= 69.81980514526367) {
+                            if (input[11] <= 55.197763442993164) {
+                                if (input[12] <= 27.858431816101074) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.038063715349606946, 0.0, 0.0, 0.961936284650393, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.49069613218307495) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 71.61429214477539) {
+                                if (input[9] <= 0.2904003784060478) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[8] <= 0.5364886820316315) {
+                    if (input[14] <= 1.675260066986084) {
+                        if (input[15] <= 11855.72607421875) {
+                            if (input[7] <= 56.5500431060791) {
+                                if (input[1] <= 0.5251479744911194) {
+                                    { const double _tmp[] = {0.1058927493238192, 0.07558791645812095, 0.06921303193755651, 0.7493063022805033, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.769783930911657, 0.0, 0.143754830471454, 0.0, 0.0, 0.0, 0.0, 0.0, 0.086461238616889}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 49.55574035644531) {
+                                    { const double _tmp[] = {0.0, 0.1323286797632086, 0.8239453217063399, 0.04372599853045154, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.542690634084838, 0.01936905717046213, 0.0, 0.0640021019545705, 0.0, 0.0, 0.1226706954129268, 0.14993084994913278, 0.10133666142806995}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 80.2494125366211) {
+                                if (input[2] <= 1.0144398212432861) {
+                                    { const double _tmp[] = {0.17466252048797326, 0.7619141747163604, 0.06342330479566634, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.10745667979765545, 0.23863552136350683, 0.03121566200279951, 0.0, 0.0, 0.0, 0.04797962863393258, 0.09595925726786517, 0.4787532509342404}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.1686153411865234) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4334203655352481, 0.0, 0.566579634464752, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.21098624914884567) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[1] <= 1.219502568244934) {
+                                if (input[4] <= 2.8847755193710327) {
+                                    { const double _tmp[] = {0.10513923789198308, 0.0, 0.274882103886269, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6199786582217478}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0322349596032167, 0.1840785851025796, 0.6320770693281348, 0.01520649181282179, 0.0, 0.04629035007726634, 0.025907356421844534, 0.0388610346327668, 0.02534415302136965}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 5.796406507492065) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 4.252217054367065) {
+                        if (input[13] <= 50.62971305847168) {
+                            if (input[11] <= 59.695465087890625) {
+                                if (input[11] <= 38.24082565307617) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.028161761261706098, 0.12061385908796494, 0.0, 0.0664250238455459, 0.0, 0.0, 0.0, 0.4526742365770536, 0.3321251192277295}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 25473.888671875) {
+                                    { const double _tmp[] = {0.0, 0.024747937671860697, 0.0, 0.0, 0.0, 0.0, 0.9752520623281393, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.40901829302310944) {
+                                if (input[4] <= 2.7008068561553955) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.627906976744186, 0.0, 0.0, 0.2674418604651163, 0.0, 0.10465116279069768}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9875346260387812, 0.012465373961218842}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 35822.09375) {
+                                    { const double _tmp[] = {0.15032432720305575, 0.2403606873909911, 0.007860332289894719, 0.07091386739796322, 0.0, 0.0, 0.3745302774425761, 0.10873459667687696, 0.04727591159864214}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.03483870967741935, 0.04387096774193548, 0.9212903225806452, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 4.391075849533081) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[4] <= 13.374321460723877) {
+                if (input[7] <= 127.01603698730469) {
+                    if (input[15] <= 57064.974609375) {
+                        if (input[3] <= 2.298140287399292) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[9] <= 2.4032962322235107) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var66, _tmp, sizeof(_tmp)); }
+            }
+        }
+    }
+    add_vectors(var15, var66, 9, var14);
+    static double var67[9];
+    if (input[7] <= 20.34731101989746) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[12] <= 176.4725799560547) {
+            if (input[8] <= 0.5185363292694092) {
+                if (input[12] <= 52.91190528869629) {
+                    if (input[11] <= 51.906320571899414) {
+                        if (input[3] <= 0.2837464213371277) {
+                            if (input[14] <= 0.9738906919956207) {
+                                if (input[4] <= 1.0419799089431763) {
+                                    { const double _tmp[] = {0.0, 0.5220125786163522, 0.47798742138364775, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 3261.6649169921875) {
+                                    { const double _tmp[] = {0.19501854795972445, 0.0, 0.0, 0.8049814520402756, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.29011170566082) {
+                                if (input[15] <= 5397.7476806640625) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05992779783393502, 0.0, 0.940072202166065, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.256380096077919) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.4872021182700794, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5127978817299206}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5245940998169323, 0.029957084121124817, 0.0, 0.4454488160619429, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[7] <= 57.6383171081543) {
+                            if (input[4] <= 1.8957300782203674) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[15] <= 8277.67529296875) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 388.5457305908203) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[9] <= 0.6827892959117889) {
+                                    { const double _tmp[] = {0.0, 0.06539238858630494, 0.7185284143459049, 0.21607919706779022, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[15] <= 15080.33154296875) {
+                        if (input[14] <= 1.0843852162361145) {
+                            if (input[1] <= 0.21543466299772263) {
+                                if (input[12] <= 75.73414611816406) {
+                                    { const double _tmp[] = {0.9086469647217311, 0.0913530352782689, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1045392022008253, 0.8954607977991748, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 60.069833755493164) {
+                                    { const double _tmp[] = {0.08782301418499103, 0.8776523588618513, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0345246269531577}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6566455696202532, 0.0, 0.34335443037974683, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 1.7269128561019897) {
+                                if (input[8] <= 0.4495404064655304) {
+                                    { const double _tmp[] = {0.0, 0.03312530004800767, 0.0, 0.8756601056168986, 0.0, 0.0, 0.0, 0.0, 0.09121459433509357}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.41192411924119243, 0.5880758807588077, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.3849277198314667) {
+                                    { const double _tmp[] = {0.049292157200302396, 0.023457013404529867, 0.0, 0.07751013124975085, 0.0, 0.0, 0.06602714884238037, 0.3961628930542822, 0.3875506562487544}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5594142571238114, 0.25411191883106143, 0.04986016995996729, 0.029988363091864385, 0.0, 0.0, 0.07663692790143121, 0.0, 0.02998836309186438}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 167.74290466308594) {
+                            if (input[5] <= 355.1555633544922) {
+                                if (input[14] <= 1.2125641107559204) {
+                                    { const double _tmp[] = {0.04764890282131662, 0.9523510971786834, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.028431770824453556, 0.08118018774876871, 0.018583416472609703, 0.0, 0.0, 0.0, 0.0, 0.0, 0.871804624954168}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 28136.171875) {
+                                    { const double _tmp[] = {0.0, 0.9686209744013212, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03137902559867877}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[9] <= 0.40901829302310944) {
+                    if (input[13] <= 41.91868782043457) {
+                        if (input[15] <= 13380.8232421875) {
+                            if (input[8] <= 0.607659786939621) {
+                                if (input[12] <= 100.06722640991211) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[7] <= 82.7586555480957) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 10302.23974609375) {
+                            if (input[9] <= 0.2884555757045746) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[0] <= 2.820475697517395) {
+                                if (input[10] <= 0.5056664496660233) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.822407841682434) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9893930465527402, 0.010606953447259877}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.1446540880503145, 0.0, 0.0, 0.8553459119496856}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 80.44136810302734) {
+                        if (input[5] <= 416.9517364501953) {
+                            if (input[10] <= 0.7124569416046143) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[10] <= 0.7705905735492706) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8079646017699115, 0.0, 0.19203539823008847, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[14] <= 22.035554885864258) {
+                            if (input[15] <= 31414.9892578125) {
+                                if (input[1] <= 0.4103119522333145) {
+                                    { const double _tmp[] = {0.0, 0.04702194357366774, 0.0, 0.0, 0.0, 0.0, 0.8867990247300591, 0.06617903169627312, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.028532128796602333, 0.3869669968039191, 0.0, 0.0, 0.0, 0.0, 0.25797799786927944, 0.057328443970950986, 0.2691944325592481}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 98.59704971313477) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.044660194174757285, 0.9378640776699029, 0.017475728155339803}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.24107142857142858, 0.53125, 0.2276785714285714, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 5.633258819580078) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[15] <= 54009.19140625) {
+                if (input[8] <= 1.1181749999523163) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[3] <= 2.6566632986068726) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[11] <= 115.34596633911133) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var67, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var14, var67, 9, var13);
+    static double var68[9];
+    if (input[5] <= 94.92239379882812) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[13] <= 86.44357681274414) {
+            if (input[3] <= 0.2950263172388077) {
+                if (input[8] <= 0.1334044188261032) {
+                    if (input[1] <= 0.2745564579963684) {
+                        if (input[1] <= 0.14133728295564651) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[10] <= 0.34641747176647186) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 36.86052131652832) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 58.7521915435791) {
+                        if (input[2] <= 1.0718421936035156) {
+                            if (input[1] <= 0.2275782749056816) {
+                                if (input[4] <= 1.6825472712516785) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.0640778541564941) {
+                                    { const double _tmp[] = {0.008755234107346781, 0.0, 0.0, 0.9912447658926532, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.26106696935300794, 0.0, 0.0, 0.7389330306469921, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.43603330850601196) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 45.334842681884766) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.15593220338983052, 0.8440677966101695, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 1.915521264076233) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[15] <= 12609.69140625) {
+                    if (input[4] <= 4.073160886764526) {
+                        if (input[6] <= 72.0423355102539) {
+                            if (input[2] <= 0.8566024899482727) {
+                                if (input[3] <= 0.3054734915494919) {
+                                    { const double _tmp[] = {0.41192411924119243, 0.5880758807588077, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.31552325189113617) {
+                                    { const double _tmp[] = {0.12655251318266114, 0.06022345473824006, 0.49629931374646025, 0.04974981043593744, 0.0, 0.0, 0.0, 0.08475893629826378, 0.18241597159843723}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.735838575483014, 0.09442754043750083, 0.0, 0.13650937911073488, 0.0, 0.0, 0.016612252484375145, 0.016612252484375145, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 60.642133712768555) {
+                                if (input[15] <= 10412.26171875) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.563922942206655, 0.43607705779334505, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.3362318362899025, 0.2921831575082163, 0.019110086033239614, 0.10344372657123183, 0.0, 0.0, 0.0, 0.08811873004216043, 0.16091246355524946}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 223.03516387939453) {
+                            if (input[14] <= 9.900143384933472) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[4] <= 5.529854774475098) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 3.1322338581085205) {
+                                if (input[8] <= 0.5088227093219757) {
+                                    { const double _tmp[] = {0.013899131025247384, 0.03968567674314056, 0.7812818770878516, 0.09835145975473963, 0.0, 0.0, 0.055853915416271896, 0.0, 0.010927939972748848}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.49240772310986003, 0.0, 0.0, 0.23228799111921658, 0.0, 0.0, 0.0, 0.1978749553978512, 0.07742933037307219}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 70.39580154418945) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[1] <= 0.5364313721656799) {
+                        if (input[2] <= 1.0433738827705383) {
+                            if (input[4] <= 2.2381935119628906) {
+                                if (input[12] <= 56.815120697021484) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.43519000520562207, 0.564809994794378, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.23269817978143692) {
+                                    { const double _tmp[] = {0.04932662664286873, 0.9506733733571313, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.41578829288482666) {
+                                if (input[14] <= 1.7452338933944702) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.40872374798061384, 0.11147011308562195, 0.4798061389337641}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.01153638453369929, 0.01646970686718912, 0.0, 0.0, 0.0, 0.032212809019649305, 0.0, 0.8808243228230027, 0.05895677675645959}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 143.53937530517578) {
+                                    { const double _tmp[] = {0.007830860554275414, 0.1341550058114025, 0.07677545513303156, 0.00923530837107481, 0.0, 0.0, 0.708040308449068, 0.03933557269161493, 0.024627488989532823}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8006329113924051, 0.19936708860759492}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 86.46016693115234) {
+                            if (input[12] <= 64.6923656463623) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 80.87266540527344) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.458852867830424, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5411471321695761}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 7.000494956970215) {
+                                if (input[1] <= 0.5978708267211914) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.12365591397849464, 0.24731182795698928, 0.6290322580645161}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 332.1129455566406) {
+                                    { const double _tmp[] = {0.0, 0.5214105793450883, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.47858942065491183}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[11] <= 109.56409072875977) {
+                if (input[8] <= 1.0146588683128357) {
+                    if (input[9] <= 0.972252368927002) {
+                        if (input[7] <= 96.15001678466797) {
+                            if (input[1] <= 0.32456669211387634) {
+                                if (input[3] <= 0.4982340931892395) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.604735883424408, 0.0, 0.39526411657559196, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 78.6314582824707) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 92.29141998291016) {
+                                if (input[6] <= 124.86529159545898) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.25409790873527527) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.8765880217785844, 0.0, 0.0, 0.1234119782214156}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 36.35926628112793) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[6] <= 209.27481079101562) {
+                    if (input[9] <= 1.7234187722206116) {
+                        if (input[4] <= 2.860100269317627) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var68, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var13, var68, 9, var12);
+    static double var69[9];
+    if (input[8] <= 0.05108945071697235) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[4] <= 1.9611130356788635) {
+            if (input[14] <= 1.041856586933136) {
+                if (input[1] <= 0.16651738435029984) {
+                    if (input[11] <= 52.16504096984863) {
+                        if (input[12] <= 80.5041389465332) {
+                            if (input[1] <= 0.15804030001163483) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[10] <= 0.5679545402526855) {
+                        if (input[3] <= 0.22902961820363998) {
+                            if (input[3] <= 0.16670875251293182) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[10] <= 0.5137765407562256) {
+                                if (input[12] <= 88.1696662902832) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 62.70722198486328) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 310.0190887451172) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[9] <= 0.09324980527162552) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 1.0824831128120422) {
+                    if (input[8] <= 0.21562927216291428) {
+                        if (input[12] <= 80.16836547851562) {
+                            if (input[3] <= 0.16118091344833374) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[2] <= 1.0640778541564941) {
+                            if (input[3] <= 0.11969835683703423) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 45.86832809448242) {
+                                if (input[15] <= 3216.5501708984375) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.044987775061124696, 0.0, 0.0, 0.9550122249388753, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.0741607546806335) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[15] <= 14660.3818359375) {
+                        if (input[12] <= 44.007652282714844) {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[6] <= 85.62714385986328) {
+                                if (input[2] <= 1.086966335773468) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7802636092730285, 0.1856548280836044, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03408156264336699}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 0.38667725026607513) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[11] <= 109.5191421508789) {
+                if (input[12] <= 73.87801742553711) {
+                    if (input[2] <= 3.9826518297195435) {
+                        if (input[11] <= 60.48003005981445) {
+                            if (input[10] <= 0.9476722478866577) {
+                                if (input[8] <= 0.5200638473033905) {
+                                    { const double _tmp[] = {0.44110746583177834, 0.16220548658826048, 0.1397887113333273, 0.11034951261503144, 0.0, 0.0, 0.0, 0.0940014366720638, 0.05254738695953877}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.9483456319923829, 0.0, 0.05165436800761721, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 54.53066635131836) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.7688022284122563, 0.2311977715877437, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 61.04838562011719) {
+                                if (input[5] <= 405.7593994140625) {
+                                    { const double _tmp[] = {0.0, 0.014739833066950807, 0.9852601669330492, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.5302777777777778, 0.3237037037037037, 0.14601851851851852, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.708946704864502) {
+                                    { const double _tmp[] = {0.25938566552901027, 0.7406143344709898, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 4.0577073097229) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[13] <= 50.602867126464844) {
+                        if (input[7] <= 85.87678146362305) {
+                            if (input[14] <= 16.597488403320312) {
+                                if (input[0] <= 2.7897262573242188) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.5554943920732127, 0.0, 0.0, 0.0, 0.0, 0.15034748503406042, 0.27062547306130874, 0.02353264983141815}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[11] <= 60.514875411987305) {
+                                if (input[15] <= 15510.65869140625) {
+                                    { const double _tmp[] = {0.0, 0.4153846153846154, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5846153846153846, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 25186.9990234375) {
+                                    { const double _tmp[] = {0.0, 0.009143244158482904, 0.0, 0.0, 0.0, 0.0, 0.9908567558415171, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.19751854985952377) {
+                            if (input[14] <= 1.2777432203292847) {
+                                if (input[11] <= 46.33780479431152) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.22634952515363693) {
+                                    { const double _tmp[] = {0.0, 0.8448979591836735, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1551020408163265}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.5608826875686646) {
+                                if (input[1] <= 0.0698462575674057) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.010799845358251455, 0.1387638025306914, 0.0, 0.0, 0.0, 0.025848159294932706, 0.1735975142770789, 0.6509906785390456, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 2.558076858520508) {
+                                    { const double _tmp[] = {0.0, 0.067620050088926, 0.0, 0.0, 0.0, 0.0, 0.06344597292294292, 0.0, 0.8689339769881311}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.7392786547110894, 0.0, 0.0, 0.0, 0.1126708110121179, 0.0, 0.0, 0.14805053427679257}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[10] <= 2.6008734703063965) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[14] <= 21.85316753387451) {
+                        if (input[1] <= 0.7203832268714905) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[8] <= 0.9953009784221649) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var69, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var12, var69, 9, var11);
+    static double var70[9];
+    if (input[12] <= 17.602185249328613) {
+        if (input[8] <= 0.07716529071331024) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+        } else {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+        }
+    } else {
+        if (input[7] <= 82.5146598815918) {
+            if (input[11] <= 61.39450454711914) {
+                if (input[3] <= 0.2923149913549423) {
+                    if (input[2] <= 1.0099802613258362) {
+                        if (input[10] <= 0.5515965223312378) {
+                            if (input[9] <= 0.11305501312017441) {
+                                if (input[5] <= 160.64014053344727) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8895674300254454, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1104325699745547}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 1.4744141697883606) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.05936433747410774) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 14.184441089630127) {
+                            if (input[7] <= 45.71025085449219) {
+                                if (input[9] <= 0.20948775112628937) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[2] <= 1.0733371376991272) {
+                                if (input[15] <= 4028.3907470703125) {
+                                    { const double _tmp[] = {0.025813692480359147, 0.0, 0.0, 0.9741863075196409, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 7614.685302734375) {
+                                    { const double _tmp[] = {0.5386250885896527, 0.4613749114103473, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.06478873239436621, 0.9352112676056339, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[15] <= 12060.45849609375) {
+                        if (input[9] <= 0.7465897798538208) {
+                            if (input[12] <= 45.5450496673584) {
+                                if (input[3] <= 0.3055620938539505) {
+                                    { const double _tmp[] = {0.2977346278317152, 0.0, 0.0, 0.7022653721682848, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.19301108222685157, 0.06123304801641343, 0.7288945956652588, 0.0, 0.0, 0.0, 0.0, 0.0, 0.01686127409147616}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 241.25824737548828) {
+                                    { const double _tmp[] = {0.228847121288344, 0.0700091522362368, 0.0, 0.34700188499699974, 0.0, 0.0, 0.0, 0.032843799814530845, 0.32129804166388864}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7624439807054156, 0.09146967260784777, 0.0, 0.0, 0.0, 0.0, 0.0, 0.11586158530327384, 0.030224761383462737}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.3797909766435623) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 268.21533203125) {
+                            if (input[12] <= 97.4903793334961) {
+                                if (input[10] <= 2.409326910972595) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[11] <= 43.635671615600586) {
+                                if (input[5] <= 313.0149383544922) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[10] <= 0.5828635692596436) {
+                                    { const double _tmp[] = {0.4882075471698114, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5117924528301887}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.035840822026988656, 0.818679829458583, 0.04685215891479842, 0.0, 0.0, 0.0, 0.0, 0.0, 0.09862718959963}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[12] <= 59.18229675292969) {
+                    if (input[7] <= 56.186899185180664) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[5] <= 229.1741714477539) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 75.24853134155273) {
+                        if (input[11] <= 66.68166732788086) {
+                            if (input[6] <= 66.94818878173828) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[8] <= 0.5348748415708542) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[6] <= 193.90642547607422) {
+                if (input[1] <= 0.5992700159549713) {
+                    if (input[9] <= 0.1711169108748436) {
+                        if (input[1] <= 0.32364673912525177) {
+                            if (input[4] <= 1.6843886375427246) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[9] <= 0.16071540117263794) {
+                                    { const double _tmp[] = {0.0, 0.9884181651935386, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.01158183480646144}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.556237218813906, 0.0, 0.0, 0.0, 0.0, 0.44376278118609414, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[9] <= 0.4033187925815582) {
+                            if (input[2] <= 1.174142062664032) {
+                                if (input[2] <= 1.070976972579956) {
+                                    { const double _tmp[] = {0.05949848848560878, 0.08494192106169149, 0.8555595904526998, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.5329844951629639) {
+                                    { const double _tmp[] = {0.006335808874456289, 0.009045200827348781, 0.0, 0.0, 0.0, 0.03538269735404082, 0.0, 0.9293106331505742, 0.019925659793579922}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 36817.93359375) {
+                                if (input[11] <= 81.49120712280273) {
+                                    { const double _tmp[] = {0.07671931142139617, 0.3086667511553421, 0.06382071963258532, 0.01645068238976578, 0.0, 0.0, 0.3643521507066643, 0.12612189832153764, 0.043868486372708744}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.11686203787195679, 0.0, 0.0, 0.0, 0.8382326420198376, 0.04490532010820561, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 0.49631567299366) {
+                        if (input[6] <= 99.3953628540039) {
+                            if (input[9] <= 0.499353289604187) {
+                                if (input[11] <= 48.26490592956543) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 74.37621307373047) {
+                                    { const double _tmp[] = {0.6965034965034965, 0.0, 0.3034965034965035, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.6026338040828705) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 1.9442594051361084) {
+                            if (input[4] <= 2.4647094011306763) {
+                                if (input[5] <= 292.3584289550781) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[9] <= 0.8961654007434845) {
+                                if (input[6] <= 77.23859786987305) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.015678254942058645, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9843217450579413}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[9] <= 1.851457118988037) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[11] <= 128.4394874572754) {
+                        if (input[4] <= 11.596989631652832) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[15] <= 69994.005859375) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var70, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var11, var70, 9, var10);
+    static double var71[9];
+    if (input[9] <= 0.03411194495856762) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[6] <= 196.48772430419922) {
+            if (input[12] <= 75.6610336303711) {
+                if (input[3] <= 0.2655643820762634) {
+                    if (input[2] <= 0.9810783863067627) {
+                        if (input[3] <= 0.24360952526330948) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[5] <= 132.73373413085938) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[14] <= 1.22252756357193) {
+                                if (input[5] <= 154.38755798339844) {
+                                    { const double _tmp[] = {0.15376044568245126, 0.0, 0.0, 0.8462395543175487, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.006807829552119358, 0.0, 0.0, 0.979513475884826, 0.0, 0.0, 0.013678694563054636, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.0874568223953247) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 4.073160886764526) {
+                        if (input[14] <= 0.5275858342647552) {
+                            if (input[12] <= 55.05546951293945) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 71.47114562988281) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 15946.0498046875) {
+                                if (input[9] <= 0.18225131183862686) {
+                                    { const double _tmp[] = {0.830425988804964, 0.0722891686339366, 0.013238498352238988, 0.0, 0.0, 0.0, 0.0, 0.020348062282145113, 0.06369828192671513}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.4152089593016641, 0.13548923935106924, 0.19643219038448195, 0.2051974711911121, 0.0, 0.0, 0.03178142651444834, 0.01589071325722417, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.5693702697753906) {
+                                    { const double _tmp[] = {0.0, 0.05660041706610794, 0.8810570945712225, 0.0, 0.0, 0.0, 0.0, 0.0, 0.062342488362669604}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 50.50776672363281) {
+                            if (input[7] <= 50.51992607116699) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[15] <= 6578.5166015625) {
+                                    { const double _tmp[] = {0.16054158607350097, 0.0, 0.839458413926499, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 1.081734836101532) {
+                                if (input[1] <= 0.48177777230739594) {
+                                    { const double _tmp[] = {0.5145413870246085, 0.0, 0.0, 0.48545861297539145, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 69.22109794616699) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[14] <= 18.82248306274414) {
+                    if (input[2] <= 1.0015130043029785) {
+                        if (input[7] <= 69.71852111816406) {
+                            if (input[3] <= 0.39216214418411255) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[13] <= 83.65201568603516) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 0.6138781905174255) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 62.656023025512695) {
+                            if (input[10] <= 0.5734552443027496) {
+                                if (input[6] <= 84.91427993774414) {
+                                    { const double _tmp[] = {0.0, 0.05459340659340659, 0.0, 0.0, 0.0, 0.0, 0.07683516483516484, 0.5378461538461539, 0.3307252747252747}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.029187817258883263, 0.9708121827411168}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 74.49472045898438) {
+                                    { const double _tmp[] = {0.0, 0.9667250437828371, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.033274956217162865}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.021191630332762244, 0.1815230440345819, 0.0, 0.0, 0.0, 0.0, 0.014193159821633973, 0.6386921919735284, 0.14439997383749345}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.40279221534729004) {
+                                if (input[13] <= 57.12455368041992) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9171779141104295, 0.0, 0.08282208588957055}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.020449711569380257, 0.0, 0.0, 0.0, 0.06856667996792204, 0.0, 0.7195268885522682, 0.19145671991042967}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 72.50541687011719) {
+                                    { const double _tmp[] = {0.0, 0.05868887232098799, 0.0, 0.0, 0.0, 0.0, 0.9085906900064055, 0.0183553674748769, 0.014365070197729743}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05732564149124889, 0.13639982679387072, 0.0, 0.0, 0.0, 0.0, 0.0767880506395124, 0.729486481075368, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 19.275224685668945) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[10] <= 2.6215977668762207) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[6] <= 233.2124252319336) {
+                    if (input[0] <= 12.578991889953613) {
+                        if (input[0] <= 9.398914337158203) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[1] <= 0.4328691363334656) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 11.296497821807861) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var71, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var10, var71, 9, var9);
+    static double var72[9];
+    if (input[7] <= 20.34731101989746) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[12] <= 169.04763793945312) {
+            if (input[7] <= 84.27391052246094) {
+                if (input[12] <= 46.70169448852539) {
+                    if (input[3] <= 0.33113864064216614) {
+                        if (input[2] <= 0.9776714146137238) {
+                            if (input[13] <= 49.84856414794922) {
+                                if (input[5] <= 160.64014053344727) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[0] <= 2.1969319581985474) {
+                                if (input[9] <= 0.1504276916384697) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.041560646922275166, 0.0, 0.02716463970522202, 0.9312747133725029, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 0.2742621898651123) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[8] <= 0.5668599009513855) {
+                            if (input[1] <= 2.081823408603668) {
+                                if (input[10] <= 0.39773960411548615) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.9279826464208243, 0.07201735357917569, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[15] <= 9963.67529296875) {
+                                if (input[10] <= 0.9486541450023651) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[3] <= 0.28815121948719025) {
+                        if (input[14] <= 1.0798894762992859) {
+                            if (input[10] <= 0.5194844603538513) {
+                                if (input[9] <= 0.04976639896631241) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[11] <= 61.66737174987793) {
+                                if (input[10] <= 0.28298354148864746) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0433534434117275, 0.06189274487068992, 0.0, 0.8947538117175826, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 76.28063583374023) {
+                            if (input[6] <= 74.28400421142578) {
+                                if (input[14] <= 6.16563618183136) {
+                                    { const double _tmp[] = {0.8244898438341232, 0.008529476359267953, 0.015620245862755766, 0.098645248328925, 0.0, 0.0, 0.012004448209340081, 0.03601334462802024, 0.004697392777567857}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.37704918032786894, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6229508196721311}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 69.69083404541016) {
+                                    { const double _tmp[] = {0.1010844200826241, 0.36077827562383924, 0.22023412809166093, 0.31790317620187575, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6146257194762442, 0.34335355553120855, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.042020724992547255}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 289.2495574951172) {
+                                if (input[9] <= 0.17668059468269348) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.12616268747517576, 0.1500948639370238, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5914849452925678, 0.1322575032952325}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 107.15239715576172) {
+                                    { const double _tmp[] = {0.0, 0.8392384981491274, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16076150185087257}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[14] <= 18.714862823486328) {
+                    if (input[8] <= 0.44452063739299774) {
+                        if (input[9] <= 0.1711169108748436) {
+                            if (input[4] <= 3.0570520162582397) {
+                                if (input[2] <= 0.9614432752132416) {
+                                    { const double _tmp[] = {0.28584861307005166, 0.7141513869299484, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 342.96058654785156) {
+                                    { const double _tmp[] = {0.0, 0.2875000000000001, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7125}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 30042.103515625) {
+                                if (input[12] <= 57.9024543762207) {
+                                    { const double _tmp[] = {0.017297190577583027, 0.123470077478142, 0.859232731944275, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1555752238643612, 0.518242905811326, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.32618187032431273}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 82.37163162231445) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 0.4033187925815582) {
+                            if (input[2] <= 1.1659573316574097) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[3] <= 1.2554563283920288) {
+                                    { const double _tmp[] = {0.0, 0.010692701069270111, 0.0, 0.0, 0.0, 0.0, 0.01504898669008386, 0.933037174785199, 0.041221137455447095}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.544, 0.0, 0.0, 0.0, 0.456, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[10] <= 1.1708975434303284) {
+                                if (input[4] <= 4.41513991355896) {
+                                    { const double _tmp[] = {0.0953804438190919, 0.22694688935025153, 0.010390339512421154, 0.05624335953462756, 0.0, 0.0, 0.5110507730553813, 0.0, 0.09998819472822676}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.016591136031953307, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9500729702742147, 0.03333589369383211, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.9007242321968079) {
+                                    { const double _tmp[] = {0.0, 0.23602911186106984, 0.04802734270800885, 0.0, 0.0, 0.014655402370458582, 0.0, 0.7012881430604626, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[6] <= 192.83785247802734) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[15] <= 52611.12890625) {
+                if (input[3] <= 1.256410539150238) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[10] <= 2.8313289880752563) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[15] <= 61061.091796875) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var72, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var9, var72, 9, var8);
+    static double var73[9];
+    if (input[8] <= 0.05108945071697235) {
+        if (input[12] <= 16.46157693862915) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+        } else {
+            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+        }
+    } else {
+        if (input[12] <= 169.49658203125) {
+            if (input[15] <= 14441.767578125) {
+                if (input[11] <= 53.33534812927246) {
+                    if (input[3] <= 0.2655643820762634) {
+                        if (input[8] <= 0.13413620367646217) {
+                            if (input[10] <= 0.4934972673654556) {
+                                if (input[11] <= 47.0703239440918) {
+                                    { const double _tmp[] = {0.7369337681629587, 0.0, 0.16055685511180925, 0.0, 0.10250937672523208, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.6244343891402715, 0.0, 0.0, 0.0, 0.0, 0.0, 0.37556561085972845}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[5] <= 154.38755798339844) {
+                                if (input[14] <= 1.1248773336410522) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.022131860256195) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03711173860427591, 0.0, 0.0, 0.9628882613957241, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 76.4522819519043) {
+                            if (input[5] <= 241.25824737548828) {
+                                if (input[2] <= 3.0517287254333496) {
+                                    { const double _tmp[] = {0.28001357407890615, 0.0908536865656738, 0.08319132745772541, 0.4803394907124319, 0.0, 0.0, 0.0, 0.02557363029256003, 0.040028290892702656}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 2.2100296020507812) {
+                                    { const double _tmp[] = {0.7349566612236273, 0.10333496517702609, 0.10917688628527314, 0.05253148731407344, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.8582089552238807, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.14179104477611937}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.40924297273159027) {
+                                if (input[6] <= 63.261112213134766) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.08769947747493292, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8640022595678577, 0.048298262957209424}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 0.5607285499572754) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.09900706586468343, 0.07067280688367206, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5967925914621196, 0.233527535789525}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 0.37656477093696594) {
+                        if (input[9] <= 0.1230282373726368) {
+                            if (input[7] <= 84.69260787963867) {
+                                if (input[7] <= 72.00940704345703) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 0.7155214548110962) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 31.92660903930664) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[6] <= 90.31109237670898) {
+                                    { const double _tmp[] = {0.0623123507835657, 0.011119884967133025, 0.9265677642493013, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.604735883424408, 0.0, 0.39526411657559196, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 65.17230606079102) {
+                            if (input[4] <= 5.678434610366821) {
+                                if (input[14] <= 1.4683908224105835) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.9215017064846416, 0.0, 0.0, 0.07849829351535836, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5690659895172054, 0.16248331542793892, 0.0, 0.2684506950548556, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[12] <= 55.77170944213867) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[1] <= 0.545059472322464) {
+                    if (input[5] <= 300.16307067871094) {
+                        if (input[3] <= 0.6441952288150787) {
+                            if (input[4] <= 2.7343517541885376) {
+                                if (input[11] <= 60.74277687072754) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 82.82730484008789) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.44721302030822413, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5035287339766671, 0.049258245715108735}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[3] <= 1.7512205839157104) {
+                                if (input[7] <= 82.24953079223633) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[13] <= 56.605947494506836) {
+                            if (input[2] <= 1.1313281655311584) {
+                                if (input[15] <= 18891.2060546875) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 121.92961502075195) {
+                                    { const double _tmp[] = {0.0, 0.01641033771999367, 0.0, 0.0, 0.0, 0.0, 0.9700332963374028, 0.0, 0.013556365942603463}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2211538461538462, 0.0, 0.7788461538461539}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 1.680192232131958) {
+                                if (input[8] <= 0.12745532393455505) {
+                                    { const double _tmp[] = {0.0, 0.13495934959349593, 0.865040650406504, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.9497088406564319, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.050291159343568}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.6038256287574768) {
+                                    { const double _tmp[] = {0.026465990455386692, 0.0, 0.24217975603453243, 0.18727564985279058, 0.0, 0.21114411503010708, 0.0, 0.0, 0.3329344886271833}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.039282837679795596, 0.1233791230811475, 0.0, 0.018531251688077486, 0.0, 0.0, 0.18943057281145878, 0.536719956299133, 0.09265625844038745}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 102.8717155456543) {
+                        if (input[5] <= 370.41847229003906) {
+                            if (input[8] <= 0.47117751836776733) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[2] <= 1.3705899119377136) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[3] <= 0.38818782567977905) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 50396.53515625) {
+                            if (input[10] <= 3.6009037494659424) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[0] <= 9.398914337158203) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[5] <= 364.0729675292969) {
+                if (input[15] <= 51187.056640625) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                }
+            } else {
+                if (input[6] <= 197.18101501464844) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var73, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var8, var73, 9, var7);
+    static double var74[9];
+    if (input[10] <= 0.14173002541065216) {
+        if (input[12] <= 17.602185249328613) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+        } else {
+            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+        }
+    } else {
+        if (input[11] <= 109.56409072875977) {
+            if (input[12] <= 75.6097183227539) {
+                if (input[15] <= 7465.326904296875) {
+                    if (input[14] <= 1.241620123386383) {
+                        if (input[8] <= 0.14428001642227173) {
+                            if (input[10] <= 0.30420413613319397) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[13] <= 51.13859939575195) {
+                                    { const double _tmp[] = {0.9074626865671642, 0.09253731343283583, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 268.18017578125) {
+                                if (input[2] <= 1.0746198892593384) {
+                                    { const double _tmp[] = {0.035492890254277716, 0.010134154191024033, 0.0, 0.9543729555546983, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.3750293105840683) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[10] <= 0.7556903958320618) {
+                            if (input[3] <= 0.27087612450122833) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[4] <= 3.0963202714920044) {
+                                    { const double _tmp[] = {0.8698161493890632, 0.0, 0.03248710919404934, 0.0586180448501325, 0.0, 0.0, 0.0, 0.0, 0.039078696566755}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 223.03516387939453) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[10] <= 2.3006891012191772) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 60.03933334350586) {
+                        if (input[5] <= 278.7421112060547) {
+                            if (input[12] <= 40.696889877319336) {
+                                if (input[6] <= 78.75107955932617) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.0684291124343872) {
+                                    { const double _tmp[] = {0.47871710075044, 0.47314498874777805, 0.04813791050178196, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.14276065095097956, 0.12228576811722067, 0.012441390062796211, 0.6285606631725739, 0.0, 0.0, 0.0, 0.019122877318742328, 0.07482865037768736}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[3] <= 0.842414915561676) {
+                                if (input[7] <= 88.90436935424805) {
+                                    { const double _tmp[] = {0.849618400700645, 0.0661604759397272, 0.05048389730340629, 0.018218102070359662, 0.0, 0.0, 0.0, 0.015519123985861935, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05239148106997055, 0.6731615955898193, 0.06848765898905788, 0.0, 0.0, 0.0, 0.0, 0.0, 0.20595926435115233}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 8.252624988555908) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.27666666666666667, 0.0, 0.7233333333333334, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 1.6384027004241943) {
+                            if (input[3] <= 0.43120166659355164) {
+                                if (input[2] <= 1.1316198110580444) {
+                                    { const double _tmp[] = {0.03970816887932065, 0.0, 0.9602918311206794, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.38177172061328796, 0.3495741056218058, 0.0, 0.0, 0.0, 0.26865417376490636, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 0.7665344178676605) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.41651473744061923, 0.46248968287448877, 0.12099557968489205, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[8] <= 0.5693478584289551) {
+                                if (input[13] <= 41.09883689880371) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 4.185441255569458) {
+                    if (input[9] <= 0.18460845202207565) {
+                        if (input[6] <= 110.1453971862793) {
+                            if (input[10] <= 0.5451623797416687) {
+                                if (input[2] <= 0.8431773483753204) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 111.06774139404297) {
+                                    { const double _tmp[] = {0.039833949250454824, 0.9288473297808906, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03131872096865469}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 111.57460021972656) {
+                                if (input[13] <= 77.58422088623047) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 167.74290466308594) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.7527272727272728, 0.0, 0.0, 0.24727272727272726}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 319.6911315917969) {
+                            if (input[2] <= 2.5046165585517883) {
+                                if (input[1] <= 0.5173290967941284) {
+                                    { const double _tmp[] = {0.0094593085982181, 0.027008815339649047, 0.0, 0.0, 0.0, 0.0, 0.11403722032296265, 0.8457760507286388, 0.0037186050105313903}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.24267291910902702, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1463741416848099, 0.610952939206163}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 78.42569732666016) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 152.29978942871094) {
+                                if (input[11] <= 59.80667686462402) {
+                                    { const double _tmp[] = {0.10371664496563546, 0.5429202445898506, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.353363110444514}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.004696252456599453, 0.12738584788526017, 0.0, 0.0, 0.0, 0.014986570339442373, 0.8303670084372509, 0.01887197746448299, 0.0036923434169640625}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 5.673110008239746) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.5036496350364964, 0.0, 0.0, 0.49635036496350365}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[4] <= 5.5639026165008545) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[6] <= 156.87212371826172) {
+                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[3] <= 2.456979274749756) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[15] <= 59581.373046875) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var74, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var7, var74, 9, var6);
+    static double var75[9];
+    if (input[4] <= 0.5358735918998718) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.44841766357422) {
+            if (input[8] <= 0.5304172039031982) {
+                if (input[12] <= 53.65656661987305) {
+                    if (input[5] <= 236.56661224365234) {
+                        if (input[14] <= 1.2296729683876038) {
+                            if (input[14] <= 1.0092228949069977) {
+                                if (input[1] <= 0.4994504451751709) {
+                                    { const double _tmp[] = {0.4260099276251365, 0.20272840854090926, 0.37126166383395426, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 132.73373413085938) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.04698192217342455, 0.0, 0.0, 0.9530180778265754, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 36.80195236206055) {
+                                if (input[1] <= 1.9129519760608673) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 7.367281436920166) {
+                                    { const double _tmp[] = {0.0, 0.35319148936170214, 0.6468085106382979, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[4] <= 1.7807374596595764) {
+                            if (input[1] <= 0.2478192374110222) {
+                                if (input[4] <= 1.6735294461250305) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[0] <= 2.060567259788513) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.5604321404456448, 0.0, 0.4395678595543551, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[13] <= 35.92631721496582) {
+                                if (input[0] <= 2.800855875015259) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 3.9293770790100098) {
+                                    { const double _tmp[] = {0.01586030316452133, 0.015095113099566352, 0.9191650795808235, 0.04987950415508881, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[15] <= 14872.81787109375) {
+                        if (input[3] <= 0.3253020942211151) {
+                            if (input[9] <= 0.30032873153686523) {
+                                if (input[9] <= 0.15102456510066986) {
+                                    { const double _tmp[] = {0.5580747369694038, 0.36214778086830335, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.07977748216229288}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.2213114754098361, 0.0, 0.0, 0.0, 0.0, 0.4672131147540983, 0.3114754098360656, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 0.18428343534469604) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[4] <= 2.575493097305298) {
+                                if (input[12] <= 75.68283081054688) {
+                                    { const double _tmp[] = {0.9223574312138813, 0.018038172546270024, 0.0, 0.02980219811992438, 0.0, 0.0, 0.0, 0.0, 0.029802198119924378}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.35648679678530426, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2508610792192882, 0.39265212399540755}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 4.0338908433914185) {
+                                    { const double _tmp[] = {0.359198888840385, 0.15245514716607372, 0.0634534018873034, 0.13739040930381347, 0.0, 0.0, 0.11703627459213739, 0.11703627459213738, 0.05342960361814967}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 1.3710410594940186) {
+                            if (input[2] <= 1.0209216475486755) {
+                                if (input[11] <= 90.74820327758789) {
+                                    { const double _tmp[] = {0.033301686993354264, 0.9666983130066458, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 45.44457817077637) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[9] <= 0.4138298034667969) {
+                                if (input[4] <= 4.754806041717529) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.024874824754656535, 0.0, 0.031323853394752674, 0.9438013218505907}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.08038638630740705, 0.34428643082974997, 0.0, 0.0, 0.0, 0.44892250294467395, 0.0, 0.0, 0.12640467991816906}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 15639.1064453125) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.09280589140866247, 0.5948522196314269, 0.0, 0.0, 0.0, 0.2612313980391981, 0.0, 0.05111049092071265}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[2] <= 4.299370527267456) {
+                    if (input[13] <= 59.14104080200195) {
+                        if (input[11] <= 62.05344200134277) {
+                            if (input[12] <= 69.31573486328125) {
+                                if (input[5] <= 225.91136169433594) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 93.80512619018555) {
+                                    { const double _tmp[] = {0.044576311467484225, 0.11136746236695481, 0.0, 0.0, 0.0, 0.0, 0.022391341639916844, 0.716522932477339, 0.10514195204830515}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.11330049261083747, 0.8866995073891626}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.45302964746952057) {
+                                if (input[6] <= 82.75136947631836) {
+                                    { const double _tmp[] = {0.0, 0.10588235294117648, 0.0, 0.0, 0.0, 0.0, 0.8941176470588235, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.887550413608551) {
+                                    { const double _tmp[] = {0.0, 0.6398104265402844, 0.0, 0.0, 0.0, 0.0, 0.36018957345971564, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.07188331982868387, 0.0, 0.0, 0.0, 0.0, 0.8093529343674036, 0.0, 0.11876374580391247}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[10] <= 0.6199643611907959) {
+                            if (input[8] <= 0.6150774657726288) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[3] <= 0.6575853526592255) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.20175438596491227, 0.40350877192982454, 0.3947368421052631}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[7] <= 82.9949722290039) {
+                                if (input[4] <= 3.122259736061096) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.22304007477509055, 0.4084589321182381, 0.36850099310667134, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.8364929854869843) {
+                                    { const double _tmp[] = {0.0, 0.11756168359941953, 0.0, 0.0, 0.0, 0.0, 0.013788098693759078, 0.8686502177068214, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.13628115182393827, 0.09727963797958754, 0.0, 0.0, 0.0, 0.03624143375710123, 0.31946152719222565, 0.4107362492471473, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 4.438229322433472) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        } else {
+            if (input[2] <= 1.115913212299347) {
+                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[9] <= 2.1755086183547974) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[2] <= 4.551395654678345) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var75, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var6, var75, 9, var5);
+    static double var76[9];
+    if (input[12] <= 16.46157693862915) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[7] <= 70.04368591308594) {
+            if (input[0] <= 2.332269310951233) {
+                if (input[8] <= 0.14428001642227173) {
+                    if (input[12] <= 45.93985366821289) {
+                        if (input[0] <= 1.2248827815055847) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[1] <= 0.15833117812871933) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 1.3144941329956055) {
+                        if (input[2] <= 1.0824831128120422) {
+                            if (input[13] <= 31.46657943725586) {
+                                if (input[5] <= 236.4428253173828) {
+                                    { const double _tmp[] = {0.11159969673995451, 0.0, 0.0, 0.8884003032600456, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.21504703909158707) {
+                                    { const double _tmp[] = {0.2977346278317152, 0.0, 0.0, 0.7022653721682848, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.00900371892738305, 0.990996281072617, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 5332.9112548828125) {
+                                if (input[6] <= 41.9934139251709) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.37988920509815216) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[0] <= 2.270642876625061) {
+                            if (input[10] <= 0.4700130373239517) {
+                                if (input[12] <= 45.1495418548584) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[0] <= 3.320728898048401) {
+                    if (input[12] <= 40.25214385986328) {
+                        { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[8] <= 0.389172688126564) {
+                            if (input[7] <= 68.13504791259766) {
+                                if (input[6] <= 42.010820388793945) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.703542034587318, 0.0, 0.0, 0.09761420812368797, 0.0, 0.0, 0.0, 0.1663056879144314, 0.03253806937456266}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 0.9856197237968445) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.3898305084745763, 0.6101694915254237}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[6] <= 89.7848129272461) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[11] <= 31.360523223876953) {
+                        if (input[2] <= 2.612543523311615) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[12] <= 73.49706268310547) {
+                            if (input[11] <= 44.63603401184082) {
+                                if (input[7] <= 50.05116653442383) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.34553323114029344, 0.08221569205860052, 0.5269728695804274, 0.0, 0.0, 0.0, 0.0, 0.0, 0.04527820722067854}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[1] <= 0.3506004065275192) {
+                                    { const double _tmp[] = {0.2677476177338229, 0.38224495426473404, 0.35000742800144313, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.1216931216931217, 0.8783068783068784, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[15] <= 49658.060546875) {
+                if (input[8] <= 0.5354550778865814) {
+                    if (input[3] <= 0.7688499391078949) {
+                        if (input[9] <= 0.114857517182827) {
+                            if (input[1] <= 0.30654457211494446) {
+                                if (input[15] <= 11726.880859375) {
+                                    { const double _tmp[] = {0.41192411924119243, 0.5880758807588076, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[8] <= 0.10852759331464767) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 73.04195785522461) {
+                                if (input[12] <= 106.62709045410156) {
+                                    { const double _tmp[] = {0.41236198903162985, 0.26612510845849846, 0.09599547541328825, 0.03997136016372704, 0.0, 0.0, 0.09079913913735525, 0.06809935435301644, 0.026647573442484692}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.12255772646536414, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8774422735346359}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 62.42672538757324) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.24020113460546674, 0.0, 0.0, 0.0, 0.6153300670448686, 0.0, 0.14446879834966475}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.06958439788465999, 0.024835220955544766, 0.8641460014411241, 0.0, 0.0, 0.02775701165619709, 0.0, 0.0, 0.013677368062473928}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 66.16429710388184) {
+                            if (input[5] <= 271.6564483642578) {
+                                if (input[13] <= 75.83493041992188) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[11] <= 83.77735137939453) {
+                                if (input[14] <= 17.040860652923584) {
+                                    { const double _tmp[] = {0.0, 0.9423368740515933, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.057663125948406675}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[13] <= 54.404151916503906) {
+                        if (input[11] <= 61.14266586303711) {
+                            if (input[2] <= 1.2937138080596924) {
+                                if (input[15] <= 12590.787109375) {
+                                    { const double _tmp[] = {0.12490679165461933, 0.6241230806689696, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2509701276764111, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.11440677966101694, 0.0, 0.0, 0.0, 0.0, 0.0, 0.885593220338983, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 7.3789849281311035) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.061497326203208545, 0.9385026737967914}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5609756097560976, 0.43902439024390244}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 25473.888671875) {
+                                if (input[12] <= 92.64454650878906) {
+                                    { const double _tmp[] = {0.0, 0.2830188679245283, 0.0, 0.0, 0.0, 0.0, 0.7169811320754716, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 330.3582763671875) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[2] <= 4.287064552307129) {
+                            if (input[5] <= 326.5007019042969) {
+                                if (input[2] <= 1.2140362858772278) {
+                                    { const double _tmp[] = {0.1660261337432744, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6671790930053805, 0.16679477325134512, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.046314168467346234, 0.028336958338573682, 0.008649031460769476, 0.0, 0.0, 0.0, 0.0, 0.8906900732099822, 0.026009768523328498}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.9514400362968445) {
+                                    { const double _tmp[] = {0.09356329817267238, 0.3506315376421612, 0.0, 0.05517183615073343, 0.0, 0.0, 0.07049734619260384, 0.32898761556548456, 0.10114836627634462}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.029637760702524697, 0.9703622392974753, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[1] <= 0.37850239872932434) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[11] <= 109.40346908569336) {
+                    if (input[9] <= 0.7506167367100716) {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                    }
+                } else {
+                    if (input[12] <= 169.04763793945312) {
+                        if (input[8] <= 1.543898105621338) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var76, _tmp, sizeof(_tmp)); }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var5, var76, 9, var4);
+    static double var77[9];
+    if (input[12] <= 16.46157693862915) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[5] <= 380.6569061279297) {
+            if (input[8] <= 0.5474140644073486) {
+                if (input[5] <= 244.2064208984375) {
+                    if (input[3] <= 0.2725820392370224) {
+                        if (input[8] <= 0.1689198836684227) {
+                            if (input[11] <= 55.27408790588379) {
+                                if (input[9] <= 0.06639420613646507) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[14] <= 1.2164583206176758) {
+                                if (input[11] <= 15.34575891494751) {
+                                    { const double _tmp[] = {0.2977346278317152, 0.0, 0.0, 0.7022653721682848, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.015459586624096784, 0.0, 0.0, 0.9845404133759033, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[6] <= 72.24325752258301) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[6] <= 79.72072982788086) {
+                            if (input[3] <= 0.33113864064216614) {
+                                if (input[5] <= 184.15592193603516) {
+                                    { const double _tmp[] = {0.3887323943661972, 0.0, 0.0, 0.6112676056338029, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8958138261702668, 0.0, 0.06505742981223157, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03912874401750159}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 2.6635435819625854) {
+                                    { const double _tmp[] = {0.10406942180267283, 0.1485727929682895, 0.17005319677093378, 0.1841010695476631, 0.0, 0.0, 0.0, 0.2091024493627778, 0.18410106954766306}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[6] <= 82.49557113647461) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[9] <= 0.1652381792664528) {
+                        if (input[1] <= 0.2851233333349228) {
+                            if (input[10] <= 0.748572051525116) {
+                                if (input[11] <= 60.28715133666992) {
+                                    { const double _tmp[] = {0.5970723142428778, 0.19372711152916328, 0.09460729623271588, 0.0, 0.0, 0.0, 0.036353729570904714, 0.0, 0.0782395484243384}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05824668968956028, 0.33261925427985745, 0.6091340560305823, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 74.34448623657227) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.01962049825738996, 0.98037950174261, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 0.9543125033378601) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 52.685462951660156) {
+                            if (input[11] <= 50.26709747314453) {
+                                if (input[0] <= 2.1234307289123535) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6003645206268232, 0.08570993485264516, 0.3139255445205316, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[7] <= 57.3358154296875) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.35658914728682173, 0.6434108527131783, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[11] <= 61.424903869628906) {
+                                if (input[12] <= 76.3385009765625) {
+                                    { const double _tmp[] = {0.5387990093960244, 0.2825656459050579, 0.014374156016589286, 0.12967988580183815, 0.0, 0.0, 0.0, 0.0, 0.03458130288049017}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.05771354292135986, 0.05492911760497847, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4638458819975959, 0.42351145747606583}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[13] <= 45.99028396606445) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.07366071030255791, 0.2103207123112509, 0.337019936595137, 0.0, 0.0, 0.17629824414325443, 0.0, 0.0, 0.20270039664779976}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[5] <= 303.480712890625) {
+                    if (input[9] <= 0.6664803922176361) {
+                        if (input[11] <= 50.90117645263672) {
+                            if (input[7] <= 71.86322402954102) {
+                                if (input[11] <= 45.947689056396484) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.09583333333333333, 0.0, 0.0, 0.9041666666666667, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 94.0893325805664) {
+                                    { const double _tmp[] = {0.0, 0.11141678129298486, 0.0, 0.0, 0.0, 0.0, 0.0, 0.8885832187070151, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.049095581699319206, 0.3504520141036931, 0.0, 0.0, 0.0, 0.0, 0.0, 0.09864575211807655, 0.5018066520789112}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[14] <= 6.789420247077942) {
+                                if (input[1] <= 0.5792098045349121) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.31221719457013575, 0.0, 0.5158371040723981, 0.0, 0.0, 0.0, 0.0, 0.17194570135746604}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[12] <= 125.71829986572266) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[11] <= 50.428829193115234) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[2] <= 4.35870885848999) {
+                        if (input[13] <= 62.20671844482422) {
+                            if (input[14] <= 2.6169334650039673) {
+                                if (input[13] <= 48.7059211730957) {
+                                    { const double _tmp[] = {0.0, 0.03052647102197316, 0.0, 0.0, 0.0, 0.0, 0.9022268102049846, 0.0, 0.06724671877304231}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.020396045251942756, 0.40765253602238233, 0.0, 0.0, 0.0, 0.0, 0.491771313296842, 0.0, 0.08018010542883293}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 59.353994369506836) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2987012987012987, 0.7012987012987013}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9903121636167923, 0.0, 0.009687836383207755}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 99.47196960449219) {
+                                if (input[3] <= 0.8206461369991302) {
+                                    { const double _tmp[] = {0.9332923455272056, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06670765447279434}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[3] <= 1.8029361367225647) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.014931114904666875, 0.15041715755812557, 0.8272943665696905, 0.00735736096751701}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.2070832393413039, 0.0, 0.0, 0.0, 0.5014662756598242, 0.2914504849988721, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 114.7132797241211) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[15] <= 42926.20703125) {
+                if (input[10] <= 1.548567295074463) {
+                    if (input[10] <= 0.580637127161026) {
+                        if (input[9] <= 0.5526885092258453) {
+                            { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[15] <= 33695.6845703125) {
+                            if (input[5] <= 400.94447326660156) {
+                                { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[7] <= 90.07026290893555) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 18.95596694946289) {
+                        { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                    } else {
+                        if (input[0] <= 8.177810192108154) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            } else {
+                if (input[10] <= 2.6215977668762207) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[14] <= 25.35711097717285) {
+                        if (input[1] <= 0.5552466511726379) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[6] <= 208.9112548828125) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[9] <= 1.0170666575431824) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var77, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var4, var77, 9, var3);
+    static double var78[9];
+    if (input[6] <= 189.79827117919922) {
+        if (input[7] <= 19.888029098510742) {
+            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+        } else {
+            if (input[15] <= 11855.72607421875) {
+                if (input[1] <= 0.2745564579963684) {
+                    if (input[11] <= 64.28170013427734) {
+                        if (input[9] <= 0.5634181797504425) {
+                            if (input[14] <= 0.2940109372138977) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[6] <= 44.57241249084473) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8296611869078085, 0.027228747362219346, 0.07479704094681941, 0.0, 0.0, 0.0, 0.019160970366006207, 0.019160970366006207, 0.029991084051140145}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[5] <= 335.9904022216797) {
+                            if (input[3] <= 0.2850980907678604) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[8] <= 0.12646017596125603) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[8] <= 0.2599664777517319) {
+                        if (input[2] <= 0.9955855011940002) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[7] <= 72.05227279663086) {
+                                if (input[12] <= 43.810508728027344) {
+                                    { const double _tmp[] = {0.05900924308944269, 0.16848691776854033, 0.3085543554315437, 0.278369690226284, 0.0, 0.0, 0.0, 0.0, 0.18557979348418932}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[4] <= 5.029646635055542) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[4] <= 1.988763153553009) {
+                            if (input[14] <= 1.2358366250991821) {
+                                if (input[8] <= 0.26664072275161743) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03576982892690511, 0.0, 0.0, 0.9642301710730948, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.2874615788459778) {
+                                    { const double _tmp[] = {0.20802919708029197, 0.791970802919708, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.6630503626519563, 0.0, 0.15295740116457246, 0.18399223618347124, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[2] <= 1.2614129185676575) {
+                                if (input[11] <= 41.276132583618164) {
+                                    { const double _tmp[] = {0.8926610671694788, 0.0, 0.01912971080147904, 0.0, 0.0, 0.0, 0.0, 0.08820922202904224, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.07065846833184435, 0.20174852142118713, 0.32328377528937213, 0.33332364408717874, 0.0, 0.0, 0.0709855908704177, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[9] <= 0.4460190534591675) {
+                                    { const double _tmp[] = {0.0, 0.6448598130841122, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.35514018691588783}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.809487375669472, 0.1905126243305279, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[1] <= 0.7427299320697784) {
+                    if (input[9] <= 0.19704101234674454) {
+                        if (input[1] <= 0.26423920691013336) {
+                            if (input[14] <= 0.42207731306552887) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[0] <= 1.8202611804008484) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.09441511122668425, 0.8836232960783907, 0.013713573719002998, 0.0, 0.0, 0.0, 0.0, 0.0, 0.008248018975922094}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[15] <= 38137.24609375) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[5] <= 302.1217803955078) {
+                            if (input[1] <= 0.5194320976734161) {
+                                if (input[9] <= 0.6334022283554077) {
+                                    { const double _tmp[] = {0.01711382467277921, 0.0, 0.044743372939675764, 0.0, 0.0, 0.0, 0.0, 0.9112319331557109, 0.026910869231833973}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.08467467694400363, 0.7365676717297664, 0.0, 0.0, 0.0, 0.17875765132622987, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 12659.74951171875) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.6639344262295083, 0.0, 0.0, 0.0, 0.18852459016393444, 0.14754098360655737}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 350.48492431640625) {
+                                if (input[6] <= 157.5760269165039) {
+                                    { const double _tmp[] = {0.04483379129355004, 0.1163747931901957, 0.05328002579792092, 0.0, 0.0, 0.003251648633255468, 0.6715256584826841, 0.08189337298569327, 0.02884070961670067}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9817073170731707, 0.018292682926829267}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 80.83145523071289) {
+                                    { const double _tmp[] = {0.05937129283982466, 0.5594181947710322, 0.21731323812938233, 0.08402328617114317, 0.0, 0.0, 0.023858463974522133, 0.0, 0.05601552411409544}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.022498839053988872, 0.3708242388657443, 0.03717199495876422, 0.0, 0.06286440323908656, 0.41164542565446305, 0.094995098227953, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[12] <= 84.37000274658203) {
+                        if (input[3] <= 0.9815650880336761) {
+                            if (input[11] <= 57.87761878967285) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[15] <= 20390.529296875) {
+                            if (input[8] <= 0.6725399494171143) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[3] <= 0.9948969483375549) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        if (input[0] <= 13.769085884094238) {
+            if (input[3] <= 2.4362268447875977) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[15] <= 59581.373046875) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                }
+            }
+        } else {
+            if (input[4] <= 13.344418048858643) {
+                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[1] <= 0.4328691363334656) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                } else {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0}; memcpy(var78, _tmp, sizeof(_tmp)); }
+                }
+            }
+        }
+    }
+    add_vectors(var3, var78, 9, var2);
+    static double var79[9];
+    if (input[12] <= 12.470900058746338) {
+        { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+    } else {
+        if (input[11] <= 109.44841766357422) {
+            if (input[7] <= 70.04368591308594) {
+                if (input[5] <= 197.97303771972656) {
+                    if (input[2] <= 1.0746198892593384) {
+                        if (input[6] <= 26.030978202819824) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[5] <= 157.1809310913086) {
+                                if (input[1] <= 0.6450541019439697) {
+                                    { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[5] <= 177.7252655029297) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.03711173860427592, 0.0, 0.0, 0.9628882613957241, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 8.80490779876709) {
+                            if (input[12] <= 40.91127014160156) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                } else {
+                    if (input[1] <= 0.28879672288894653) {
+                        if (input[11] <= 50.56272888183594) {
+                            if (input[9] <= 0.5422268211841583) {
+                                if (input[12] <= 44.156951904296875) {
+                                    { const double _tmp[] = {0.160541586073501, 0.0, 0.8394584139264991, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.7813429582668339, 0.03598289939386735, 0.03294819703534841, 0.0, 0.0, 0.0, 0.0, 0.050642599146924414, 0.09908334615702602}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[14] <= 1.7353095412254333) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 39.036970138549805) {
+                                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            } else {
+                                if (input[5] <= 278.4110412597656) {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.7012987012987013, 0.0, 0.0, 0.2987012987012987, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.36456808199121526, 0.0, 0.6354319180087847, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[14] <= 1.2310736179351807) {
+                            if (input[13] <= 16.604902744293213) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            if (input[4] <= 3.014784574508667) {
+                                if (input[2] <= 1.1004582643508911) {
+                                    { const double _tmp[] = {0.16584805168491226, 0.23676991589227608, 0.10840068438441554, 0.391185078430717, 0.0, 0.0, 0.0, 0.0, 0.09779626960767923}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.9375118589736435, 0.0, 0.02228259292412712, 0.0, 0.0, 0.0, 0.0, 0.0, 0.040205548102229365}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.6651530265808105) {
+                                    { const double _tmp[] = {0.1223971006994846, 0.04368449153254632, 0.04000025730690988, 0.7939181504610592, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.1418171012554788, 0.3895698685090262, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4686130302354951}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (input[9] <= 0.16003695130348206) {
+                    if (input[6] <= 110.48260498046875) {
+                        if (input[1] <= 0.432539626955986) {
+                            if (input[15] <= 11763.24951171875) {
+                                if (input[9] <= 0.0835246853530407) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.8071832142463202, 0.0, 0.13763129190004048, 0.0, 0.0, 0.0, 0.0, 0.0, 0.05518549385363942}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[2] <= 1.0739328265190125) {
+                                    { const double _tmp[] = {0.04898169631348283, 0.9510183036865172, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[5] <= 267.0123748779297) {
+                                { const double _tmp[] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    } else {
+                        if (input[12] <= 116.1987075805664) {
+                            { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        } else {
+                            if (input[12] <= 121.61075592041016) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            }
+                        }
+                    }
+                } else {
+                    if (input[14] <= 17.86886215209961) {
+                        if (input[8] <= 0.41355079412460327) {
+                            if (input[3] <= 0.745238870382309) {
+                                if (input[8] <= 0.09982309490442276) {
+                                    { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.26346419452464154, 0.20626473123968647, 0.3221881414970014, 0.040092377427662834, 0.0, 0.013560657071121255, 0.0, 0.03415276595689797, 0.1202771322829885}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[11] <= 51.44691848754883) {
+                                    { const double _tmp[] = {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.9686370431266003, 0.0, 0.0, 0.010556312313485795, 0.0, 0.0, 0.020806644559914027}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        } else {
+                            if (input[12] <= 82.24459838867188) {
+                                if (input[10] <= 0.6574585139751434) {
+                                    { const double _tmp[] = {0.43680530980617494, 0.12902008016507252, 0.01968981143081428, 0.1421090738050074, 0.0, 0.0, 0.24211175537149413, 0.030263969421436766, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.1042580005371568, 0.5209470487366485, 0.3747949507261947, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            } else {
+                                if (input[15] <= 30943.953125) {
+                                    { const double _tmp[] = {0.008423926478591335, 0.12026263459567892, 0.0, 0.0, 0.0, 0.0, 0.41186240539310237, 0.36672679932262564, 0.09272423421000174}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                } else {
+                                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.05611885268123409, 0.05653454788628026, 0.8762854922373439, 0.011061107195141789}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                                }
+                            }
+                        }
+                    } else {
+                        if (input[15] <= 47001.021484375) {
+                            if (input[14] <= 18.42396068572998) {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            } else {
+                                { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                            }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        } else {
+            if (input[10] <= 0.8558885753154755) {
+                { const double _tmp[] = {0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+            } else {
+                if (input[10] <= 2.604356527328491) {
+                    { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                } else {
+                    if (input[2] <= 3.8713241815567017) {
+                        if (input[8] <= 1.5042557120323181) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        }
+                    } else {
+                        if (input[4] <= 9.371326684951782) {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        } else {
+                            { const double _tmp[] = {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0}; memcpy(var79, _tmp, sizeof(_tmp)); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    add_vectors(var2, var79, 9, var1);
+    mul_vector_number(var1, 0.025, 9, var0);
+    memcpy(output, var0, 9 * sizeof(double));
 }
 
 } // namespace generated_model

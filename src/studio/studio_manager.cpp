@@ -54,7 +54,11 @@ void StudioManager::handleCommand(const std::string& command) {
 
         float dur = 5.0f;
         if (!durStr.empty()) {
-            dur = std::stof(durStr);
+            char* endPtr = nullptr;
+            float parsed = strtof(durStr.c_str(), &endPtr);
+            if (endPtr != durStr.c_str()) {
+                dur = parsed;
+            }
         }
         if (dur < 1.0f) dur = 1.0f;
         if (dur > 30.0f) dur = 30.0f;

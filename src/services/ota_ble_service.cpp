@@ -126,38 +126,37 @@ void OtaBleService::handleControlWrite(const uint8_t* data, size_t len) {
             return;
         }
 
-        // Cryptographic SHA-256 validation if client supplied checksum (len >= 33)
-        if (len >= 33) {
-            uint8_t calculatedSha256[32];
-            if (_sha256Initialized) {
-                mbedtls_sha256_finish(&_sha256Ctx, calculatedSha256);
-                mbedtls_sha256_free(&_sha256Ctx);
-                _sha256Initialized = false;
-            } else {
-                memset(calculatedSha256, 0, sizeof(calculatedSha256));
-            }
-
-            if (memcmp(calculatedSha256, &data[1], 32) != 0) {
-                Serial.println("[OTA] SECURITY ALERT: SHA-256 Checksum mismatch!");
-                Serial.print("[OTA] Expected:   ");
-                for (int i = 0; i < 32; i++) Serial.printf("%02x", data[1 + i]);
-                Serial.println();
-                Serial.print("[OTA] Calculated: ");
-                for (int i = 0; i < 32; i++) Serial.printf("%02x", calculatedSha256[i]);
-                Serial.println();
-
-                abort();
-                notifyError(OTA_ERR_CHECKSUM_MISMATCH);
-                return;
-            }
-            Serial.println("[OTA] SHA-256 Cryptographic Checksum verified successfully!");
-        } else {
-            if (_sha256Initialized) {
-                mbedtls_sha256_free(&_sha256Ctx);
-                _sha256Initialized = false;
-            }
-            Serial.println("[OTA] Warning: No SHA-256 checksum provided in OTA_END packet. Proceeding with image validation...");
+        // Mandatory cryptographic SHA-256 validation (1-byte opcode + 32-byte SHA-256 digest = 33 bytes)
+        if (len < 33) {
+            Serial.printf("[OTA-BLE] Security Error: OTA_END rejected! Mandatory 32-byte SHA-256 digest missing (len=%u).\n", (unsigned int)len);
+            abort();
+            notifyError(OTA_ERR_CHECKSUM_MISMATCH);
+            return;
         }
+
+        uint8_t calculatedSha256[32];
+        if (_sha256Initialized) {
+            mbedtls_sha256_finish(&_sha256Ctx, calculatedSha256);
+            mbedtls_sha256_free(&_sha256Ctx);
+            _sha256Initialized = false;
+        } else {
+            memset(calculatedSha256, 0, sizeof(calculatedSha256));
+        }
+
+        if (memcmp(calculatedSha256, &data[1], 32) != 0) {
+            Serial.println("[OTA] SECURITY ALERT: SHA-256 Checksum mismatch!");
+            Serial.print("[OTA] Expected:   ");
+            for (int i = 0; i < 32; i++) Serial.printf("%02x", data[1 + i]);
+            Serial.println();
+            Serial.print("[OTA] Calculated: ");
+            for (int i = 0; i < 32; i++) Serial.printf("%02x", calculatedSha256[i]);
+            Serial.println();
+
+            abort();
+            notifyError(OTA_ERR_CHECKSUM_MISMATCH);
+            return;
+        }
+        Serial.println("[OTA] SHA-256 Cryptographic Checksum verified successfully!");
 
         esp_err_t err = esp_ota_end(_otaHandle);
         _otaHandle = 0;
@@ -215,6 +214,15 @@ void OtaBleService::handleDataWrite(const uint8_t* data, size_t len) {
     }
 
     if (len == 0 || !data) return;
+
+    if (_bytesWritten == 0 && len > 0) {
+        if (data[0] != 0xE9) {
+            Serial.printf("[OTA-BLE] Security Error: Invalid ESP32 image magic byte (0x%02X != 0xE9). Aborting!\n", data[0]);
+            abort();
+            notifyError(OTA_ERR_VALIDATION_FAILED);
+            return;
+        }
+    }
 
     esp_err_t err = esp_ota_write(_otaHandle, data, len);
     if (err != ESP_OK) {

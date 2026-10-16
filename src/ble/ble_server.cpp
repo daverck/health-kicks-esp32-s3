@@ -23,6 +23,17 @@ public:
     void onMTUChange(uint16_t MTU, ble_gap_conn_desc* desc) override {
         _parent->onMtuChange(MTU, desc);
     }
+    void onAuthenticationComplete(ble_gap_conn_desc* desc) override {
+        if (desc->sec_state.encrypted) {
+            _parent->setLinkEncrypted(true);
+            Serial.printf("[BLE-SEC] Link encrypted successfully (Bonded: %d, LESC: %d).\n",
+                          desc->sec_state.bonded, desc->sec_state.authenticated);
+        } else {
+            _parent->setLinkEncrypted(false);
+            Serial.println("[BLE-SEC] Warning: BLE authentication completed without encryption (possible stale bond on peer). Purging peer bond for safe recovery...");
+            NimBLEDevice::deleteBond(NimBLEAddress(desc->peer_ota_addr));
+        }
+    }
 private:
     HealthKicksBleServer* _parent;
 };
@@ -87,6 +98,8 @@ HealthKicksBleServer::HealthKicksBleServer()
       _pCharOtaControl(nullptr),
       _pCharOtaData(nullptr),
       _deviceConnected(false),
+      _linkEncrypted(false),
+      _rescueWindowUntilMs(0),
       _negotiatedMtu(23),
       _lastActivityTime(0),
       _onHaptic(nullptr),
@@ -97,6 +110,12 @@ HealthKicksBleServer::HealthKicksBleServer()
 void HealthKicksBleServer::begin(const char* deviceName) {
     NimBLEDevice::init(deviceName);
     NimBLEDevice::setMTU(BLE_PREFERRED_MTU);
+
+    // Configure BLE Security Manager: LE Secure Connections (LESC) + Bonding (Option 1A: Just Works)
+    NimBLEDevice::setSecurityAuth(true, false, true); // bonding = true, mitm = false, sc = true
+    NimBLEDevice::setSecurityIOCap(BLE_HS_IO_NO_INPUT_OUTPUT);
+    NimBLEDevice::setSecurityInitKey(BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID);
+    NimBLEDevice::setSecurityRespKey(BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID);
 
     _pServer = NimBLEDevice::createServer();
     _pServer->setCallbacks(new ServerCallbacks(this));
@@ -219,12 +238,15 @@ void HealthKicksBleServer::stopAdvertising() {
 
 void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) {
     _deviceConnected = true;
+    _linkEncrypted = desc->sec_state.encrypted;
     _lastActivityTime = millis();
-    Serial.printf("[BLE] BLE client connected (Handle: %d). Waiting for MTU negotiation...\n", desc->conn_handle);
+    Serial.printf("[BLE] BLE client connected (Handle: %d). Waiting for MTU negotiation & LESC security...\n", desc->conn_handle);
+    NimBLEDevice::startSecurity(desc->conn_handle);
 }
 
 void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
+    _linkEncrypted = false;
     _lastActivityTime = millis();
     if (_otaService.isOtaInProgress()) {
         Serial.println("[BLE] Client disconnected during OTA! Aborting OTA session...");

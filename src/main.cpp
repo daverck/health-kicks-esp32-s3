@@ -229,6 +229,15 @@ void loop() {
 
     // Anti-Bricking probation monitoring: confirm stability after 15 seconds of nominal execution
     if (otaPendingVerification) {
+        if (digitalRead(PIN_BTN_PAIRING) == LOW) {
+            delay(50);
+            if (digitalRead(PIN_BTN_PAIRING) == LOW) {
+                Serial.println("[OTA-ROLLBACK] Emergency button press detected during probation! Rolling back to previous firmware slot...");
+                haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 200, 300);
+                delay(400);
+                esp_ota_mark_app_invalid_rollback_and_reboot();
+            }
+        }
         if (!imuReady) {
             Serial.println("[OTA-ROLLBACK] CRITICAL: IMU became unresponsive during probation period!");
             Serial.println("[OTA-ROLLBACK] Triggering emergency rollback to previous operational slot...");
@@ -460,6 +469,7 @@ void loop() {
                 if (pressDuration < BUTTON_LONG_PRESS_MS && pressDuration >= 50) {
                     Serial.printf("[BUTTON] Short press (%u ms): restarting BLE advertising\n", pressDuration);
                     haptic.play(HAPTIC_PATTERN_CONTINUOUS, 180, 80);
+                    bleServer.openRescueWindow(60000);
                     if (!bleServer.isConnected()) {
                         NimBLEDevice::getAdvertising()->start();
                         statusLed.setBleAdvertising();

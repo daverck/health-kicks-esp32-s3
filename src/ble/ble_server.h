@@ -62,6 +62,15 @@ public:
     void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
 
     bool isConnected() const { return _deviceConnected; }
+    bool isLinkEncrypted() const { return _linkEncrypted; }
+    void setLinkEncrypted(bool enc) { _linkEncrypted = enc; }
+    void openRescueWindow(uint32_t durationMs = 60000) {
+        _rescueWindowUntilMs = millis() + durationMs;
+        Serial.printf("[BLE-SEC] Hardware Rescue Window opened for %u ms.\n", durationMs);
+    }
+    bool isRescueWindowActive() const {
+        return _rescueWindowUntilMs != 0 && (int32_t)(_rescueWindowUntilMs - millis()) > 0;
+    }
     uint16_t getNegotiatedMtu() const { return _negotiatedMtu; }
     uint32_t getLastActivityTime() const { return _lastActivityTime; }
 
@@ -92,6 +101,8 @@ private:
     OtaBleService _otaService;
 
     bool _deviceConnected;
+    bool _linkEncrypted;
+    uint32_t _rescueWindowUntilMs;
     uint16_t _negotiatedMtu;
     uint32_t _lastActivityTime;
 

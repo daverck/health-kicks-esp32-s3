@@ -215,6 +215,11 @@ void setup() {
     // Start NimBLE server
     Serial.printf("[BLE] Starting NimBLE server with name \"%s\"...\n", BLE_DEVICE_NAME);
     bleServer.begin(BLE_DEVICE_NAME);
+
+    // Open a 60-second pairing window automatically right after an OTA update or when no bonds exist in NVS
+    if (otaPendingVerification || NimBLEDevice::getNumBonds() == 0) {
+        bleServer.openPairingWindow(60000);
+    }
 }
 
 void loop() {
@@ -458,9 +463,9 @@ void loop() {
             if (s_isPressed && !s_isShuttingDown) {
                 uint32_t pressDuration = now - s_pressStartMs;
                 if (pressDuration < BUTTON_LONG_PRESS_MS && pressDuration >= 50) {
-                    Serial.printf("[BUTTON] Short press (%u ms): restarting BLE advertising\n", pressDuration);
+                    Serial.printf("[BUTTON] Short press (%u ms): opening BLE pairing window & restarting advertising\n", pressDuration);
                     haptic.play(HAPTIC_PATTERN_CONTINUOUS, 180, 80);
-                    bleServer.openRescueWindow(60000);
+                    bleServer.openPairingWindow(60000);
                     if (!bleServer.isConnected()) {
                         NimBLEDevice::getAdvertising()->start();
                         statusLed.setBleAdvertising();

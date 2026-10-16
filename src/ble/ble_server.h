@@ -64,13 +64,22 @@ public:
     bool isConnected() const { return _deviceConnected; }
     bool isLinkEncrypted() const { return _linkEncrypted; }
     void setLinkEncrypted(bool enc) { _linkEncrypted = enc; }
-    void openRescueWindow(uint32_t durationMs = 60000) {
+    bool isPeerAuthorized() const { return _peerAuthorized; }
+    void setPeerAuthorized(bool auth) { _peerAuthorized = auth; }
+
+    /**
+     * @brief Opens a 60-second pairing window triggered by a short press on the physical shoe button (GPIO 14).
+     * Only while this window is active (or when 0 devices are bonded in NVS) can a new phone bond or replace a stale bond.
+     */
+    void openPairingWindow(uint32_t durationMs = 60000) {
         _rescueWindowUntilMs = millis() + durationMs;
-        Serial.printf("[BLE-SEC] Hardware Rescue Window opened for %u ms.\n", durationMs);
+        Serial.printf("[BLE-SEC] Physical Button Pairing Window OPENED for %u ms.\n", durationMs);
     }
-    bool isRescueWindowActive() const {
+    void openRescueWindow(uint32_t durationMs = 60000) { openPairingWindow(durationMs); }
+    bool isPairingWindowActive() const {
         return _rescueWindowUntilMs != 0 && (int32_t)(_rescueWindowUntilMs - millis()) > 0;
     }
+    bool isRescueWindowActive() const { return isPairingWindowActive(); }
     uint16_t getNegotiatedMtu() const { return _negotiatedMtu; }
     uint32_t getLastActivityTime() const { return _lastActivityTime; }
 
@@ -102,6 +111,7 @@ private:
 
     bool _deviceConnected;
     bool _linkEncrypted;
+    bool _peerAuthorized;
     uint32_t _rescueWindowUntilMs;
     uint16_t _negotiatedMtu;
     uint32_t _lastActivityTime;

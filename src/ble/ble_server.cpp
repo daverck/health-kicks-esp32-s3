@@ -26,12 +26,18 @@ public:
     void onAuthenticationComplete(ble_gap_conn_desc* desc) override {
         if (desc->sec_state.encrypted) {
             _parent->setLinkEncrypted(true);
-            Serial.printf("[BLE-SEC] Link encrypted successfully (Bonded: %d, LESC: %d).\n",
+            _parent->setPeerAuthorized(true);
+            Serial.printf("[BLE-SEC] Link encrypted & authenticated (Bonded: %d, LESC: %d).\n",
                           desc->sec_state.bonded, desc->sec_state.authenticated);
         } else {
             _parent->setLinkEncrypted(false);
-            Serial.println("[BLE-SEC] Warning: BLE authentication completed without encryption (possible stale bond on peer). Purging peer bond for safe recovery...");
-            NimBLEDevice::deleteBond(NimBLEAddress(desc->peer_ota_addr));
+            if (_parent->isPairingWindowActive()) {
+                Serial.println("[BLE-SEC] Pairing window is OPEN: purging stale bond for peer and re-initiating pairing...");
+                NimBLEDevice::deleteBond(NimBLEAddress(desc->peer_ota_addr));
+                NimBLEDevice::startSecurity(desc->conn_handle);
+            } else {
+                Serial.println("[BLE-SEC] Authentication failed without encryption while pairing window is CLOSED. Press shoe button (GPIO 14) to re-pair.");
+            }
         }
     }
 private:
@@ -99,6 +105,7 @@ HealthKicksBleServer::HealthKicksBleServer()
       _pCharOtaData(nullptr),
       _deviceConnected(false),
       _linkEncrypted(false),
+      _peerAuthorized(false),
       _rescueWindowUntilMs(0),
       _negotiatedMtu(23),
       _lastActivityTime(0),
@@ -237,16 +244,34 @@ void HealthKicksBleServer::stopAdvertising() {
 }
 
 void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) {
+    NimBLEAddress peerAddr(desc->peer_ota_addr);
+    NimBLEAddress peerIdAddr(desc->peer_id_addr);
+    bool alreadyBonded = desc->sec_state.bonded || NimBLEDevice::isBonded(peerAddr) || NimBLEDevice::isBonded(peerIdAddr);
+    int numBonds = NimBLEDevice::getNumBonds();
+    bool pairingAllowed = isPairingWindowActive() || (numBonds == 0);
+
+    if (!alreadyBonded && !pairingAllowed) {
+        _peerAuthorized = false;
+        _linkEncrypted = false;
+        Serial.printf("[BLE-SEC] REJECTED unbonded device %s (Bonds in NVS: %d, Pairing window: CLOSED). Press shoe button (GPIO 14) to pair a new phone.\n",
+                      peerAddr.toString().c_str(), numBonds);
+        pServer->disconnect(desc->conn_handle);
+        return;
+    }
+
     _deviceConnected = true;
+    _peerAuthorized = true;
     _linkEncrypted = desc->sec_state.encrypted;
     _lastActivityTime = millis();
-    Serial.printf("[BLE] BLE client connected (Handle: %d). Waiting for MTU negotiation & LESC security...\n", desc->conn_handle);
+    Serial.printf("[BLE-SEC] Client %s connected (Handle: %d, AlreadyBonded: %d, PairingWindow: %d). Starting LESC security...\n",
+                  peerAddr.toString().c_str(), desc->conn_handle, alreadyBonded, isPairingWindowActive());
     NimBLEDevice::startSecurity(desc->conn_handle);
 }
 
 void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
     _linkEncrypted = false;
+    _peerAuthorized = false;
     _lastActivityTime = millis();
     if (_otaService.isOtaInProgress()) {
         Serial.println("[BLE] Client disconnected during OTA! Aborting OTA session...");
@@ -261,6 +286,10 @@ void HealthKicksBleServer::onMtuChange(uint16_t MTU, ble_gap_conn_desc* desc) {
 }
 
 void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length) {
+    if (!_peerAuthorized && !isPairingWindowActive()) {
+        Serial.println("[BLE-SEC] Ignored write from unauthorized BLE peer.");
+        return;
+    }
     _lastActivityTime = millis();
 
     Serial.printf("[BLE] Raw haptic command received (len %u): ", (unsigned int)length);
@@ -312,6 +341,10 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
 }
 
 void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t length) {
+    if (!_peerAuthorized && !isPairingWindowActive()) {
+        Serial.println("[BLE-SEC] Ignored write from unauthorized BLE peer.");
+        return;
+    }
     _lastActivityTime = millis();
     if (length == 0) return;
 
@@ -412,11 +445,19 @@ bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {
 }
 
 void HealthKicksBleServer::handleOtaControlWrite(const uint8_t* data, size_t length) {
+    if (!_peerAuthorized && !isPairingWindowActive()) {
+        Serial.println("[BLE-SEC] Ignored write from unauthorized BLE peer.");
+        return;
+    }
     _lastActivityTime = millis();
     _otaService.handleControlWrite(data, length);
 }
 
 void HealthKicksBleServer::handleOtaDataWrite(const uint8_t* data, size_t length) {
+    if (!_peerAuthorized && !isPairingWindowActive()) {
+        Serial.println("[BLE-SEC] Ignored write from unauthorized BLE peer.");
+        return;
+    }
     _lastActivityTime = millis();
     _otaService.handleDataWrite(data, length);
 }

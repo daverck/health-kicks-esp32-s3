@@ -17,6 +17,9 @@ RTC_DATA_ATTR static bool rtc_is_calibrated = false;
 RTC_DATA_ATTR static float rtc_calibration_matrix[9] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
 // Static member definitions
+uint32_t PowerManager::_bootTimeMs = 0;
+bool PowerManager::_hasConnectedSinceBoot = false;
+uint32_t PowerManager::_bootTimeoutSec = DEEP_SLEEP_BOOT_TIMEOUT_SEC;
 uint32_t PowerManager::_lastActivityMs = 0;
 uint32_t PowerManager::_inactivityTimeoutSec = DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC;
 esp_sleep_wakeup_cause_t PowerManager::_wakeupCause = ESP_SLEEP_WAKEUP_UNDEFINED;
@@ -25,6 +28,8 @@ void PowerManager::init(StepDetector* stepDetector, ImuCalibrator* imuCalibrator
     rtc_boot_count++;
     _wakeupCause = esp_sleep_get_wakeup_cause();
     _lastActivityMs = millis();
+    _bootTimeMs = millis();
+    _hasConnectedSinceBoot = false;
 
     switch (_wakeupCause) {
         case ESP_SLEEP_WAKEUP_EXT0:
@@ -57,6 +62,16 @@ void PowerManager::init(StepDetector* stepDetector, ImuCalibrator* imuCalibrator
     }
 }
 
+void PowerManager::onBleConnected() {
+    _hasConnectedSinceBoot = true;
+    _lastActivityMs = millis();
+    Serial.println("[POWER] Mobile app connected: boot connection timeout cancelled.");
+}
+
+bool PowerManager::hasConnectedSinceBoot() {
+    return _hasConnectedSinceBoot;
+}
+
 void PowerManager::recordActivity(uint32_t nowMs) {
     _lastActivityMs = nowMs;
 }
@@ -70,15 +85,38 @@ void PowerManager::checkSleepConditions(bool isBleConnected,
                                        StepDetector& stepDetector,
                                        ImuCalibrator& imuCalibrator) {
     // Keep alive if a client is connected or a Studio capture is recording
-    if (isBleConnected || isRecording) {
+    if (isBleConnected) {
+        _hasConnectedSinceBoot = true;
         _lastActivityMs = nowMs;
         return;
     }
 
-    // Check inactivity timeout
+    if (isRecording) {
+        _lastActivityMs = nowMs;
+        return;
+    }
+
+    // Do not enter deep sleep if user just opened the 60s physical pairing window
+    if (bleServer.isPairingWindowActive()) {
+        return;
+    }
+
+    // 1. Boot connection timeout: If after power-on/wake the device does not connect
+    // to the mobile app within 5 minutes (default 300s), automatically enter Deep Sleep (~10 uA).
+    if (!_hasConnectedSinceBoot) {
+        uint32_t timeSinceBootMs = nowMs - _bootTimeMs;
+        if (timeSinceBootMs >= (_bootTimeoutSec * 1000UL)) {
+            Serial.printf("\n[POWER] Device powered on for %u s without connecting to mobile app. Entering Deep Sleep to conserve battery...\n",
+                          _bootTimeoutSec);
+            enterDeepSleep(imu, bleServer, haptic, stepDetector, imuCalibrator, SLEEP_REASON_BOOT_CONNECTION_TIMEOUT);
+            return;
+        }
+    }
+
+    // 2. Nominal inactivity timeout (15 minutes of stillness and disconnection)
     uint32_t elapsedMs = nowMs - _lastActivityMs;
     if (elapsedMs >= (_inactivityTimeoutSec * 1000UL)) {
-        enterDeepSleep(imu, bleServer, haptic, stepDetector, imuCalibrator);
+        enterDeepSleep(imu, bleServer, haptic, stepDetector, imuCalibrator, SLEEP_REASON_INACTIVITY);
     }
 }
 
@@ -90,6 +128,9 @@ void PowerManager::enterDeepSleep(ImuMpu6050& imu,
                                  DeepSleepReason reason) {
     if (reason == SLEEP_REASON_MANUAL_POWER_OFF) {
         Serial.println("\n[POWER] Manual Power-OFF initiated. Entering Deep Sleep (~10 uA)...");
+    } else if (reason == SLEEP_REASON_BOOT_CONNECTION_TIMEOUT) {
+        Serial.printf("\n[POWER] Boot connection timeout (%u s) reached without mobile connection. Entering Deep Sleep (~10 uA)...\n",
+                      _bootTimeoutSec);
     } else {
         Serial.printf("\n[POWER] Inactivity timeout (%u s) reached without connection. Entering Deep Sleep (~10 uA)...\n",
                       _inactivityTimeoutSec);
@@ -108,14 +149,15 @@ void PowerManager::enterDeepSleep(ImuMpu6050& imu,
                   rtc_total_steps, rtc_walk_steps, rtc_run_steps,
                   rtc_stairs_steps, rtc_unclassified_steps, rtc_is_calibrated);
 
-    // 2. Stop haptic motor and BLE stack cleanly
+    // 2. Stop haptic motor, turn off status LED, and de-initialize BLE stack cleanly
     haptic.stop();
+    digitalWrite(PIN_LED_BLUE, LOW);
     bleServer.stopAdvertising();
     NimBLEDevice::deinit(true);
     Serial.println("[POWER] BLE stack stopped and de-initialized.");
 
     // 3. Configure IMU mode and arm wakeup sources based on shutdown reason
-    if (reason == SLEEP_REASON_INACTIVITY) {
+    if (reason == SLEEP_REASON_INACTIVITY || reason == SLEEP_REASON_BOOT_CONNECTION_TIMEOUT) {
         // Put MPU-6050 in ultra-low power Wake-On-Motion mode
         imu.enableWakeOnMotion(IMU_WOM_THRESHOLD, IMU_WOM_DURATION);
         Serial.printf("[POWER] MPU-6050 WOM mode configured on GPIO %d (Thresh=%u, Dur=%u).\n",
@@ -155,5 +197,13 @@ void PowerManager::setTimeoutSec(uint32_t sec) {
 
 uint32_t PowerManager::getTimeoutSec() {
     return _inactivityTimeoutSec;
+}
+
+void PowerManager::setBootTimeoutSec(uint32_t sec) {
+    _bootTimeoutSec = sec > 0 ? sec : DEEP_SLEEP_BOOT_TIMEOUT_SEC;
+}
+
+uint32_t PowerManager::getBootTimeoutSec() {
+    return _bootTimeoutSec;
 }
 

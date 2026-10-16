@@ -73,6 +73,8 @@
 #define FIRMWARE_BUILD_DATE     __DATE__ " " __TIME__
 
 // Deep Sleep & Power Management Configuration
+#define DEEP_SLEEP_BOOT_TIMEOUT_SEC         300     // 5 minutes without BLE mobile connection after power-on/wake
+#define DEEP_SLEEP_BOOT_TIMEOUT_MS          (DEEP_SLEEP_BOOT_TIMEOUT_SEC * 1000UL)
 #define DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC   900     // 15 minutes of stillness and disconnection before Deep Sleep
 #define DEEP_SLEEP_TIMEOUT_MS               (DEEP_SLEEP_INACTIVITY_TIMEOUT_SEC * 1000UL)
 

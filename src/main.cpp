@@ -255,9 +255,9 @@ void loop() {
         }
     }
 
-    // BLE connection edge detection for initial step state synchronization & status LED
     bool bleConnected = bleServer.isConnected();
     if (bleConnected && !prevBleConnected) {
+        PowerManager::onBleConnected();
         // Just connected: notify immediately to sync initial step state and signal LED connection confirmation
         statusLed.setBleConnected();
         StepCounterPayload payload = stepDetector.getPayload(now);
@@ -410,16 +410,18 @@ void loop() {
     }
 
     // 4. Inactivity evaluation and automatic Deep Sleep management (~10 uA)
-    PowerManager::checkSleepConditions(
-        bleServer.isConnected(),
-        studioManager.isRecording(),
-        now,
-        imu,
-        bleServer,
-        haptic,
-        stepDetector,
-        imuCalibrator
-    );
+    if (!otaPendingVerification) {
+        PowerManager::checkSleepConditions(
+            bleServer.isConnected(),
+            studioManager.isRecording(),
+            now,
+            imu,
+            bleServer,
+            haptic,
+            stepDetector,
+            imuCalibrator
+        );
+    }
 
     // 5. Handle power/pairing button (GPIO 14 - Active LOW with internal pull-up)
     static const uint32_t BUTTON_LONG_PRESS_MS = 2500;

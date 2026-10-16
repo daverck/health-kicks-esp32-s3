@@ -25,8 +25,20 @@ class PowerManager {
 public:
     enum DeepSleepReason {
         SLEEP_REASON_INACTIVITY = 0,
-        SLEEP_REASON_MANUAL_POWER_OFF = 1
+        SLEEP_REASON_MANUAL_POWER_OFF = 1,
+        SLEEP_REASON_BOOT_CONNECTION_TIMEOUT = 2
     };
+
+    /**
+     * @brief Notifies the power manager that a BLE client has successfully connected.
+     * Cancels the 5-minute boot connection timeout.
+     */
+    static void onBleConnected();
+
+    /**
+     * @brief Checks if a mobile BLE client has connected at least once since boot.
+     */
+    static bool hasConnectedSinceBoot();
 
     /**
      * @brief Initializes power management, checks wakeup cause, and restores state from RTC fast memory.
@@ -97,7 +109,20 @@ public:
      */
     static uint32_t getTimeoutSec();
 
+    /**
+     * @brief Sets boot connection timeout in seconds (default 300s / 5 minutes).
+     */
+    static void setBootTimeoutSec(uint32_t sec);
+
+    /**
+     * @brief Gets current boot connection timeout in seconds.
+     */
+    static uint32_t getBootTimeoutSec();
+
 private:
+    static uint32_t _bootTimeMs;
+    static bool _hasConnectedSinceBoot;
+    static uint32_t _bootTimeoutSec;
     static uint32_t _lastActivityMs;
     static uint32_t _inactivityTimeoutSec;
     static esp_sleep_wakeup_cause_t _wakeupCause;

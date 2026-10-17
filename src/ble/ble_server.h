@@ -62,6 +62,7 @@ public:
     void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
 
     bool isConnected() const { return _deviceConnected; }
+    NimBLEServer* getServer() const { return _pServer; }
     bool isLinkEncrypted() const { return _linkEncrypted; }
     void setLinkEncrypted(bool enc) { _linkEncrypted = enc; }
     bool isPeerAuthorized() const { return _peerAuthorized; }

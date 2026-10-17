@@ -32,15 +32,13 @@ public:
         } else {
             _parent->setLinkEncrypted(false);
             _parent->setPeerAuthorized(false);
-            if (_parent->isPairingWindowActive()) {
-                Serial.println("[BLE-SEC] Pairing window is OPEN: purging stale bond for peer and re-initiating pairing...");
-                NimBLEDevice::deleteBond(NimBLEAddress(desc->peer_ota_addr));
-                NimBLEDevice::startSecurity(desc->conn_handle);
-            } else {
+            if (!_parent->isPairingWindowActive()) {
                 Serial.println("[BLE-SEC] Authentication failed without encryption while pairing window is CLOSED. Disconnecting unauthorized peer.");
                 if (_parent->getServer()) {
                     _parent->getServer()->disconnect(desc->conn_handle);
                 }
+            } else {
+                Serial.println("[BLE-SEC] Pairing window is OPEN: keeping link active for user pairing confirmation (single prompt).");
             }
         }
     }
@@ -261,6 +259,20 @@ void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* d
                       peerAddr.toString().c_str(), numBonds);
         pServer->disconnect(desc->conn_handle);
         return;
+    }
+
+    // If pairing window is explicitly open, purge any stale bond for this peer so pairing starts clean
+    if (isPairingWindowActive()) {
+        if (NimBLEDevice::isBonded(peerAddr)) {
+            Serial.printf("[BLE-SEC] Pairing window active: deleting stale bond for %s to ensure clean pairing.\n",
+                          peerAddr.toString().c_str());
+            NimBLEDevice::deleteBond(peerAddr);
+        }
+        if (NimBLEDevice::isBonded(peerIdAddr)) {
+            Serial.printf("[BLE-SEC] Pairing window active: deleting stale bond for ID %s to ensure clean pairing.\n",
+                          peerIdAddr.toString().c_str());
+            NimBLEDevice::deleteBond(peerIdAddr);
+        }
     }
 
     _deviceConnected = true;

@@ -58,6 +58,7 @@
 // Detection flags (Characteristic 0002)
 #define DETECTION_FLAG_CRITICAL_FALL    (1 << 0)
 #define DETECTION_FLAG_LOCAL_HAPTIC     (1 << 1)
+#define DETECTION_FLAG_OFFLINE_BUFFERED (1 << 2)
 
 // Packet types for Studio Burst Transfer (Characteristic 0005)
 #define BURST_PACKET_START_OF_BURST     0x01

@@ -11,6 +11,7 @@
 #include "step_detector.h"
 #include "inactivity_monitor.h"
 #include "power_manager.h"
+#include "offline_fall_storage.h"
 #include <esp_task_wdt.h>
 
 // Hardware module and service instances
@@ -23,6 +24,7 @@ static ActivityDetector activityDetector;
 static ImuCalibrator imuCalibrator;
 static StepDetector stepDetector;
 static InactivityMonitor inactivityMonitor;
+static OfflineFallStorage offlineFallStorage;
 
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
@@ -217,6 +219,9 @@ void setup() {
     Serial.printf("[BLE] Starting NimBLE server with name \"%s\"...\n", BLE_DEVICE_NAME);
     bleServer.begin(BLE_DEVICE_NAME);
 
+    // Initialize resilient offline fall storage in NVS flash
+    offlineFallStorage.begin();
+
     // Open a 60-second pairing window automatically right after an OTA update or when no bonds exist in NVS
     if (otaPendingVerification || NimBLEDevice::getNumBonds() == 0) {
         bleServer.openPairingWindow(60000);
@@ -272,6 +277,11 @@ void loop() {
         lastNotifiedTotalSteps = stepDetector.getTotalSteps();
         hasPendingIdleConfirmation = false;
         Serial.printf("[STEP] BLE connected, sent initial step state: Total=%u\n", lastNotifiedTotalSteps);
+
+        // Flush any offline falls buffered in NVS flash
+        if (offlineFallStorage.hasPendingFalls()) {
+            offlineFallStorage.flushToBle(bleServer);
+        }
     } else if (!bleConnected && prevBleConnected) {
         // Just disconnected: signal alert pattern then return to advertising
         statusLed.setBleDisconnected();
@@ -358,13 +368,22 @@ void loop() {
                                 // Trigger emergency haptic feedback alert
                                 haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 255, 500);
 
-                                // Notify connected mobile client over BLE with critical fall flags
-                                bleServer.notifyActivity(
-                                    result.stateCode,
-                                    (uint8_t)(result.confidence * 100.0f),
-                                    epochSec,
-                                    DETECTION_FLAG_CRITICAL_FALL | DETECTION_FLAG_LOCAL_HAPTIC
-                                );
+                                if (bleServer.isConnected()) {
+                                    // Notify connected mobile client over BLE with critical fall flags
+                                    bleServer.notifyActivity(
+                                        result.stateCode,
+                                        (uint8_t)(result.confidence * 100.0f),
+                                        epochSec,
+                                        DETECTION_FLAG_CRITICAL_FALL | DETECTION_FLAG_LOCAL_HAPTIC
+                                    );
+                                } else {
+                                    // BLE disconnected: persist fall alert to non-volatile flash memory
+                                    offlineFallStorage.saveFall(
+                                        result.stateCode,
+                                        (uint8_t)(result.confidence * 100.0f),
+                                        epochSec
+                                    );
+                                }
                                 lastReportedActivityState = result.stateCode;
                             } else if (result.stateCode != lastReportedActivityState) {
                                 Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Latency: %u us)\n",

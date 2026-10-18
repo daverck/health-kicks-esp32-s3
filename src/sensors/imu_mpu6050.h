@@ -10,27 +10,38 @@ public:
     ImuMpu6050();
 
     /**
-     * @brief Initialise le bus I2C et configure les registres du MPU-6050.
-     * @return true si l'IMU répond correctement (WHO_AM_I == 0x68), false sinon.
+     * @brief Initializes the I2C bus and configures MPU-6050 hardware registers.
+     * @param sdaPin I2C data pin (default: PIN_IMU_SDA).
+     * @param sclPin I2C clock pin (default: PIN_IMU_SCL).
+     * @param frequency I2C bus frequency in Hz (default: IMU_I2C_FREQ_HZ).
+     * @return true if the IMU responds with expected WHO_AM_I, false otherwise.
      */
     bool begin(int sdaPin = PIN_IMU_SDA, int sclPin = PIN_IMU_SCL, uint32_t frequency = IMU_I2C_FREQ_HZ);
 
     /**
-     * @brief Vérifie la présence physique et lit le registre WHO_AM_I (0x75).
-     * @return Valeur du registre WHO_AM_I (0x68 attendu).
+     * @brief Verifies physical chip presence by reading the WHO_AM_I register (0x75).
+     * @return Value of WHO_AM_I register (0x68 expected nominally).
      */
     uint8_t readWhoAmI();
 
     /**
-     * @brief Lit 14 octets consécutifs du MPU6050 à partir du registre 0x3B.
-     * @param frame Référence vers la structure de trame compressée au format HealthKicks.
-     * @param deltaMs Horodatage relatif en ms depuis le début de capture.
-     * @return true si la lecture I2C a réussi, false sinon.
+     * @brief Reads 14 consecutive burst bytes from MPU-6050 starting at register 0x3B.
+     * Converts chip raw coordinates into standard footwear frame and scales to network units.
+     * @param frame Reference to the compressed raw frame structure in big-endian network order.
+     * @param deltaMs Relative timestamp in milliseconds since session capture start.
+     * @return true if the I2C transaction succeeded, false on bus error.
      */
     bool readFrame(ImuRawFrame& frame, uint16_t deltaMs = 0);
 
     /**
-     * @brief Lecture des valeurs physiques flottantes (milli-g et deg/s) pour affichage/debug.
+     * @brief Reads aligned acceleration and angular velocity in physical engineering float units.
+     * @param ax_g Output acceleration X in g.
+     * @param ay_g Output acceleration Y in g.
+     * @param az_g Output acceleration Z in g.
+     * @param gx_dps Output angular rate X in deg/s.
+     * @param gy_dps Output angular rate Y in deg/s.
+     * @param gz_dps Output angular rate Z in deg/s.
+     * @return true on successful I2C read, false otherwise.
      */
     bool readRawMetrics(float& ax_g, float& ay_g, float& az_g, float& gx_dps, float& gy_dps, float& gz_dps);
 

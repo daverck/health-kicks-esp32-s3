@@ -16,6 +16,21 @@ static const uint8_t MPU_REG_PWR_MGMT_1      = 0x6B;
 static const uint8_t MPU_REG_PWR_MGMT_2      = 0x6C;
 static const uint8_t MPU_REG_WHO_AM_I        = 0x75;
 
+// MPU-6050 Configuration Bit Masks & Constants
+static const uint8_t MPU_PWR1_RESET          = 0x80; // Reset internal registers to default
+static const uint8_t MPU_PWR1_WAKE_X_GYRO    = 0x01; // Wake up with auto X-axis gyro reference
+static const uint8_t MPU_PWR1_SLEEP          = 0x40; // Enter ultra-low power sleep (~5 uA)
+static const uint8_t MPU_PWR1_CYCLE_TEMP_DIS = 0x28; // Low-power cycle mode with temperature sensor disabled
+static const uint8_t MPU_PWR2_STBY_GYRO_ALL  = 0x07; // Put gyroscopes in standby for Wake-on-Motion
+static const uint8_t MPU_ACCEL_FS_8G         = 0x10; // +/- 8g full-scale range (4096 LSB/g)
+static const uint8_t MPU_ACCEL_FS_8G_HPF     = 0x11; // +/- 8g range + 5 Hz high-pass filter for motion detection
+static const uint8_t MPU_GYRO_FS_250DPS      = 0x00; // +/- 250 dps full-scale range (131.0 LSB/dps)
+static const uint8_t MPU_DLPF_21HZ           = 0x04; // Digital Low-Pass Filter (~21 Hz Accel / 20 Hz Gyro)
+static const uint8_t MPU_INT_PIN_LATCH       = 0x20; // Latch INT pin active high until cleared
+static const uint8_t MPU_INT_EN_MOT          = 0x40; // Enable motion detection interrupt
+static const uint8_t MPU_MOT_DETECT_CTRL_VAL = 0x15; // Accel power-on delay for motion detection
+static const uint8_t MPU_SAMPLE_DIV_50HZ     = 19;   // 1000 Hz / (1 + 19) = 50 Hz nominal sampling rate
+
 ImuMpu6050::ImuMpu6050() : _address(IMU_I2C_ADDR), _wire(&Wire) {}
 
 bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
@@ -26,13 +41,13 @@ bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
     delay(50);
 
     // 1. Software reset of MPU-6050 (Bit 7 = 1)
-    if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x80)) {
+    if (!writeRegister(MPU_REG_PWR_MGMT_1, MPU_PWR1_RESET)) {
         return false;
     }
     delay(100);
 
     // 2. Wake up + Select clock source Auto X-Gyro (0x01)
-    if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x01)) {
+    if (!writeRegister(MPU_REG_PWR_MGMT_1, MPU_PWR1_WAKE_X_GYRO)) {
         return false;
     }
     delay(30);
@@ -44,24 +59,23 @@ bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
         return false;
     }
 
-    // 4. Configure accelerometer to +/- 8g (0x1C = 0x10) -> 4096 LSB/g
-    if (!writeRegister(MPU_REG_ACCEL_CONFIG, 0x10)) {
+    // 4. Configure accelerometer to +/- 8g (4096 LSB/g)
+    if (!writeRegister(MPU_REG_ACCEL_CONFIG, MPU_ACCEL_FS_8G)) {
         return false;
     }
 
-    // 5. Configure gyroscope to +/- 250 deg/s (0x1B = 0x00) -> 131.0 LSB/(deg/s)
-    if (!writeRegister(MPU_REG_GYRO_CONFIG, 0x00)) {
+    // 5. Configure gyroscope to +/- 250 deg/s (131.0 LSB/dps)
+    if (!writeRegister(MPU_REG_GYRO_CONFIG, MPU_GYRO_FS_250DPS)) {
         return false;
     }
 
-    // 6. Configure hardware low-pass filter (DLPF ~21 Hz Accel / 20 Hz Gyro) (0x1A = 0x04)
-    if (!writeRegister(MPU_REG_CONFIG, 0x04)) {
+    // 6. Configure hardware digital low-pass filter (DLPF ~21 Hz Accel / 20 Hz Gyro)
+    if (!writeRegister(MPU_REG_CONFIG, MPU_DLPF_21HZ)) {
         return false;
     }
 
-    // 7. Sample Rate Divider (Sample Rate Divider = 19 -> 50 Hz with 1 kHz DLPF base)
-    // Sample Rate = 1000 / (1 + 19) = 50 Hz
-    if (!writeRegister(MPU_REG_SMPLRT_DIV, 19)) {
+    // 7. Sample Rate Divider: 1000 / (1 + 19) = 50 Hz
+    if (!writeRegister(MPU_REG_SMPLRT_DIV, MPU_SAMPLE_DIV_50HZ)) {
         return false;
     }
 
@@ -183,12 +197,12 @@ bool ImuMpu6050::enableWakeOnMotion(uint8_t threshold, uint8_t duration) {
     delay(10);
 
     // 2. Configure INT pin: Active HIGH, Push-Pull, Latch until cleared
-    if (!writeRegister(MPU_REG_INT_PIN_CFG, 0x20)) {
+    if (!writeRegister(MPU_REG_INT_PIN_CFG, MPU_INT_PIN_LATCH)) {
         return false;
     }
 
     // 3. Configure High-Pass Filter for motion detection (5Hz HPF, +/-8g scale)
-    if (!writeRegister(MPU_REG_ACCEL_CONFIG, 0x11)) {
+    if (!writeRegister(MPU_REG_ACCEL_CONFIG, MPU_ACCEL_FS_8G_HPF)) {
         return false;
     }
 
@@ -201,23 +215,23 @@ bool ImuMpu6050::enableWakeOnMotion(uint8_t threshold, uint8_t duration) {
     }
 
     // 5. Configure motion detection control (accel power-on delay)
-    if (!writeRegister(MPU_REG_MOT_DETECT_CTRL, 0x15)) {
+    if (!writeRegister(MPU_REG_MOT_DETECT_CTRL, MPU_MOT_DETECT_CTRL_VAL)) {
         return false;
     }
 
-    // 6. Enable Motion Detection Interrupt (Bit 6 MOT_EN = 0x40)
-    if (!writeRegister(MPU_REG_INT_ENABLE, 0x40)) {
+    // 6. Enable Motion Detection Interrupt (Bit 6 MOT_EN)
+    if (!writeRegister(MPU_REG_INT_ENABLE, MPU_INT_EN_MOT)) {
         return false;
     }
 
     // 7. Configure low-power sampling in PWR_MGMT_2:
-    // LP_WAKE_CTRL = 00 (1.25 Hz), STBY_ACCEL = 000 (active), STBY_GYRO = 111 (disable gyroscopes to minimize current)
-    if (!writeRegister(MPU_REG_PWR_MGMT_2, 0x07)) {
+    // Standby all gyroscopes to minimize current during low-power WOM
+    if (!writeRegister(MPU_REG_PWR_MGMT_2, MPU_PWR2_STBY_GYRO_ALL)) {
         return false;
     }
 
-    // 8. Put MPU-6050 in CYCLE mode (Bit 5 CYCLE = 1, Bit 6 SLEEP = 0, Bit 3 TEMP_DIS = 1) -> 0x28
-    if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x28)) {
+    // 8. Put MPU-6050 in CYCLE mode with temperature sensor disabled
+    if (!writeRegister(MPU_REG_PWR_MGMT_1, MPU_PWR1_CYCLE_TEMP_DIS)) {
         return false;
     }
 
@@ -235,16 +249,16 @@ bool ImuMpu6050::setSleepEnabled(bool enable) {
         // 2. Clear interrupt status register
         readRegister(MPU_REG_INT_STATUS);
 
-        // 3. Set SLEEP bit (bit 6 = 1) in MPU_REG_PWR_MGMT_1 to enter ultra-low power sleep (~5 uA) with no WOM
-        if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x40)) {
+        // 3. Set SLEEP bit in MPU_REG_PWR_MGMT_1 to enter ultra-low power sleep (~5 uA)
+        if (!writeRegister(MPU_REG_PWR_MGMT_1, MPU_PWR1_SLEEP)) {
             return false;
         }
 
         log_i("MPU-6050 entered full low-power sleep mode (interrupts disabled)");
         return true;
     } else {
-        // Wake up chip and select Auto X-Gyro clock source (0x01)
-        if (!writeRegister(MPU_REG_PWR_MGMT_1, 0x01)) {
+        // Wake up chip and select Auto X-Gyro clock source
+        if (!writeRegister(MPU_REG_PWR_MGMT_1, MPU_PWR1_WAKE_X_GYRO)) {
             return false;
         }
         return true;

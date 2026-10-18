@@ -21,6 +21,7 @@ ImuMpu6050::ImuMpu6050() : _address(IMU_I2C_ADDR), _wire(&Wire) {}
 bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
     _wire->begin(sdaPin, sclPin);
     _wire->setClock(frequency);
+    _wire->setTimeOut(25); // Set 25ms hardware timeout to prevent infinite blocking on SDA/SCL glitches
 
     delay(50);
 

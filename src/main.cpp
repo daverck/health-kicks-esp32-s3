@@ -11,6 +11,7 @@
 #include "step_detector.h"
 #include "inactivity_monitor.h"
 #include "power_manager.h"
+#include <esp_task_wdt.h>
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
@@ -220,9 +221,15 @@ void setup() {
     if (otaPendingVerification || NimBLEDevice::getNumBonds() == 0) {
         bleServer.openPairingWindow(60000);
     }
+
+    // Initialize Task Watchdog Timer (TWDT) with 5s timeout to protect against I2C/FreeRTOS deadlocks
+    esp_task_wdt_init(5, true);
+    esp_task_wdt_add(NULL);
+    Serial.println("[SYSTEM] FreeRTOS Task Watchdog Timer initialized (5.0s timeout).");
 }
 
 void loop() {
+    esp_task_wdt_reset();
     uint32_t now = millis();
 
     // Fast-path handling during OTA firmware flash: dedicate 100% CPU and Flash bandwidth to BLE stream

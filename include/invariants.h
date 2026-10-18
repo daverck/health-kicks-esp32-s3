@@ -64,6 +64,7 @@
 #define BURST_PACKET_DATA_CHUNK         0x02
 #define BURST_PACKET_END_OF_BURST       0x03
 #define BURST_PACKET_DELTA_CHUNK        0x04
+#define BURST_PACKET_RLE_CHUNK          0x05
 
 // Haptic vibration patterns & Control Commands (Characteristic 0003)
 #define HAPTIC_PATTERN_CONTINUOUS       0

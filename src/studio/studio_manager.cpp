@@ -222,38 +222,112 @@ void StudioManager::sendBurstPackets() {
 
     uint16_t mtu = _bleServer->getNegotiatedMtu();
     int usable = mtu - 3 - 4; // MTU - 3 ATT - 4 Header
-    int framesPerPacket = usable / IMU_BYTES_PER_FRAME;
-    if (framesPerPacket < 1) framesPerPacket = 1;
-    if (framesPerPacket > 17) framesPerPacket = 17;
+    int rawFramesPerPacket = usable / IMU_BYTES_PER_FRAME;
+    if (rawFramesPerPacket < 1) rawFramesPerPacket = 1;
+    if (rawFramesPerPacket > 17) rawFramesPerPacket = 17;
+
+    // Delta payload: 1 byte count + 14 bytes keyframe + K * 7 bytes deltas
+    int maxDeltaFrames = (usable > 15) ? ((usable - 15) / 7) : 0;
+    if (maxDeltaFrames > 32) maxDeltaFrames = 32; // Safe ceiling to fit in packetBuf
 
     size_t totalSamples = _frames.size();
     size_t offset = 0;
     uint16_t seqNum = 0;
 
-    Serial.printf("[STUDIO] Starting Burst transmission: %u frames (MTU=%d, %d frames/packet)...\n",
-                  (unsigned int)totalSamples, mtu, framesPerPacket);
+    Serial.printf("[STUDIO] Starting Burst transmission: %u frames (MTU=%d, raw max=%d, delta max=%d)...\n",
+                  (unsigned int)totalSamples, mtu, rawFramesPerPacket, maxDeltaFrames + 1);
 
-    uint8_t packetBuf[256];
+    uint8_t packetBuf[260];
 
     while (offset < totalSamples) {
-        size_t chunkCount = totalSamples - offset;
-        if (chunkCount > (size_t)framesPerPacket) {
-            chunkCount = framesPerPacket;
+        // Attempt lossless delta compression if at least 2 samples remain and maxDeltaFrames >= 1
+        int deltaCount = 0;
+        if (maxDeltaFrames >= 1 && (totalSamples - offset) >= 2) {
+            size_t maxPossibleDeltas = totalSamples - offset - 1;
+            if (maxPossibleDeltas > (size_t)maxDeltaFrames) {
+                maxPossibleDeltas = (size_t)maxDeltaFrames;
+            }
+
+            for (size_t k = 0; k < maxPossibleDeltas; ++k) {
+                const ImuRawFrame& prev = _frames[offset + k];
+                const ImuRawFrame& curr = _frames[offset + k + 1];
+
+                int diff_ms = (int)ntohs(curr.delta_ms) - (int)ntohs(prev.delta_ms);
+                if (diff_ms < 0 || diff_ms > 255) break;
+
+                int diff_ax = (int)(int16_t)ntohs(curr.ax) - (int)(int16_t)ntohs(prev.ax);
+                if (diff_ax < -127 || diff_ax > 127) break;
+
+                int diff_ay = (int)(int16_t)ntohs(curr.ay) - (int)(int16_t)ntohs(prev.ay);
+                if (diff_ay < -127 || diff_ay > 127) break;
+
+                int diff_az = (int)(int16_t)ntohs(curr.az) - (int)(int16_t)ntohs(prev.az);
+                if (diff_az < -127 || diff_az > 127) break;
+
+                int diff_gx = (int)(int16_t)ntohs(curr.gx) - (int)(int16_t)ntohs(prev.gx);
+                if (diff_gx < -127 || diff_gx > 127) break;
+
+                int diff_gy = (int)(int16_t)ntohs(curr.gy) - (int)(int16_t)ntohs(prev.gy);
+                if (diff_gy < -127 || diff_gy > 127) break;
+
+                int diff_gz = (int)(int16_t)ntohs(curr.gz) - (int)(int16_t)ntohs(prev.gz);
+                if (diff_gz < -127 || diff_gz > 127) break;
+
+                deltaCount++;
+            }
         }
 
-        uint8_t payloadBytes = (uint8_t)(chunkCount * IMU_BYTES_PER_FRAME);
+        // If at least 1 delta frame fits, send DELTA_CHUNK (0x04)
+        if (deltaCount >= 1) {
+            uint8_t totalFramesInPacket = (uint8_t)(1 + deltaCount);
+            uint8_t payloadBytes = (uint8_t)(1 + IMU_BYTES_PER_FRAME + deltaCount * 7);
 
-        packetBuf[0] = BURST_PACKET_DATA_CHUNK; // 0x02
-        packetBuf[1] = (uint8_t)((seqNum >> 8) & 0xFF);
-        packetBuf[2] = (uint8_t)(seqNum & 0xFF);
-        packetBuf[3] = payloadBytes;
+            packetBuf[0] = BURST_PACKET_DELTA_CHUNK; // 0x04
+            packetBuf[1] = (uint8_t)((seqNum >> 8) & 0xFF);
+            packetBuf[2] = (uint8_t)(seqNum & 0xFF);
+            packetBuf[3] = payloadBytes;
 
-        memcpy(&packetBuf[4], &_frames[offset], payloadBytes);
+            packetBuf[4] = totalFramesInPacket;
+            memcpy(&packetBuf[5], &_frames[offset], IMU_BYTES_PER_FRAME);
 
-        _bleServer->sendBurstPacket(packetBuf, 4 + payloadBytes);
+            size_t p = 5 + IMU_BYTES_PER_FRAME;
+            for (int k = 0; k < deltaCount; ++k) {
+                const ImuRawFrame& prev = _frames[offset + k];
+                const ImuRawFrame& curr = _frames[offset + k + 1];
 
-        offset += chunkCount;
-        seqNum++;
+                packetBuf[p + 0] = (uint8_t)((int)ntohs(curr.delta_ms) - (int)ntohs(prev.delta_ms));
+                packetBuf[p + 1] = (uint8_t)(int8_t)((int)(int16_t)ntohs(curr.ax) - (int)(int16_t)ntohs(prev.ax));
+                packetBuf[p + 2] = (uint8_t)(int8_t)((int)(int16_t)ntohs(curr.ay) - (int)(int16_t)ntohs(prev.ay));
+                packetBuf[p + 3] = (uint8_t)(int8_t)((int)(int16_t)ntohs(curr.az) - (int)(int16_t)ntohs(prev.az));
+                packetBuf[p + 4] = (uint8_t)(int8_t)((int)(int16_t)ntohs(curr.gx) - (int)(int16_t)ntohs(prev.gx));
+                packetBuf[p + 5] = (uint8_t)(int8_t)((int)(int16_t)ntohs(curr.gy) - (int)(int16_t)ntohs(prev.gy));
+                packetBuf[p + 6] = (uint8_t)(int8_t)((int)(int16_t)ntohs(curr.gz) - (int)(int16_t)ntohs(prev.gz));
+                p += 7;
+            }
+
+            _bleServer->sendBurstPacket(packetBuf, 4 + payloadBytes);
+            offset += totalFramesInPacket;
+            seqNum++;
+        } else {
+            // Fallback to uncompressed DATA_CHUNK (0x02)
+            size_t chunkCount = totalSamples - offset;
+            if (chunkCount > (size_t)rawFramesPerPacket) {
+                chunkCount = rawFramesPerPacket;
+            }
+
+            uint8_t payloadBytes = (uint8_t)(chunkCount * IMU_BYTES_PER_FRAME);
+
+            packetBuf[0] = BURST_PACKET_DATA_CHUNK; // 0x02
+            packetBuf[1] = (uint8_t)((seqNum >> 8) & 0xFF);
+            packetBuf[2] = (uint8_t)(seqNum & 0xFF);
+            packetBuf[3] = payloadBytes;
+
+            memcpy(&packetBuf[4], &_frames[offset], payloadBytes);
+
+            _bleServer->sendBurstPacket(packetBuf, 4 + payloadBytes);
+            offset += chunkCount;
+            seqNum++;
+        }
 
         delay(5); // Inter-packet delay to prevent BLE radio buffer overflow
     }

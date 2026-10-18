@@ -89,6 +89,11 @@ void StudioManager::startCountdown() {
     Serial.printf("[STUDIO] Starting countdown (3 haptic pulses) for session \"%s\" (%.1fs)...\n",
                   _sessionId.c_str(), _durationSec);
 
+    // Request fast burst connection parameters (15-20 ms) in anticipation of high-speed data burst
+    if (_bleServer) {
+        _bleServer->requestFastBurstConnectionParams();
+    }
+
     _state = StudioState::COUNTDOWN_PULSE_1;
     _stepTimestampMs = millis();
     Serial.println("[STUDIO] Countdown: 1/3");
@@ -212,6 +217,11 @@ void StudioManager::finishRecordingAndStreamBurst() {
 
     _state = StudioState::IDLE;
     _frames.clear();
+
+    // Restore nominal connection parameters (100-125 ms) to preserve battery life
+    if (_bleServer) {
+        _bleServer->requestNominalConnectionParams();
+    }
 }
 
 void StudioManager::sendBurstPackets() {
@@ -414,6 +424,9 @@ void StudioManager::cancel() {
         _frames.clear();
         _haptic->stop();
         _bleServer->notifyStudioControl("CANCELLED");
+        if (_bleServer) {
+            _bleServer->requestNominalConnectionParams();
+        }
         Serial.println("[STUDIO] Session cancelled.");
     }
 }

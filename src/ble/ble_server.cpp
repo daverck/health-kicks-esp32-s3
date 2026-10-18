@@ -111,6 +111,7 @@ HealthKicksBleServer::HealthKicksBleServer()
       _rescueWindowUntilMs(0),
       _negotiatedMtu(23),
       _lastActivityTime(0),
+      _connHandle(BLE_HS_CONN_HANDLE_NONE),
       _onHaptic(nullptr),
       _onStudioCommand(nullptr),
       _onCalibration(nullptr),
@@ -276,9 +277,11 @@ void HealthKicksBleServer::onConnect(NimBLEServer* pServer, ble_gap_conn_desc* d
     }
 
     _deviceConnected = true;
+    _connHandle = desc->conn_handle;
     _peerAuthorized = false;
     _linkEncrypted = desc->sec_state.encrypted;
     _lastActivityTime = millis();
+    requestNominalConnectionParams();
     Serial.printf("[BLE-SEC] Client %s connected (Handle: %d, AlreadyBonded: %d, PairingWindow: %d). Starting LESC security...\n",
                   peerAddr.toString().c_str(), desc->conn_handle, alreadyBonded, isPairingWindowActive());
     NimBLEDevice::startSecurity(desc->conn_handle);
@@ -288,6 +291,7 @@ void HealthKicksBleServer::onDisconnect(NimBLEServer* pServer) {
     _deviceConnected = false;
     _linkEncrypted = false;
     _peerAuthorized = false;
+    _connHandle = BLE_HS_CONN_HANDLE_NONE;
     _lastActivityTime = millis();
     if (_otaService.isOtaInProgress()) {
         Serial.println("[BLE] Client disconnected during OTA! Aborting OTA session...");
@@ -458,6 +462,20 @@ bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {
     _pCharStudioBurst->setValue(data, length);
     _pCharStudioBurst->notify();
     return true;
+}
+
+void HealthKicksBleServer::requestFastBurstConnectionParams() {
+    if (_pServer && _deviceConnected && _connHandle != BLE_HS_CONN_HANDLE_NONE) {
+        Serial.printf("[BLE] Requesting Fast Burst connection interval: 15-20 ms (conn_handle: %d)\n", _connHandle);
+        _pServer->updateConnParams(_connHandle, 12, 16, 0, 400);
+    }
+}
+
+void HealthKicksBleServer::requestNominalConnectionParams() {
+    if (_pServer && _deviceConnected && _connHandle != BLE_HS_CONN_HANDLE_NONE) {
+        Serial.printf("[BLE] Restoring Nominal connection interval: 100-125 ms (conn_handle: %d)\n", _connHandle);
+        _pServer->updateConnParams(_connHandle, 80, 100, 0, 400);
+    }
 }
 
 void HealthKicksBleServer::handleOtaControlWrite(const uint8_t* data, size_t length) {

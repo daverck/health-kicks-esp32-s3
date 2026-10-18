@@ -55,6 +55,14 @@ public:
      */
     bool sendBurstPacket(const uint8_t* data, size_t length);
 
+    /**
+     * @brief Requests dynamic BLE connection parameters update (minInterval/maxInterval in 1.25ms units).
+     * Nominal mode: 100-125ms (min=80, max=100, latency=0, timeout=400 -> 4s).
+     * Fast Burst mode: 15-20ms (min=12, max=16, latency=0, timeout=400 -> 4s).
+     */
+    void requestFastBurstConnectionParams();
+    void requestNominalConnectionParams();
+
     // Event callbacks
     void setHapticCallback(HapticCallback cb) { _onHaptic = cb; }
     void setStudioCommandCallback(StudioCommandCallback cb) { _onStudioCommand = cb; }
@@ -116,6 +124,7 @@ private:
     uint32_t _rescueWindowUntilMs;
     uint16_t _negotiatedMtu;
     uint32_t _lastActivityTime;
+    uint16_t _connHandle;
 
     HapticCallback _onHaptic;
     StudioCommandCallback _onStudioCommand;

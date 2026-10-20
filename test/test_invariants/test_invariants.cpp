@@ -50,7 +50,7 @@ void test_activity_state_codes_contract(void) {
 void test_activity_model_dimensions(void) {
     // Invariant: TinyML feature dimension and class count
     TEST_ASSERT_EQUAL_INT(16, MODEL_FEATURE_COUNT);
-    TEST_ASSERT_EQUAL_INT(9, MODEL_CLASS_COUNT);
+    TEST_ASSERT_EQUAL_INT(10, MODEL_CLASS_COUNT);
     TEST_ASSERT_EQUAL_INT(57, MODEL_WINDOW_SAMPLES);
 }
 
@@ -61,12 +61,15 @@ void test_activity_model_fall_classes_mask(void) {
     // Index 2: fall_lateral (true)
     // Index 3: fall_recovery (false)
     // Index 4: idle (false)
+    // Index 6: sit_down (false)
+    // Index 9: walk (false)
     TEST_ASSERT_TRUE(MODEL_IS_FALL_CLASS[0]);
     TEST_ASSERT_TRUE(MODEL_IS_FALL_CLASS[1]);
     TEST_ASSERT_TRUE(MODEL_IS_FALL_CLASS[2]);
     TEST_ASSERT_FALSE(MODEL_IS_FALL_CLASS[3]);
     TEST_ASSERT_FALSE(MODEL_IS_FALL_CLASS[4]);
-    TEST_ASSERT_FALSE(MODEL_IS_FALL_CLASS[8]); // walk
+    TEST_ASSERT_FALSE(MODEL_IS_FALL_CLASS[6]); // sit_down
+    TEST_ASSERT_FALSE(MODEL_IS_FALL_CLASS[9]); // walk
 }
 
 int main(int argc, char **argv) {

@@ -72,10 +72,10 @@ private:
     uint32_t _lastStepTimestampMs;
     uint32_t _lastAlertTimestampMs;
     uint32_t _lastObservedTotalSteps;
-    uint32_t _stepCountAtAlert;
+    uint32_t _activeStepsSinceAlert;
+    uint8_t _lastObservedActivityState;
     bool _alertTriggered;
 
     InactivityAlertCallback _onInactivityAlert;
     Preferences _prefs;
 };
-

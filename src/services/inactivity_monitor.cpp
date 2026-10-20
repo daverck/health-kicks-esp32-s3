@@ -1,5 +1,14 @@
 #include "inactivity_monitor.h"
 
+namespace {
+bool isActiveLocomotionState(uint8_t activityState) {
+    return activityState == STATE_CODE_WALK ||
+           activityState == STATE_CODE_RUN ||
+           activityState == STATE_CODE_STAIRS_UP ||
+           activityState == STATE_CODE_STAIRS_DOWN;
+}
+}
+
 InactivityMonitor::InactivityMonitor()
     : _enabled(true),
       _inactivityThresholdSec(DEFAULT_INACTIVITY_THRESHOLD_SEC),
@@ -7,7 +16,8 @@ InactivityMonitor::InactivityMonitor()
       _lastStepTimestampMs(0),
       _lastAlertTimestampMs(0),
       _lastObservedTotalSteps(0),
-      _stepCountAtAlert(0),
+      _activeStepsSinceAlert(0),
+      _lastObservedActivityState(STATE_CODE_IDLE),
       _alertTriggered(false),
       _onInactivityAlert(nullptr) {}
 
@@ -21,7 +31,8 @@ void InactivityMonitor::begin() {
     _lastAlertTimestampMs = 0;
     _alertTriggered = false;
     _lastObservedTotalSteps = 0;
-    _stepCountAtAlert = 0;
+    _activeStepsSinceAlert = 0;
+    _lastObservedActivityState = STATE_CODE_IDLE;
 
     Serial.printf("[INACTIVITY] Monitor initialized: enabled=%d, thresh=%u s (%u min), cool=%u s (%u min)\n",
                   _enabled, _inactivityThresholdSec, _inactivityThresholdSec / 60,
@@ -42,14 +53,26 @@ void InactivityMonitor::configure(bool enabled, uint16_t inactivityThresholdSec,
 }
 
 void InactivityMonitor::processStepActivity(uint32_t totalSteps, uint8_t currentActivityState, uint32_t nowMs) {
-    if (totalSteps > _lastObservedTotalSteps) {
-        // Step detected: update last step timestamp
-        _lastStepTimestampMs = nowMs;
+    if (currentActivityState == STATE_CODE_SIT_DOWN &&
+        _lastObservedActivityState != STATE_CODE_SIT_DOWN) {
+        Serial.println("[INACTIVITY] User transitioned to seated posture (sit_down). Inactivity tracking active.");
+    }
+    _lastObservedActivityState = currentActivityState;
 
-        // Check if walking resumed with at least RESUME_STEP_THRESHOLD steps
-        if (_alertTriggered && (totalSteps - _stepCountAtAlert >= RESUME_STEP_THRESHOLD)) {
-            _alertTriggered = false;
-            Serial.println("[INACTIVITY] Walking resumed (>=10 steps). Inactivity timer reset.");
+    if (totalSteps > _lastObservedTotalSteps) {
+        const uint32_t newSteps = totalSteps - _lastObservedTotalSteps;
+        if (isActiveLocomotionState(currentActivityState)) {
+            _lastStepTimestampMs = nowMs;
+
+            if (_alertTriggered) {
+                if (newSteps >= RESUME_STEP_THRESHOLD - _activeStepsSinceAlert) {
+                    _alertTriggered = false;
+                    _activeStepsSinceAlert = 0;
+                    Serial.println("[INACTIVITY] Walking resumed (>=10 active steps). Inactivity timer reset.");
+                } else {
+                    _activeStepsSinceAlert += newSteps;
+                }
+            }
         }
         _lastObservedTotalSteps = totalSteps;
     }
@@ -62,7 +85,7 @@ void InactivityMonitor::processStepActivity(uint32_t totalSteps, uint8_t current
         if ((nowMs - _lastStepTimestampMs) >= ((uint32_t)_inactivityThresholdSec * 1000)) {
             _alertTriggered = true;
             _lastAlertTimestampMs = nowMs;
-            _stepCountAtAlert = totalSteps;
+            _activeStepsSinceAlert = 0;
 
             Serial.println("[INACTIVITY] Alert triggered! Continuous inactivity threshold exceeded.");
             if (_onInactivityAlert) {
@@ -84,5 +107,5 @@ void InactivityMonitor::processStepActivity(uint32_t totalSteps, uint8_t current
 void InactivityMonitor::resetTimer() {
     _lastStepTimestampMs = millis();
     _alertTriggered = false;
+    _activeStepsSinceAlert = 0;
 }
-

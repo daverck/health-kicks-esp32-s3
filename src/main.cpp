@@ -342,7 +342,7 @@ void loop() {
                     }
                 }
 
-                // Inactivity monitoring with step accumulation gating
+                // Inactivity timer is reset only when steps occur in an active locomotion state.
                 inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
 
                 // Push calibrated sample into sliding buffer
@@ -399,6 +399,7 @@ void loop() {
                             }
                         }
                     }
+
                 }
             }
         }

@@ -21,7 +21,7 @@ class InactivityMonitor {
 public:
     static constexpr uint16_t DEFAULT_INACTIVITY_THRESHOLD_SEC = 3000; // 50 minutes
     static constexpr uint16_t DEFAULT_COOLDOWN_DURATION_SEC = 600;    // 10 minutes
-    static constexpr uint32_t RESUME_STEP_THRESHOLD = 10;             // Steps required to clear alert
+    static constexpr uint32_t RESUME_STEP_THRESHOLD = 2;              // Steps required to clear alert
 
     InactivityMonitor();
 

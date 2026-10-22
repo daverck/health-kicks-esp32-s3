@@ -60,7 +60,7 @@ void StudioManager::handleCommand(const std::string& command) {
                 dur = parsed;
             }
         }
-        if (dur < 1.0f) dur = 1.0f;
+        if (dur < 2.0f) dur = 2.0f;
         if (dur > 30.0f) dur = 30.0f;
         if (label.empty()) label = "unlabeled";
         if (sessId.empty()) sessId = "default-session-id";
@@ -80,6 +80,18 @@ void StudioManager::handleCommand(const std::string& command) {
         _sessionId = sessId;
 
         startCountdown();
+    } else if (command == "FINISH") {
+        if (_state != StudioState::RECORDING) {
+            _bleServer->notifyStudioControl("ERROR not_recording");
+            return;
+        }
+
+        if (millis() - _recordingStartTimeMs < 2000) {
+            _bleServer->notifyStudioControl("ERROR minimum_duration");
+            return;
+        }
+
+        finishRecordingAndStreamBurst();
     } else if (command == "CANCEL") {
         cancel();
     }
@@ -200,6 +212,8 @@ void StudioManager::update() {
 }
 
 void StudioManager::finishRecordingAndStreamBurst() {
+    const float actualDurationSec =
+        (millis() - _recordingStartTimeMs) / 1000.0f;
     _state = StudioState::TRANSMITTING_BURST;
 
     // Trigger discrete double pulse to signal end of physical recording window
@@ -210,7 +224,14 @@ void StudioManager::finishRecordingAndStreamBurst() {
     Serial.printf("[STUDIO] Recording finished. Samples collected: %u\n", (unsigned int)_frames.size());
 
     char finishMsg[128];
-    snprintf(finishMsg, sizeof(finishMsg), "FINISHED %u %s", (unsigned int)_frames.size(), _sessionId.c_str());
+    snprintf(
+        finishMsg,
+        sizeof(finishMsg),
+        "FINISHED %u %s %.3f",
+        (unsigned int)_frames.size(),
+        _sessionId.c_str(),
+        actualDurationSec
+    );
     _bleServer->notifyStudioControl(finishMsg);
 
     sendBurstPackets();

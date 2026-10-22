@@ -198,6 +198,13 @@ void HealthKicksBleServer::begin(const char* deviceName) {
     _otaService.begin([this](const uint8_t* data, size_t len) {
         this->notifyOtaControl(data, len);
     });
+    _otaService.setStateChangeCallback([this](bool active) {
+        if (active) {
+            requestFastBurstConnectionParams();
+        } else {
+            requestNominalConnectionParams();
+        }
+    });
 
     // Create standard Bluetooth SIG Device Information Service (0x180A)
     NimBLEService* pDisService = _pServer->createService(NimBLEUUID((uint16_t)0x180A));
@@ -466,7 +473,7 @@ bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {
 
 void HealthKicksBleServer::requestFastBurstConnectionParams() {
     if (_pServer && _deviceConnected && _connHandle != BLE_HS_CONN_HANDLE_NONE) {
-        Serial.printf("[BLE] Requesting Fast Burst connection interval: 15-20 ms (conn_handle: %d)\n", _connHandle);
+        Serial.printf("[BLE] Requesting Fast transfer connection interval: 15-20 ms (conn_handle: %d)\n", _connHandle);
         _pServer->updateConnParams(_connHandle, 12, 16, 0, 400);
     }
 }

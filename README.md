@@ -85,20 +85,8 @@ graph LR
     GPIO5 --> IMU_SCL
     IMU_INT --> GPIO6
     GPIO7 --> MOSFET
-    GPIO13 --> R_LED --> LED_BL
-    SW_1 --> GPIO14
-```
-
-    %% Signaux IMU
-    GPIO4 <--> IMU_SDA
-    GPIO5 --> IMU_SCL
-    IMU_INT --> GPIO6
-
-    %% Signal Vibreur
-    GPIO7 --> MOSFET
     MOSFET --> MOT_NEG
-
-    %% Signal Bouton
+    GPIO13 --> R_LED --> LED_BL
     SW_1 --> GPIO14
 ```
 
@@ -272,7 +260,7 @@ Ce script vérifie automatiquement la compilation du firmware via PlatformIO (`p
 
 ---
 
-### B. Méthode Manuelle : Script d'Export Dédié (`tools/export_model_to_c.py`)
+## B. Méthode Manuelle : Script d'Export Dédié (`tools/export_model_to_c.py`)
 
 Si vous disposez déjà d'un fichier de modèle entraîné `.joblib` et souhaitez uniquement générer le header C++ :
 
@@ -299,6 +287,3 @@ python tools/export_model_to_c.py --model path/to/model.joblib --output include/
 1. Entraîner et exporter le modèle (automatique via `update_edge_model.py` ou manuel via `export_model_to_c.py`).
 2. Vérifier la compilation du firmware avec `pio run`.
 3. Flasher l'ESP32-S3 via USB CDC avec `pio run --target upload`.
-
-
-

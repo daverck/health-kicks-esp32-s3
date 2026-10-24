@@ -434,6 +434,30 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
         return;
     }
 
+    // Check for ASCII SET_HITL command: SET_HITL <0|1>
+    if (cmd.startsWith("SET_HITL")) {
+        int firstSpace = cmd.indexOf(' ');
+        if (firstSpace > 0) {
+            int val = cmd.substring(firstSpace + 1).toInt();
+            if (val == 0 || val == 1) {
+                _hitlEnabled = (val == 1);
+                Serial.printf("[BLE] Studio Control SET_HITL: %d\n", val);
+                if (_onHitlConfig) {
+                    _onHitlConfig(_hitlEnabled);
+                }
+                char resp[32];
+                snprintf(resp, sizeof(resp), "HITL_OK %d", val);
+                notifyStudioControl(resp);
+                return;
+            } else {
+                notifyStudioControl("HITL_ERROR invalid_params");
+                return;
+            }
+        }
+        notifyStudioControl("HITL_ERROR invalid_params");
+        return;
+    }
+
     // Check for ASCII CALIBRATE command
     if (cmd.equalsIgnoreCase("CALIBRATE") || cmd.startsWith("CALIB")) {
         Serial.println("[BLE] Studio Control CALIBRATE command received");

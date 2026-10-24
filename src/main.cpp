@@ -44,6 +44,16 @@ static uint32_t lastStepDetectedMs = 0;
 static bool hasPendingIdleConfirmation = false;
 static bool prevBleConnected = false;
 
+// Human-in-the-Loop (HITL) rolling frame buffer (4.0s @ 19 Hz = 76 samples)
+static const size_t HITL_BUFFER_CAPACITY = 76;
+static const size_t HITL_POST_TRIGGER_SAMPLES = 28; // ~1.5s post-event (28 * 53ms ≈ 1.48s)
+static ImuRawFrame hitlRingBuffer[HITL_BUFFER_CAPACITY];
+static size_t hitlRingHead = 0;
+static size_t hitlBufferCount = 0;
+static bool hitlCapturePending = false;
+static size_t hitlPostSamplesRemaining = 0;
+static uint32_t hitlTriggerEpochSec = 0;
+
 // Anti-Bricking & Rollback Probationary State
 static bool otaPendingVerification = false;
 static uint32_t otaVerificationStartMs = 0;
@@ -363,6 +373,47 @@ void loop() {
                 // Inactivity timer is reset only when steps occur in an active locomotion state.
                 inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
 
+                // Store calibrated sample into HITL ring buffer (4.0s history)
+                ImuRawFrame hitlFrame;
+                hitlFrame.delta_ms = 0;
+                hitlFrame.ax = (int16_t)(ax * 1000.0f);
+                hitlFrame.ay = (int16_t)(ay * 1000.0f);
+                hitlFrame.az = (int16_t)(az * 1000.0f);
+                hitlFrame.gx = (int16_t)(gx * 10.0f);
+                hitlFrame.gy = (int16_t)(gy * 10.0f);
+                hitlFrame.gz = (int16_t)(gz * 10.0f);
+
+                hitlRingBuffer[hitlRingHead] = hitlFrame;
+                hitlRingHead = (hitlRingHead + 1) % HITL_BUFFER_CAPACITY;
+                if (hitlBufferCount < HITL_BUFFER_CAPACITY) {
+                    hitlBufferCount++;
+                }
+
+                if (hitlCapturePending) {
+                    if (hitlPostSamplesRemaining > 0) {
+                        hitlPostSamplesRemaining--;
+                    }
+                    if (hitlPostSamplesRemaining == 0) {
+                        hitlCapturePending = false;
+                        if (bleServer.isConnected() && bleServer.isHitlEnabled() && !studioManager.isBusy()) {
+                            std::vector<ImuRawFrame> burstFrames;
+                            burstFrames.reserve(hitlBufferCount);
+                            size_t startIdx = (hitlBufferCount == HITL_BUFFER_CAPACITY) ? hitlRingHead : 0;
+                            for (size_t i = 0; i < hitlBufferCount; ++i) {
+                                size_t idx = (startIdx + i) % HITL_BUFFER_CAPACITY;
+                                ImuRawFrame f = hitlRingBuffer[idx];
+                                f.delta_ms = (uint16_t)(i * IMU_SAMPLE_PERIOD_MS);
+                                burstFrames.push_back(f);
+                            }
+                            char sessionId[64];
+                            snprintf(sessionId, sizeof(sessionId), "hitl-%u", (unsigned int)hitlTriggerEpochSec);
+                            Serial.printf("[HITL] Dispatching 4.0s burst of %u samples for session %s...\n",
+                                          (unsigned int)burstFrames.size(), sessionId);
+                            studioManager.streamHitlBurst(burstFrames, sessionId);
+                        }
+                    }
+                }
+
                 // Push calibrated sample into sliding buffer
                 activityDetector.pushSample(ax, ay, az, gx, gy, gz);
 
@@ -403,6 +454,11 @@ void loop() {
                                     );
                                 }
                                 lastReportedActivityState = result.stateCode;
+                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
+                                    hitlCapturePending = true;
+                                    hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
+                                    hitlTriggerEpochSec = epochSec;
+                                }
                             } else if (result.stateCode != lastReportedActivityState) {
                                 Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Latency: %u us)\n",
                                               result.className, result.confidence * 100.0f, result.inferenceTimeUs);
@@ -414,6 +470,11 @@ void loop() {
                                     0
                                 );
                                 lastReportedActivityState = result.stateCode;
+                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
+                                    hitlCapturePending = true;
+                                    hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
+                                    hitlTriggerEpochSec = epochSec;
+                                }
                             }
                         }
                     }

@@ -11,6 +11,7 @@ typedef std::function<void(const String& command)> StudioCommandCallback;
 typedef std::function<void()> CalibrationTriggerCallback;
 typedef std::function<void(bool enabled, uint16_t thresholdSec, uint16_t cooldownSec)> InactivityConfigCallback;
 typedef std::function<void(float minFallImpactMs2)> FallImpactConfigCallback;
+typedef std::function<void(bool enabled)> HitlConfigCallback;
 
 // Asynchronous BLE advertising restart flag (handled in loop() to avoid radio deadlocks)
 extern volatile bool g_need_restart_advertising;
@@ -70,6 +71,9 @@ public:
     void setCalibrationCallback(CalibrationTriggerCallback cb) { _onCalibration = cb; }
     void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
     void setFallImpactConfigCallback(FallImpactConfigCallback cb) { _onFallImpactConfig = cb; }
+    void setHitlConfigCallback(HitlConfigCallback cb) { _onHitlConfig = cb; }
+    bool isHitlEnabled() const { return _hitlEnabled; }
+    void setHitlEnabled(bool enabled) { _hitlEnabled = enabled; }
 
     bool isConnected() const { return _deviceConnected; }
     NimBLEServer* getServer() const { return _pServer; }
@@ -133,4 +137,6 @@ private:
     CalibrationTriggerCallback _onCalibration;
     InactivityConfigCallback _onInactivityConfig;
     FallImpactConfigCallback _onFallImpactConfig;
+    HitlConfigCallback _onHitlConfig;
+    bool _hitlEnabled = false;
 };

@@ -451,3 +451,20 @@ void StudioManager::cancel() {
         Serial.println("[STUDIO] Session cancelled.");
     }
 }
+
+void StudioManager::streamHitlBurst(const std::vector<ImuRawFrame>& frames, const std::string& sessionId) {
+    if (!_bleServer || !_bleServer->isConnected() || frames.empty()) {
+        return;
+    }
+    if (_state != StudioState::IDLE) {
+        Serial.println("[STUDIO] Ignoring HITL burst: Studio session is currently active.");
+        return;
+    }
+    _frames = frames;
+    _sessionId = sessionId;
+    char finishMsg[128];
+    snprintf(finishMsg, sizeof(finishMsg), "FINISHED %u %s 4.0", (unsigned int)_frames.size(), _sessionId.c_str());
+    _bleServer->notifyStudioControl(finishMsg);
+    sendBurstPackets();
+    _frames.clear();
+}

@@ -43,6 +43,11 @@ public:
     bool isRecording() const { return _state == StudioState::RECORDING; }
     bool isBusy() const { return _state != StudioState::IDLE; }
 
+    /**
+     * @brief Diffuse une salve de trames IMU acquises en mode Human-in-the-Loop (HITL).
+     */
+    void streamHitlBurst(const std::vector<ImuRawFrame>& frames, const std::string& sessionId);
+
 private:
     void startCountdown();
     void startRecording();

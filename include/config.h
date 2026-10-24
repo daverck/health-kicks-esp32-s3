@@ -82,6 +82,11 @@
 #define IMU_WOM_THRESHOLD                   20       // Motion threshold (1 LSB = 32 mg, 20 = ~640 mg)
 #define IMU_WOM_DURATION                    2        // Minimum duration count for motion event
 
+// Fall Impact Detection Threshold (in m/s^2, default 16.2 m/s^2 ~ 1.65 g)
+#define DEFAULT_MIN_FALL_IMPACT_MS2         16.2f
+#define MIN_FALL_IMPACT_MIN_MS2             10.0f
+#define MIN_FALL_IMPACT_MAX_MS2             25.0f
+
 /**
  * @brief Configure Deep Sleep wakeup via GPIO 14 button (ext1)
  */

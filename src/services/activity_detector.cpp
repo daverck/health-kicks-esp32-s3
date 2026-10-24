@@ -9,7 +9,7 @@ ActivityDetector::ActivityDetector()
       _samplesSinceLastEval(0),
       _confidenceThreshold(0.50f),
       _fallConfidenceThreshold(0.65f),
-      _minFallImpactMs2(18.0f),
+      _minFallImpactMs2(16.2f),
       _minForwardFallImpactMs2(12.0f),
       _fallCooldownMs(5000),
       _lastFallTimestampMs(0) {

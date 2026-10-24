@@ -25,6 +25,9 @@ static ImuCalibrator imuCalibrator;
 static StepDetector stepDetector;
 static InactivityMonitor inactivityMonitor;
 static OfflineFallStorage offlineFallStorage;
+static Preferences configPrefs;
+static const char* CONFIG_NVS_NAMESPACE = "hk_config";
+static const char* KEY_FALL_IMPACT = "fall_impact";
 
 // Timers and scheduling
 static uint32_t lastImuReadMs = 0;
@@ -143,11 +146,18 @@ void setup() {
     // Configure Studio capture manager with dynamic tilt calibrator
     studioManager.begin(&bleServer, &haptic, &imu, &imuCalibrator);
 
-    // Configure Edge AI activity detection engine (0.50f threshold for 9-class ensemble)
-    activityDetector.begin(0.50f, 5000, 18.0f);
-    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%).\n",
+    // Configure Edge AI activity detection engine with persisted fall impact or default 16.2 m/s2 (~1.65 g)
+    configPrefs.begin(CONFIG_NVS_NAMESPACE, false);
+    float fallImpact = configPrefs.getFloat(KEY_FALL_IMPACT, DEFAULT_MIN_FALL_IMPACT_MS2);
+    if (fallImpact < MIN_FALL_IMPACT_MIN_MS2 || fallImpact > MIN_FALL_IMPACT_MAX_MS2) {
+        fallImpact = DEFAULT_MIN_FALL_IMPACT_MS2;
+    }
+    activityDetector.begin(0.50f, 5000, fallImpact);
+    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%, MinImpact: %.2f m/s2 / %.2f g).\n",
                   MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT,
-                  activityDetector.getConfidenceThreshold() * 100.0f);
+                  activityDetector.getConfidenceThreshold() * 100.0f,
+                  activityDetector.getMinFallImpact(),
+                  activityDetector.getMinFallImpact() / 9.80665f);
 
     // Configure Dynamic IMU Tilt Calibrator (4.0s stillness window @ 19 Hz)
     imuCalibrator.begin(IMU_SAMPLE_FREQ_HZ, 4.0f);
@@ -204,6 +214,14 @@ void setup() {
     bleServer.setInactivityConfigCallback([](bool enabled, uint16_t threshSec, uint16_t coolSec) {
         PowerManager::recordActivity(millis());
         inactivityMonitor.configure(enabled, threshSec, coolSec);
+    });
+
+    bleServer.setFallImpactConfigCallback([](float minFallImpactMs2) {
+        PowerManager::recordActivity(millis());
+        activityDetector.setMinFallImpact(minFallImpactMs2);
+        configPrefs.putFloat(KEY_FALL_IMPACT, minFallImpactMs2);
+        Serial.printf("[EDGE-AI] Fall impact threshold updated to %.2f m/s2 (%.2f g) and persisted in NVS.\n",
+                      minFallImpactMs2, minFallImpactMs2 / 9.80665f);
     });
 
     bleServer.getOtaService().setStateChangeCallback([](bool active) {

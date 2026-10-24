@@ -409,6 +409,31 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
         return;
     }
 
+    // Check for ASCII SET_FALL_IMPACT command: SET_FALL_IMPACT <impact_ms2>
+    if (cmd.startsWith("SET_FALL_IMPACT")) {
+        int firstSpace = cmd.indexOf(' ');
+        if (firstSpace > 0) {
+            float impact = cmd.substring(firstSpace + 1).toFloat();
+            if (impact >= MIN_FALL_IMPACT_MIN_MS2 && impact <= MIN_FALL_IMPACT_MAX_MS2) {
+                Serial.printf("[BLE] Studio Control SET_FALL_IMPACT: %.2f m/s2 (%.2f g)\n", impact, impact / 9.80665f);
+                if (_onFallImpactConfig) {
+                    _onFallImpactConfig(impact);
+                }
+                char resp[32];
+                snprintf(resp, sizeof(resp), "FALL_IMPACT_OK %.1f", impact);
+                notifyStudioControl(resp);
+                return;
+            } else {
+                Serial.printf("[BLE] Studio Control SET_FALL_IMPACT rejected: %.2f out of range [%.1f, %.1f]\n",
+                              impact, MIN_FALL_IMPACT_MIN_MS2, MIN_FALL_IMPACT_MAX_MS2);
+                notifyStudioControl("FALL_IMPACT_ERROR out_of_range");
+                return;
+            }
+        }
+        notifyStudioControl("FALL_IMPACT_ERROR invalid_params");
+        return;
+    }
+
     // Check for ASCII CALIBRATE command
     if (cmd.equalsIgnoreCase("CALIBRATE") || cmd.startsWith("CALIB")) {
         Serial.println("[BLE] Studio Control CALIBRATE command received");

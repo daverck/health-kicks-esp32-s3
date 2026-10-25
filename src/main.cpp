@@ -210,9 +210,9 @@ void setup() {
         haptic.play(pattern, intensity, durationMs);
     });
 
-    bleServer.setStudioCommandCallback([](const String& command) {
+    bleServer.setStudioCommandCallback([](const std::string& command) {
         PowerManager::recordActivity(millis());
-        studioManager.handleCommand(command.c_str());
+        studioManager.handleCommand(command);
     });
 
     bleServer.setCalibrationCallback([]() {

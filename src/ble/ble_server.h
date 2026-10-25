@@ -7,7 +7,7 @@
 #include "ota_ble_service.h"
 
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
-typedef std::function<void(const String& command)> StudioCommandCallback;
+typedef std::function<void(const std::string& command)> StudioCommandCallback;
 typedef std::function<void()> CalibrationTriggerCallback;
 typedef std::function<void(bool enabled, uint16_t thresholdSec, uint16_t cooldownSec)> InactivityConfigCallback;
 typedef std::function<void(float minFallImpactMs2)> FallImpactConfigCallback;

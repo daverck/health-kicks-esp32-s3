@@ -325,29 +325,7 @@ void HealthKicksBleServer::handleHapticWrite(const uint8_t* data, size_t length)
     }
     Serial.println();
 
-    // Check for Inactivity configuration command (Opcode 0x06 - 6 bytes)
-    if (length >= 6 && data[0] == CMD_SET_INACTIVITY_CONFIG) {
-        bool enabled = (data[1] != 0);
-        uint16_t thresh = ((uint16_t)data[2] << 8) | (uint16_t)data[3];
-        uint16_t cool = ((uint16_t)data[4] << 8) | (uint16_t)data[5];
-
-        Serial.printf("[BLE] Inactivity config received: enabled=%d, thresh=%u s, cool=%u s\n",
-                      enabled, thresh, cool);
-        if (_onInactivityConfig) {
-            _onInactivityConfig(enabled, thresh, cool);
-        }
-        return;
-    }
-
-    // Check for Zero-Calibration command (Opcode 0x05)
-    if (length >= 1 && data[0] == CMD_TRIGGER_CALIBRATION) {
-        Serial.println("[BLE] Zero-calibration command received (Opcode 0x05)");
-        if (_onCalibration) {
-            _onCalibration();
-        }
-        return;
-    }
-
+    // Characteristic 0003 is strictly reserved for direct haptic commands (4 bytes: pattern, intensity, duration_ms)
     if (length >= 4) {
         uint8_t pattern = data[0];
         uint8_t intensity = data[1];
@@ -375,47 +353,52 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
     _lastActivityTime = millis();
     if (length == 0) return;
 
-    String cmd = "";
-    for (size_t i = 0; i < length; i++) {
-        cmd += static_cast<char>(data[i]);
+    // Fixed stack buffer avoiding dynamic heap String allocations and fragmentation
+    char cmdBuf[128];
+    size_t copyLen = (length < sizeof(cmdBuf) - 1) ? length : (sizeof(cmdBuf) - 1);
+    memcpy(cmdBuf, data, copyLen);
+    cmdBuf[copyLen] = '\0';
+
+    // In-place trim of trailing control/whitespace characters
+    while (copyLen > 0 && (cmdBuf[copyLen - 1] == ' ' || cmdBuf[copyLen - 1] == '\r' || cmdBuf[copyLen - 1] == '\n' || cmdBuf[copyLen - 1] == '\t')) {
+        cmdBuf[--copyLen] = '\0';
     }
-    cmd.trim();
 
-    log_i("BLE Studio Control Write received: \"%s\"", cmd.c_str());
+    // Skip leading whitespace
+    const char* pCmd = cmdBuf;
+    while (*pCmd == ' ' || *pCmd == '\t') {
+        pCmd++;
+    }
 
-    // Check for ASCII SET_INACTIVITY command: SET_INACTIVITY <0|1> <thresh_sec> <cool_sec>
-    if (cmd.startsWith("SET_INACTIVITY")) {
-        int firstSpace = cmd.indexOf(' ');
-        if (firstSpace > 0) {
-            int secondSpace = cmd.indexOf(' ', firstSpace + 1);
-            if (secondSpace > 0) {
-                int thirdSpace = cmd.indexOf(' ', secondSpace + 1);
-                if (thirdSpace > 0) {
-                    bool enabled = cmd.substring(firstSpace + 1, secondSpace).toInt() != 0;
-                    uint16_t thresh = (uint16_t)cmd.substring(secondSpace + 1, thirdSpace).toInt();
-                    uint16_t cool = (uint16_t)cmd.substring(thirdSpace + 1).toInt();
+    if (*pCmd == '\0') return;
 
-                    Serial.printf("[BLE] Studio Control SET_INACTIVITY: enabled=%d, thresh=%u s, cool=%u s\n",
-                                  enabled, thresh, cool);
-                    if (_onInactivityConfig) {
-                        _onInactivityConfig(enabled, thresh, cool);
-                    }
-                    notifyStudioControl("INACTIVITY_CONFIG_OK");
-                    return;
-                }
+    log_i("BLE Device & Studio Control Write received: \"%s\"", pCmd);
+
+    // 1. SET_INACTIVITY <enabled:0|1> <threshold_sec> <cooldown_sec>
+    if (strncmp(pCmd, "SET_INACTIVITY", 14) == 0) {
+        int enabledInt = 0;
+        unsigned int thresh = 0;
+        unsigned int cool = 0;
+        if (sscanf(pCmd + 14, "%d %u %u", &enabledInt, &thresh, &cool) == 3) {
+            bool enabled = (enabledInt != 0);
+            Serial.printf("[BLE] Device Control SET_INACTIVITY: enabled=%d, thresh=%u s, cool=%u s\n",
+                          enabled, (uint16_t)thresh, (uint16_t)cool);
+            if (_onInactivityConfig) {
+                _onInactivityConfig(enabled, (uint16_t)thresh, (uint16_t)cool);
             }
+            notifyStudioControl("INACTIVITY_CONFIG_OK");
+            return;
         }
         notifyStudioControl("INACTIVITY_CONFIG_ERROR invalid_params");
         return;
     }
 
-    // Check for ASCII SET_FALL_IMPACT command: SET_FALL_IMPACT <impact_ms2>
-    if (cmd.startsWith("SET_FALL_IMPACT")) {
-        int firstSpace = cmd.indexOf(' ');
-        if (firstSpace > 0) {
-            float impact = cmd.substring(firstSpace + 1).toFloat();
+    // 2. SET_FALL_IMPACT <impact_ms2>
+    if (strncmp(pCmd, "SET_FALL_IMPACT", 15) == 0) {
+        float impact = 0.0f;
+        if (sscanf(pCmd + 15, "%f", &impact) == 1) {
             if (impact >= MIN_FALL_IMPACT_MIN_MS2 && impact <= MIN_FALL_IMPACT_MAX_MS2) {
-                Serial.printf("[BLE] Studio Control SET_FALL_IMPACT: %.2f m/s2 (%.2f g)\n", impact, impact / 9.80665f);
+                Serial.printf("[BLE] Device Control SET_FALL_IMPACT: %.2f m/s2 (%.2f g)\n", impact, impact / 9.80665f);
                 if (_onFallImpactConfig) {
                     _onFallImpactConfig(impact);
                 }
@@ -424,7 +407,7 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
                 notifyStudioControl(resp);
                 return;
             } else {
-                Serial.printf("[BLE] Studio Control SET_FALL_IMPACT rejected: %.2f out of range [%.1f, %.1f]\n",
+                Serial.printf("[BLE] Device Control SET_FALL_IMPACT rejected: %.2f out of range [%.1f, %.1f]\n",
                               impact, MIN_FALL_IMPACT_MIN_MS2, MIN_FALL_IMPACT_MAX_MS2);
                 notifyStudioControl("FALL_IMPACT_ERROR out_of_range");
                 return;
@@ -434,41 +417,36 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
         return;
     }
 
-    // Check for ASCII SET_HITL command: SET_HITL <0|1>
-    if (cmd.startsWith("SET_HITL")) {
-        int firstSpace = cmd.indexOf(' ');
-        if (firstSpace > 0) {
-            int val = cmd.substring(firstSpace + 1).toInt();
-            if (val == 0 || val == 1) {
-                _hitlEnabled = (val == 1);
-                Serial.printf("[BLE] Studio Control SET_HITL: %d\n", val);
-                if (_onHitlConfig) {
-                    _onHitlConfig(_hitlEnabled);
-                }
-                char resp[32];
-                snprintf(resp, sizeof(resp), "HITL_OK %d", val);
-                notifyStudioControl(resp);
-                return;
-            } else {
-                notifyStudioControl("HITL_ERROR invalid_params");
-                return;
+    // 3. SET_HITL <enabled:0|1>
+    if (strncmp(pCmd, "SET_HITL", 8) == 0) {
+        int val = -1;
+        if (sscanf(pCmd + 8, "%d", &val) == 1 && (val == 0 || val == 1)) {
+            _hitlEnabled = (val == 1);
+            Serial.printf("[BLE] Device Control SET_HITL: %d\n", val);
+            if (_onHitlConfig) {
+                _onHitlConfig(_hitlEnabled);
             }
+            char resp[32];
+            snprintf(resp, sizeof(resp), "HITL_OK %d", val);
+            notifyStudioControl(resp);
+            return;
         }
         notifyStudioControl("HITL_ERROR invalid_params");
         return;
     }
 
-    // Check for ASCII CALIBRATE command
-    if (cmd.equalsIgnoreCase("CALIBRATE") || cmd.startsWith("CALIB")) {
-        Serial.println("[BLE] Studio Control CALIBRATE command received");
+    // 4. CALIBRATE
+    if (strcasecmp(pCmd, "CALIBRATE") == 0 || strncasecmp(pCmd, "CALIB", 5) == 0) {
+        Serial.println("[BLE] Device Control CALIBRATE command received");
         if (_onCalibration) {
             _onCalibration();
         }
         return;
     }
 
+    // 5. Studio commands (START, FINISH, CANCEL) dispatched via callback
     if (_onStudioCommand) {
-        _onStudioCommand(cmd);
+        _onStudioCommand(std::string(pCmd));
     }
 }
 

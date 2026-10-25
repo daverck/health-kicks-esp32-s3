@@ -71,8 +71,9 @@
 #define HAPTIC_PATTERN_CONTINUOUS       0
 #define HAPTIC_PATTERN_DOUBLE_PULSE     1
 #define HAPTIC_PATTERN_ALERT_PULSE      2
-#define CMD_TRIGGER_CALIBRATION         0x05
-#define CMD_SET_INACTIVITY_CONFIG       0x06
+// Deprecated on 0003: Now exclusively handled via ASCII commands on 0004 (Device & Studio Control)
+// #define CMD_TRIGGER_CALIBRATION         0x05
+// #define CMD_SET_INACTIVITY_CONFIG       0x06
 
 // IMU frame parameters
 #define IMU_BYTES_PER_FRAME             14

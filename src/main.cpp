@@ -53,6 +53,8 @@ static size_t hitlBufferCount = 0;
 static bool hitlCapturePending = false;
 static size_t hitlPostSamplesRemaining = 0;
 static uint32_t hitlTriggerEpochSec = 0;
+static uint32_t lastHitlBurstTriggerMs = 0;
+static const uint32_t HITL_TRIGGER_COOLDOWN_MS = 3000;
 
 // Anti-Bricking & Rollback Probationary State
 static bool otaPendingVerification = false;
@@ -469,7 +471,8 @@ void loop() {
                                     );
                                 }
                                 lastReportedActivityState = result.stateCode;
-                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
+                                if (bleServer.isHitlEnabled() && !hitlCapturePending && (now - lastHitlBurstTriggerMs >= HITL_TRIGGER_COOLDOWN_MS)) {
+                                    lastHitlBurstTriggerMs = now;
                                     hitlCapturePending = true;
                                     hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
                                     hitlTriggerEpochSec = epochSec;
@@ -485,7 +488,8 @@ void loop() {
                                     0
                                 );
                                 lastReportedActivityState = result.stateCode;
-                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
+                                if (bleServer.isHitlEnabled() && !hitlCapturePending && (now - lastHitlBurstTriggerMs >= HITL_TRIGGER_COOLDOWN_MS)) {
+                                    lastHitlBurstTriggerMs = now;
                                     hitlCapturePending = true;
                                     hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
                                     hitlTriggerEpochSec = epochSec;

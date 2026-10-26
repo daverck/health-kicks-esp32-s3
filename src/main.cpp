@@ -53,8 +53,6 @@ static size_t hitlBufferCount = 0;
 static bool hitlCapturePending = false;
 static size_t hitlPostSamplesRemaining = 0;
 static uint32_t hitlTriggerEpochSec = 0;
-static uint32_t lastHitlBurstTriggerMs = 0;
-static const uint32_t HITL_TRIGGER_COOLDOWN_MS = 3000;
 
 // Anti-Bricking & Rollback Probationary State
 static bool otaPendingVerification = false;
@@ -383,12 +381,7 @@ void loop() {
                 }
 
                 // Inactivity timer is reset only when steps occur in an active locomotion state.
-                // Suspend and reset inactivity tracking when HITL or Studio session is active.
-                if (bleServer.isHitlEnabled() || studioManager.isBusy()) {
-                    inactivityMonitor.resetTimer();
-                } else {
-                    inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
-                }
+                inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
 
                 // Store calibrated sample into HITL ring buffer (4.0s history)
                 ImuRawFrame hitlFrame;
@@ -471,8 +464,7 @@ void loop() {
                                     );
                                 }
                                 lastReportedActivityState = result.stateCode;
-                                if (bleServer.isHitlEnabled() && !hitlCapturePending && (now - lastHitlBurstTriggerMs >= HITL_TRIGGER_COOLDOWN_MS)) {
-                                    lastHitlBurstTriggerMs = now;
+                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
                                     hitlCapturePending = true;
                                     hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
                                     hitlTriggerEpochSec = epochSec;
@@ -488,8 +480,7 @@ void loop() {
                                     0
                                 );
                                 lastReportedActivityState = result.stateCode;
-                                if (bleServer.isHitlEnabled() && !hitlCapturePending && (now - lastHitlBurstTriggerMs >= HITL_TRIGGER_COOLDOWN_MS)) {
-                                    lastHitlBurstTriggerMs = now;
+                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
                                     hitlCapturePending = true;
                                     hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
                                     hitlTriggerEpochSec = epochSec;

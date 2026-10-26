@@ -72,6 +72,7 @@ public:
     void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
     void setFallImpactConfigCallback(FallImpactConfigCallback cb) { _onFallImpactConfig = cb; }
     void setHitlConfigCallback(HitlConfigCallback cb) { _onHitlConfig = cb; }
+    void setOtaStateChangeCallback(OtaStateChangeCallback cb) { _onOtaStateChange = cb; }
     bool isHitlEnabled() const { return _hitlEnabled; }
     void setHitlEnabled(bool enabled) { _hitlEnabled = enabled; }
 
@@ -138,5 +139,6 @@ private:
     InactivityConfigCallback _onInactivityConfig;
     FallImpactConfigCallback _onFallImpactConfig;
     HitlConfigCallback _onHitlConfig;
+    OtaStateChangeCallback _onOtaStateChange;
     bool _hitlEnabled = false;
 };

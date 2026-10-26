@@ -48,7 +48,10 @@ void LedDriver::setStudioRecording(bool active) {
 }
 
 void LedDriver::setOtaUpdating(bool active) {
-    _isOtaUpdating = active;
+    if (_isOtaUpdating != active) {
+        _isOtaUpdating = active;
+        _stateTimestampMs = millis();
+    }
 }
 
 void LedDriver::update(uint32_t nowMs) {

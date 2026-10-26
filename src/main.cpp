@@ -234,7 +234,7 @@ void setup() {
                       minFallImpactMs2, minFallImpactMs2 / 9.80665f);
     });
 
-    bleServer.getOtaService().setStateChangeCallback([](bool active) {
+    bleServer.setOtaStateChangeCallback([](bool active) {
         statusLed.setOtaUpdating(active);
         if (active) {
             Serial.println("[MAIN] OTA Update started: IMU sampling & Edge AI paused.");
@@ -256,7 +256,12 @@ void setup() {
     }
 
     // Initialize Task Watchdog Timer (TWDT) with 5s timeout to protect against I2C/FreeRTOS deadlocks
-    esp_task_wdt_init(5, true);
+    esp_task_wdt_config_t twdt_config = {
+        .timeout_ms = 5000,
+        .idle_core_mask = 0,
+        .trigger_panic = true,
+    };
+    esp_task_wdt_init(&twdt_config);
     esp_task_wdt_add(NULL);
     Serial.println("[SYSTEM] FreeRTOS Task Watchdog Timer initialized (5.0s timeout).");
 }
@@ -267,9 +272,14 @@ void loop() {
 
     // Fast-path handling during OTA firmware flash: dedicate 100% CPU and Flash bandwidth to BLE stream
     if (bleServer.getOtaService().isOtaInProgress()) {
+        if (!statusLed.isOtaUpdating()) {
+            statusLed.setOtaUpdating(true);
+        }
         statusLed.update(now);
         delay(2);
         return;
+    } else if (statusLed.isOtaUpdating()) {
+        statusLed.setOtaUpdating(false);
     }
 
     // Anti-Bricking probation monitoring: confirm stability after 15 seconds of nominal execution

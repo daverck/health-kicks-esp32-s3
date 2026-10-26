@@ -115,7 +115,8 @@ HealthKicksBleServer::HealthKicksBleServer()
       _onHaptic(nullptr),
       _onStudioCommand(nullptr),
       _onCalibration(nullptr),
-      _onInactivityConfig(nullptr) {}
+      _onInactivityConfig(nullptr),
+      _onOtaStateChange(nullptr) {}
 
 void HealthKicksBleServer::begin(const char* deviceName) {
     NimBLEDevice::init(deviceName);
@@ -203,6 +204,9 @@ void HealthKicksBleServer::begin(const char* deviceName) {
             requestFastBurstConnectionParams();
         } else {
             requestNominalConnectionParams();
+        }
+        if (_onOtaStateChange) {
+            _onOtaStateChange(active);
         }
     });
 

@@ -68,13 +68,18 @@ void InactivityMonitor::processStepActivity(uint32_t totalSteps, uint8_t current
                 if (newSteps >= RESUME_STEP_THRESHOLD - _activeStepsSinceAlert) {
                     _alertTriggered = false;
                     _activeStepsSinceAlert = 0;
-                    Serial.println("[INACTIVITY] Walking resumed (>=10 active steps). Inactivity timer reset.");
+                    Serial.println("[INACTIVITY] Walking resumed (>=2 active steps). Inactivity timer reset.");
                 } else {
                     _activeStepsSinceAlert += newSteps;
                 }
             }
         }
         _lastObservedTotalSteps = totalSteps;
+    } else if (isActiveLocomotionState(currentActivityState) ||
+               currentActivityState == STATE_CODE_STUMBLE_RECOVER ||
+               currentActivityState == STATE_CODE_FALL_RECOVERY) {
+        // Active motion detected by ML inference: keep inactivity timer updated
+        _lastStepTimestampMs = nowMs;
     }
 
     if (!_enabled) {

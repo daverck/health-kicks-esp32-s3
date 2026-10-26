@@ -381,7 +381,12 @@ void loop() {
                 }
 
                 // Inactivity timer is reset only when steps occur in an active locomotion state.
-                inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
+                // Suspend and reset inactivity tracking when HITL or Studio session is active.
+                if (bleServer.isHitlEnabled() || studioManager.isBusy()) {
+                    inactivityMonitor.resetTimer();
+                } else {
+                    inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
+                }
 
                 // Store calibrated sample into HITL ring buffer (4.0s history)
                 ImuRawFrame hitlFrame;

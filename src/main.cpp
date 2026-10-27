@@ -12,6 +12,7 @@
 #include "inactivity_monitor.h"
 #include "power_manager.h"
 #include "offline_fall_storage.h"
+#include <esp_idf_version.h>
 #include <esp_task_wdt.h>
 
 // Hardware module and service instances
@@ -256,12 +257,17 @@ void setup() {
     }
 
     // Initialize Task Watchdog Timer (TWDT) with 5s timeout to protect against I2C/FreeRTOS deadlocks
+#if defined(ESP_IDF_VERSION_MAJOR) && (ESP_IDF_VERSION_MAJOR >= 5)
     esp_task_wdt_config_t twdt_config = {
         .timeout_ms = 5000,
         .idle_core_mask = 0,
         .trigger_panic = true,
     };
     esp_task_wdt_init(&twdt_config);
+#else
+    // ESP-IDF v4.x / Arduino ESP32 v2.x (timeout in seconds, panic on timeout)
+    esp_task_wdt_init(5, true);
+#endif
     esp_task_wdt_add(NULL);
     Serial.println("[SYSTEM] FreeRTOS Task Watchdog Timer initialized (5.0s timeout).");
 }

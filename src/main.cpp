@@ -14,6 +14,7 @@
 #include "offline_fall_storage.h"
 #include <esp_idf_version.h>
 #include <esp_task_wdt.h>
+#include <lwip/def.h>
 
 // Hardware module and service instances
 static ImuMpu6050 imu;
@@ -390,14 +391,15 @@ void loop() {
                 inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
 
                 // Store calibrated sample into HITL ring buffer (4.0s history)
+                // Encode in standard network byte order (Big-Endian / htons) for consistency with Studio recordings
                 ImuRawFrame hitlFrame;
                 hitlFrame.delta_ms = 0;
-                hitlFrame.ax = (int16_t)(ax * 1000.0f);
-                hitlFrame.ay = (int16_t)(ay * 1000.0f);
-                hitlFrame.az = (int16_t)(az * 1000.0f);
-                hitlFrame.gx = (int16_t)(gx * 10.0f);
-                hitlFrame.gy = (int16_t)(gy * 10.0f);
-                hitlFrame.gz = (int16_t)(gz * 10.0f);
+                hitlFrame.ax = htons((int16_t)roundf(ax * 1000.0f));
+                hitlFrame.ay = htons((int16_t)roundf(ay * 1000.0f));
+                hitlFrame.az = htons((int16_t)roundf(az * 1000.0f));
+                hitlFrame.gx = htons((int16_t)roundf(gx * 10.0f));
+                hitlFrame.gy = htons((int16_t)roundf(gy * 10.0f));
+                hitlFrame.gz = htons((int16_t)roundf(gz * 10.0f));
 
                 hitlRingBuffer[hitlRingHead] = hitlFrame;
                 hitlRingHead = (hitlRingHead + 1) % HITL_BUFFER_CAPACITY;
@@ -418,7 +420,7 @@ void loop() {
                             for (size_t i = 0; i < hitlBufferCount; ++i) {
                                 size_t idx = (startIdx + i) % HITL_BUFFER_CAPACITY;
                                 ImuRawFrame f = hitlRingBuffer[idx];
-                                f.delta_ms = (uint16_t)(i * IMU_SAMPLE_PERIOD_MS);
+                                f.delta_ms = htons((uint16_t)(i * IMU_SAMPLE_PERIOD_MS));
                                 burstFrames.push_back(f);
                             }
                             char sessionId[64];

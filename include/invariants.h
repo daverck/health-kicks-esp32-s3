@@ -46,6 +46,7 @@
 #define STATE_CODE_STAIRS_UP            0x03
 #define STATE_CODE_STAIRS_DOWN          0x04
 #define STATE_CODE_SIT_DOWN             0x05
+#define STATE_CODE_STAND_UP            0x06
 #define STATE_CODE_STAIRS               0x03  // Legacy alias for compatibility
 #define STATE_CODE_FALL_FORWARD         0x10
 #define STATE_CODE_FALL_BACKWARD        0x11

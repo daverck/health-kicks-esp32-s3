@@ -5,6 +5,7 @@ static const char* NVS_NAMESPACE = "hk_calib_v2";
 ImuCalibrator::ImuCalibrator()
     : _phase(CALIB_WAITING_INITIAL_IDLE),
       _isCalibrated(false),
+      _isLiveCalibrated(false),
       _manualCalibrationPending(false),
       _sampleRateHz(DEFAULT_SAMPLE_RATE_HZ),
       _durationSec(DEFAULT_CALIBRATION_IDLE_DURATION_SEC),
@@ -35,10 +36,12 @@ void ImuCalibrator::begin(uint16_t sampleRateHz, float durationSec) {
     // Try loading persistent calibration from NVS as initial fallback
     if (loadFromNvs()) {
         _isCalibrated = true;
+        _isLiveCalibrated = false; // Fallback for coarse activity detection only; high-precision Studio requires live calibration
         Serial.printf("[CALIB] Restored existing calibration from NVS v2 (Gyro Bias: [%.2f, %.2f, %.2f] dps).\n",
                       _gyroBiasX, _gyroBiasY, _gyroBiasZ);
     } else {
         _isCalibrated = false;
+        _isLiveCalibrated = false;
         Serial.println("[CALIB] No stored calibration found in NVS v2.");
     }
 
@@ -212,6 +215,7 @@ void ImuCalibrator::computeAndApplyAlignment(int step) {
     }
 
     _isCalibrated = true;
+    _isLiveCalibrated = true;
     Serial.printf("[CALIB] Calculated rotation matrix R (step %d) from measured gravity [%.3f, %.3f, %.3f]:\n",
                   step, nx, ny, nz);
     Serial.printf("        [ %.4f, %.4f, %.4f ]\n", _r[0][0], _r[0][1], _r[0][2]);
@@ -347,6 +351,7 @@ void ImuCalibrator::reset() {
     _gyroBiasY = 0.0f;
     _gyroBiasZ = 0.0f;
     _isCalibrated = false;
+    _isLiveCalibrated = false;
     _phase = CALIB_WAITING_INITIAL_IDLE;
     _manualCalibrationPending = false;
     _stillnessSampleCount = 0;
@@ -378,6 +383,7 @@ void ImuCalibrator::restoreFromMatrix(const float matrix9[9]) {
         }
     }
     _isCalibrated = true;
+    _isLiveCalibrated = false;
     _phase = CALIB_FIRST_DONE_WAITING_WALK;
 }
 

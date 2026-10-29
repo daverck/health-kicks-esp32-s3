@@ -77,6 +77,14 @@ void StudioManager::handleCommand(const std::string& command) {
             return;
         }
 
+        if (_calibrator && !_calibrator->isLiveCalibrated()) {
+            Serial.println("[STUDIO] Rejected: IMU not calibrated for studio session.");
+            if (_bleServer) {
+                _bleServer->notifyStudioControl("ERROR not_calibrated");
+            }
+            return;
+        }
+
         _label = label;
         _durationSec = dur;
         _sessionId = sessId;

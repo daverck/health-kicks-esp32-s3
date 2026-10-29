@@ -87,6 +87,12 @@ public:
     bool isCalibrated() const { return _isCalibrated; }
 
     /**
+     * @brief Returns true if an automatic or manual calibration completed during the current active session.
+     * NVS restoration at boot is insufficient for precision Studio recordings.
+     */
+    bool isLiveCalibrated() const { return _isLiveCalibrated; }
+
+    /**
      * @brief Returns true if an on-demand manual calibration sequence is currently in progress.
      */
     bool isCalibrating() const { return _manualCalibrationPending; }
@@ -128,6 +134,7 @@ public:
 private:
     CalibrationPhase _phase;
     bool _isCalibrated;
+    bool _isLiveCalibrated;
     bool _manualCalibrationPending;
     uint16_t _sampleRateHz;
     float _durationSec;

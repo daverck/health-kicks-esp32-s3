@@ -33,7 +33,8 @@ StudioManager::StudioManager()
       _sessionId(""),
       _stepTimestampMs(0),
       _recordingStartTimeMs(0),
-      _lastSampleTimeMs(0) {}
+      _lastSampleTimeMs(0),
+      _finishRequested(false) {}
 
 void StudioManager::begin(HealthKicksBleServer* bleServer, HapticDriver* haptic, ImuMpu6050* imu, ImuCalibrator* calibrator) {
     _bleServer = bleServer;
@@ -41,6 +42,7 @@ void StudioManager::begin(HealthKicksBleServer* bleServer, HapticDriver* haptic,
     _imu = imu;
     _calibrator = calibrator;
     _state = StudioState::IDLE;
+    _finishRequested = false;
     _frames.reserve(1600); // Reserve for 30s at 50Hz (1500 frames)
 }
 
@@ -91,7 +93,8 @@ void StudioManager::handleCommand(const std::string& command) {
             return;
         }
 
-        finishRecordingAndStreamBurst();
+        Serial.println("[STUDIO] FINISH command received -> Requesting burst completion in main loop.");
+        _finishRequested = true;
     } else if (command == "CANCEL") {
         cancel();
     }
@@ -121,6 +124,7 @@ void StudioManager::startRecording() {
     _frames.reserve(expectedSamples);
 
     _state = StudioState::RECORDING;
+    _finishRequested = false;
     _recordingStartTimeMs = millis();
     _lastSampleTimeMs = 0;
 
@@ -177,7 +181,8 @@ void StudioManager::update() {
             uint32_t elapsed = now - _recordingStartTimeMs;
             uint32_t targetDurationMs = (uint32_t)(_durationSec * 1000.0f);
 
-            if (elapsed >= targetDurationMs) {
+            if (_finishRequested || elapsed >= targetDurationMs) {
+                _finishRequested = false;
                 finishRecordingAndStreamBurst();
             } else if (now - _lastSampleTimeMs >= IMU_SAMPLE_PERIOD_MS) {
                 _lastSampleTimeMs = now;
@@ -442,6 +447,7 @@ void StudioManager::sendBurstPackets() {
 void StudioManager::cancel() {
     if (_state != StudioState::IDLE) {
         _state = StudioState::IDLE;
+        _finishRequested = false;
         _frames.clear();
         _haptic->stop();
         _bleServer->notifyStudioControl("CANCELLED");

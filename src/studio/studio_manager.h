@@ -67,6 +67,7 @@ private:
     uint32_t _stepTimestampMs;
     uint32_t _recordingStartTimeMs;
     uint32_t _lastSampleTimeMs;
+    volatile bool _finishRequested;
 
     std::vector<ImuRawFrame> _frames;
 };

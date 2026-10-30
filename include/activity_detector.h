@@ -66,7 +66,7 @@ public:
     bool isEvaluationDue() const;
 
     /**
-     * @brief Extracts 16 biomechanical features from current window and evaluates the classifier.
+     * @brief Extracts 19 biomechanical features from current window and evaluates the classifier.
      * @param[out] result Output detection result with class, state code, confidence and metrics.
      * @return true if classification completed successfully, false if insufficient samples or unconfirmed fall.
      */

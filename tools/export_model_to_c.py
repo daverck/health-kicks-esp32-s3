@@ -38,6 +38,9 @@ CANONICAL_FEATURES = [
     "gz_std",
     "acc_energy",
     "gyro_energy",
+    "ax_mean",
+    "ay_mean",
+    "az_mean",
 ]
 
 STATE_CODE_MAP = {
@@ -52,7 +55,7 @@ STATE_CODE_MAP = {
     "lying_supine": "0x07",
     "lying_prone": "0x08",
     "lying_lateral": "0x09",
-    "jump": "0x02",
+    "jump": "0x0A",
     "custom": "0x00",
     "fall_forward": "0x10",
     "fall_backward": "0x11",

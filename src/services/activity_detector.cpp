@@ -185,6 +185,11 @@ void ActivityDetector::computeFeatures(double* featureVector) {
     featureVector[13] = gz_std;
     featureVector[14] = acc_energy;
     featureVector[15] = gyro_energy;
+#if MODEL_FEATURE_COUNT >= 19
+    featureVector[16] = ax_mean;
+    featureVector[17] = ay_mean;
+    featureVector[18] = az_mean;
+#endif
 }
 
 bool ActivityDetector::isUprightFlatFootStillness() const {

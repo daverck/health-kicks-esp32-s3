@@ -56,6 +56,7 @@ STATE_CODE_MAP = {
     "lying_prone": "0x08",
     "lying_lateral": "0x09",
     "jump": "0x0A",
+    "lie_down": "0x0B",
     "custom": "0x00",
     "fall_forward": "0x10",
     "fall_backward": "0x11",

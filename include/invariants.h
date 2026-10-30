@@ -51,6 +51,7 @@
 #define STATE_CODE_LYING_PRONE          0x08
 #define STATE_CODE_LYING_LATERAL        0x09
 #define STATE_CODE_JUMP                 0x0A
+#define STATE_CODE_LIE_DOWN             0x0B
 #define STATE_CODE_STAIRS               0x03  // Legacy alias for compatibility
 #define STATE_CODE_FALL_FORWARD         0x10
 #define STATE_CODE_FALL_BACKWARD        0x11

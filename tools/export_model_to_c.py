@@ -48,6 +48,8 @@ CANONICAL_FEATURES = [
     "gyro_mag_mean_tail",
     "acc_jerk_max",
     "gyro_mag_max_to_mean",
+    "ay_p2p_first_half",
+    "ay_p2p_second_half",
 ]
 
 STATE_CODE_MAP = {

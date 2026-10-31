@@ -263,6 +263,26 @@ void ActivityDetector::computeFeatures(double* featureVector) {
     featureVector[24] = acc_jerk_max;
     featureVector[25] = gyro_mag_max_to_mean;
 #endif
+#if MODEL_FEATURE_COUNT >= 28
+    double ay_min_1 = 1e9, ay_max_1 = -1e9;
+    double ay_min_2 = 1e9, ay_max_2 = -1e9;
+    for (uint16_t i = 0; i < N; ++i) {
+        uint16_t ringIdx = (oldestIdx + i) % MODEL_WINDOW_SAMPLES;
+        double ay_val = (double)_buffer[ringIdx].ay;
+        if (i < halfN) {
+            if (ay_val < ay_min_1) ay_min_1 = ay_val;
+            if (ay_val > ay_max_1) ay_max_1 = ay_val;
+        } else {
+            if (ay_val < ay_min_2) ay_min_2 = ay_val;
+            if (ay_val > ay_max_2) ay_max_2 = ay_val;
+        }
+    }
+    double ay_p2p_first_half = (halfN > 0) ? (ay_max_1 - ay_min_1) : 0.0;
+    double ay_p2p_second_half = (tailN > 0) ? (ay_max_2 - ay_min_2) : 0.0;
+
+    featureVector[26] = ay_p2p_first_half;
+    featureVector[27] = ay_p2p_second_half;
+#endif
 }
 
 bool ActivityDetector::detect(ActivityDetectionResult& result) {
@@ -330,35 +350,7 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
 
     uint32_t nowMs = millis();
 
-    // Contextual gating for "fall_recovery" (0x13):
-    // A recovery from a fall can ONLY physically occur if a fall actually occurred in the recent past (< 45s).
-    // Without a preceding fall, standing up or shifting weight must not emit spurious "Chute relevée" alerts.
-    if (MODEL_CLASS_STATE_CODES[bestIdx] == STATE_CODE_FALL_RECOVERY) {
-        bool hasRecentFall = (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs <= 45000));
-        if (!hasRecentFall) {
-            // Find best alternative nominal class (excluding fall classes and fall_recovery)
-            int altIdx = -1;
-            double altProb = 0.0;
-            for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-                if (!MODEL_IS_FALL_CLASS[i] && MODEL_CLASS_STATE_CODES[i] != STATE_CODE_FALL_RECOVERY) {
-                    if (probs[i] > altProb) {
-                        altProb = probs[i];
-                        altIdx = i;
-                    }
-                }
-            }
-            if (altIdx >= 0 && altProb >= _confidenceThreshold) {
-                bestIdx = altIdx;
-                bestProb = altProb;
-                confidence = (float)altProb;
-            } else {
-                return false;
-            }
-        } else {
-            // Valid recovery confirmed: clear fall context
-            _lastFallTimestampMs = 0;
-        }
-    }
+    // Contextual gating removed upon user request: trust pure ML classification for all states.
 
     bool isFallClass = MODEL_IS_FALL_CLASS[bestIdx];
 
@@ -372,10 +364,12 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
             return false;
         }
 
-        // Forward falls (0x10) often involve knees/hands cushioning impact before the foot (~8-12 m/s2)
+        // Falls (forward 0x10 and backward 0x11) involve knees/hands/buttocks cushioning impact before the foot (~8-12 m/s2)
         // If confidence is solid (>= 0.65), trust the trained Random Forest directly without hard impact veto.
-        // Otherwise, enforce minimum physical impact threshold.
-        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? _minForwardFallImpactMs2 : _minFallImpactMs2;
+        // Otherwise, enforce minimum physical impact threshold (softened for both forward and backward falls).
+        bool isForwardOrBackwardFall = (MODEL_CLASS_STATE_CODES[bestIdx] == STATE_CODE_FALL_FORWARD ||
+                                        MODEL_CLASS_STATE_CODES[bestIdx] == STATE_CODE_FALL_BACKWARD);
+        float requiredImpactMs2 = isForwardOrBackwardFall ? _minForwardFallImpactMs2 : _minFallImpactMs2;
         if (confidence < 0.65f && peakImpactMs2 < requiredImpactMs2) {
             return false;
         }

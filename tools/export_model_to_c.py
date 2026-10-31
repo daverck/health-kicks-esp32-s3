@@ -107,6 +107,28 @@ def load_model_and_metadata(model_path: Path) -> tuple[Any, list[str], list[str]
     return estimator, feature_names, classes, window_size_sec, metadata
 
 
+def clean_c_tree_code(c_code: str, func_name: str) -> str:
+    import re
+    c_code = c_code.replace("void add_vectors(", "inline void add_vectors(")
+    c_code = c_code.replace("void mul_vector_number(", "inline void mul_vector_number(")
+    c_code = c_code.replace(f"void {func_name}(", f"inline void {func_name}(")
+
+    # Fix C++ compatibility for C99 compound literal memcpy
+    c_code = re.sub(
+        r"memcpy\((\w+),\s*\(double\s*\[\s*\]\)\{([^}]+)\},\s*[^;]+\);",
+        r"{ const double _tmp[] = {\2}; memcpy(\1, _tmp, sizeof(_tmp)); }",
+        c_code,
+    )
+
+    # Convert local intermediate variables to static storage to eliminate stack usage
+    c_code = re.sub(
+        r"(\n\s*)double\s+(var\d+(\[\d+\])?);",
+        r"\1static double \2;",
+        c_code,
+    )
+    return c_code
+
+
 def generate_c_header(
     estimator: Any,
     feature_names: list[str],
@@ -114,28 +136,45 @@ def generate_c_header(
     window_size_sec: float,
     metadata: dict[str, Any],
 ) -> str:
-    """Transpiles the classifier and formats the generated C header."""
-    import re
-    c_raw_code = m2c.export_to_c(estimator, function_name="raw_predict_activity")
+    """Transpiles the classifier and formats the generated C header.
 
-    # Ensure all helper functions are static/inline for header-only inclusion
-    c_raw_code = c_raw_code.replace("void add_vectors(", "inline void add_vectors(")
-    c_raw_code = c_raw_code.replace("void mul_vector_number(", "inline void mul_vector_number(")
-    c_raw_code = c_raw_code.replace("void raw_predict_activity(", "inline void raw_predict_activity(")
+    If estimator is an ensemble (RandomForestClassifier / ExtraTreesClassifier),
+    each individual tree is transpiled into its own function (tree chunking) to prevent
+    the Xtensa assembler error: 'l32r: literal target out of range' when the forest is large.
+    """
+    is_forest = hasattr(estimator, "estimators_") and len(estimator.estimators_) > 1
 
-    # Fix C++ compatibility for C99 compound literal memcpy (e.g. taking address of temporary array in G++)
-    c_raw_code = re.sub(
-        r"memcpy\((\w+),\s*\(double\s*\[\s*\]\)\{([^}]+)\},\s*[^;]+\);",
-        r"{ const double _tmp[] = {\2}; memcpy(\1, _tmp, sizeof(_tmp)); }",
-        c_raw_code,
-    )
+    if is_forest:
+        tree_snippets = []
+        tree_invocations = []
+        n_trees = len(estimator.estimators_)
+        for i, tree in enumerate(estimator.estimators_):
+            func_name = f"score_tree_{i}"
+            raw_tree = m2c.export_to_c(tree, function_name=func_name)
+            cleaned = clean_c_tree_code(raw_tree, func_name)
+            # Remove duplicated #include <string.h>
+            cleaned = cleaned.replace("#include <string.h>", "")
+            tree_snippets.append(cleaned)
+            tree_invocations.append(
+                f"        score_tree_{i}(input, tree_buf);\n"
+                f"        for (int c = 0; c < {len(classes)}; ++c) output[c] += tree_buf[c];"
+            )
 
-    # Convert local intermediate variables to static storage to eliminate stack usage on embedded FreeRTOS tasks
-    c_raw_code = re.sub(
-        r"(\n\s*)double\s+(var\d+(\[\d+\])?);",
-        r"\1static double \2;",
-        c_raw_code,
-    )
+        invocations_str = "\n".join(tree_invocations)
+        c_raw_code = "#include <string.h>\n" + "\n".join(tree_snippets) + f"""
+inline void raw_predict_activity(double *input, double *output) {{
+    memset(output, 0, {len(classes)} * sizeof(double));
+    static double tree_buf[{len(classes)}];
+{invocations_str}
+    const double inv_trees = 1.0 / {n_trees}.0;
+    for (int c = 0; c < {len(classes)}; ++c) {{
+        output[c] *= inv_trees;
+    }}
+}}
+"""
+    else:
+        c_raw_code = m2c.export_to_c(estimator, function_name="raw_predict_activity")
+        c_raw_code = clean_c_tree_code(c_raw_code, "raw_predict_activity")
 
     feature_count = len(feature_names)
     class_count = len(classes)

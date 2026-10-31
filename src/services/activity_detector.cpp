@@ -219,6 +219,29 @@ void ActivityDetector::computeFeatures(double* featureVector) {
     featureVector[20] = acc_energy_half_diff;
     featureVector[21] = gz_mean;
 #endif
+#if MODEL_FEATURE_COUNT >= 24
+    uint16_t tailN = N - halfN;
+    double invTailN = (tailN > 0) ? (1.0 / (double)tailN) : 0.0;
+    double sum_tail_acc_mag = 0.0;
+    double sum_tail_acc_mag_sq = 0.0;
+    double sum_tail_gyro_mag = 0.0;
+    for (uint16_t i = halfN; i < N; ++i) {
+        uint16_t ringIdx = (oldestIdx + i) % MODEL_WINDOW_SAMPLES;
+        const Sample& s = _buffer[ringIdx];
+        double a_mag = sqrt((double)s.ax * s.ax + (double)s.ay * s.ay + (double)s.az * s.az);
+        double g_mag = sqrt((double)s.gx * s.gx + (double)s.gy * s.gy + (double)s.gz * s.gz);
+        sum_tail_acc_mag += a_mag;
+        sum_tail_acc_mag_sq += a_mag * a_mag;
+        sum_tail_gyro_mag += g_mag;
+    }
+    double tail_acc_mean = sum_tail_acc_mag * invTailN;
+    double tail_acc_var = (sum_tail_acc_mag_sq * invTailN) - (tail_acc_mean * tail_acc_mean);
+    double acc_mag_std_tail = (tail_acc_var > 0.0) ? sqrt(tail_acc_var) : 0.0;
+    double gyro_mag_mean_tail = sum_tail_gyro_mag * invTailN;
+
+    featureVector[22] = acc_mag_std_tail;
+    featureVector[23] = gyro_mag_mean_tail;
+#endif
 }
 
 bool ActivityDetector::detect(ActivityDetectionResult& result) {

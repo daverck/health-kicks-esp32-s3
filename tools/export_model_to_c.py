@@ -41,6 +41,11 @@ CANONICAL_FEATURES = [
     "ax_mean",
     "ay_mean",
     "az_mean",
+    "ay_delta_end_start",
+    "acc_energy_half_diff",
+    "gz_mean",
+    "acc_mag_std_tail",
+    "gyro_mag_mean_tail",
 ]
 
 STATE_CODE_MAP = {

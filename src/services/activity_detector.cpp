@@ -242,6 +242,27 @@ void ActivityDetector::computeFeatures(double* featureVector) {
     featureVector[22] = acc_mag_std_tail;
     featureVector[23] = gyro_mag_mean_tail;
 #endif
+#if MODEL_FEATURE_COUNT >= 26
+    // Chronological jerk: max delta between consecutive acceleration magnitudes
+    double acc_jerk_max = 0.0;
+    double prev_a_mag = 0.0;
+    for (uint16_t i = 0; i < N; ++i) {
+        uint16_t ringIdx = (oldestIdx + i) % MODEL_WINDOW_SAMPLES;
+        const Sample& s = _buffer[ringIdx];
+        double a_mag = sqrt((double)s.ax * s.ax + (double)s.ay * s.ay + (double)s.az * s.az);
+        if (i > 0) {
+            double delta = fabs(a_mag - prev_a_mag);
+            if (delta > acc_jerk_max) {
+                acc_jerk_max = delta;
+            }
+        }
+        prev_a_mag = a_mag;
+    }
+    double gyro_mag_max_to_mean = (gyro_mag_mean > 1e-4) ? (gyro_mag_max / (gyro_mag_mean + 1e-4)) : (gyro_mag_max / 1e-4);
+
+    featureVector[24] = acc_jerk_max;
+    featureVector[25] = gyro_mag_max_to_mean;
+#endif
 }
 
 bool ActivityDetector::detect(ActivityDetectionResult& result) {

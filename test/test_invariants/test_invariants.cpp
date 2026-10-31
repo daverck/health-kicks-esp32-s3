@@ -55,7 +55,7 @@ void test_activity_state_codes_contract(void) {
 
 void test_activity_model_dimensions(void) {
     // Invariant: TinyML feature dimension and class count
-    TEST_ASSERT_EQUAL_INT(24, MODEL_FEATURE_COUNT);
+    TEST_ASSERT_EQUAL_INT(26, MODEL_FEATURE_COUNT);
     TEST_ASSERT_EQUAL_INT(16, MODEL_CLASS_COUNT);
     TEST_ASSERT_EQUAL_INT(57, MODEL_WINDOW_SAMPLES);
 }

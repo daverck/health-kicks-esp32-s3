@@ -46,6 +46,8 @@ CANONICAL_FEATURES = [
     "gz_mean",
     "acc_mag_std_tail",
     "gyro_mag_mean_tail",
+    "acc_jerk_max",
+    "gyro_mag_max_to_mean",
 ]
 
 STATE_CODE_MAP = {

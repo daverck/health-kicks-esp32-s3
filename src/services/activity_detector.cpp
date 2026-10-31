@@ -9,8 +9,8 @@ ActivityDetector::ActivityDetector()
       _samplesSinceLastEval(0),
       _confidenceThreshold(0.50f),
       _fallConfidenceThreshold(0.65f),
-      _minFallImpactMs2(16.2f),
-      _minForwardFallImpactMs2(12.0f),
+      _minFallImpactMs2(13.5f),
+      _minForwardFallImpactMs2(10.0f),
       _fallCooldownMs(5000),
       _lastFallTimestampMs(0) {
     memset(_buffer, 0, sizeof(_buffer));
@@ -20,6 +20,7 @@ void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs,
     _confidenceThreshold = confidenceThreshold;
     _fallCooldownMs = fallCooldownMs;
     _minFallImpactMs2 = minFallImpactMs2;
+    _minForwardFallImpactMs2 = (minFallImpactMs2 > 10.0f) ? 10.0f : minFallImpactMs2;
     reset();
 }
 
@@ -346,14 +347,14 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
             return true;
         }
 
-        // Forward falls (state code 0x10) often involve knees/hands absorbing impact first (~12-16 m/s2 at foot)
-        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? 12.0f : _minFallImpactMs2;
+        // Forward falls (state code 0x10) often involve knees/hands absorbing impact first (~10-14 m/s2 at foot)
+        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? _minForwardFallImpactMs2 : _minFallImpactMs2;
         if (peakImpactMs2 < requiredImpactMs2) {
             return false;
         }
 
-        // For forward fall with lower impact (12-17 m/s2), verify accompanying pitch/rotational motion
-        if (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10 && peakImpactMs2 < _minFallImpactMs2 && gyroMaxDps < 60.0f) {
+        // For forward fall with lower impact, verify accompanying pitch/rotational motion (threshold softened to 35 deg/s)
+        if (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10 && peakImpactMs2 < _minFallImpactMs2 && gyroMaxDps < 35.0f) {
             return false;
         }
 

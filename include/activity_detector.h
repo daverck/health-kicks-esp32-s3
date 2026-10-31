@@ -35,7 +35,7 @@ public:
     void begin(
         float confidenceThreshold = 0.40f,
         uint32_t fallCooldownMs = 5000,
-        float minFallImpactMs2 = 16.2f
+        float minFallImpactMs2 = 13.5f
     );
 
     /**
@@ -81,7 +81,7 @@ public:
     void setConfidenceThreshold(float threshold) { _confidenceThreshold = threshold; }
     float getConfidenceThreshold() const { return _confidenceThreshold; }
     void setFallCooldown(uint32_t cooldownMs) { _fallCooldownMs = cooldownMs; }
-    void setMinFallImpact(float minFallImpactMs2) { _minFallImpactMs2 = minFallImpactMs2; }
+    void setMinFallImpact(float minFallImpactMs2) { _minFallImpactMs2 = minFallImpactMs2; _minForwardFallImpactMs2 = (minFallImpactMs2 > 10.0f) ? 10.0f : minFallImpactMs2; }
     float getMinFallImpact() const { return _minFallImpactMs2; }
     uint32_t getSampleCount() const { return _sampleCount; }
 

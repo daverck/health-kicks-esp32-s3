@@ -83,8 +83,8 @@
 #define IMU_WOM_DURATION                    2        // Minimum duration count for motion event
 
 // Fall Impact Detection Threshold (in m/s^2, default 16.2 m/s^2 ~ 1.65 g)
-#define DEFAULT_MIN_FALL_IMPACT_MS2         16.2f
-#define MIN_FALL_IMPACT_MIN_MS2             10.0f
+#define DEFAULT_MIN_FALL_IMPACT_MS2         13.5f
+#define MIN_FALL_IMPACT_MIN_MS2             8.0f
 #define MIN_FALL_IMPACT_MAX_MS2             25.0f
 
 /**

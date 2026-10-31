@@ -101,6 +101,13 @@ private:
     uint32_t _sampleCount;
     uint32_t _samplesSinceLastEval;
 
+    // Event-Centric Triggering state (aligns evaluation with shock / transition peak)
+    bool _eventTriggerArmed;
+    bool _eventEvaluationDue;
+    uint16_t _postEventSamplesCountdown;
+    uint16_t _eventRefractoryCountdown;
+    float _prevAccMag;
+
     float _confidenceThreshold;
     float _fallConfidenceThreshold;
     float _minFallImpactMs2;

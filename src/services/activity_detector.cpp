@@ -7,10 +7,15 @@ ActivityDetector::ActivityDetector()
     : _writeIndex(0),
       _sampleCount(0),
       _samplesSinceLastEval(0),
+      _eventTriggerArmed(false),
+      _eventEvaluationDue(false),
+      _postEventSamplesCountdown(0),
+      _eventRefractoryCountdown(0),
+      _prevAccMag(1.0f),
       _confidenceThreshold(0.50f),
       _fallConfidenceThreshold(0.65f),
       _minFallImpactMs2(13.5f),
-      _minForwardFallImpactMs2(10.0f),
+      _minForwardFallImpactMs2(9.0f),
       _fallCooldownMs(5000),
       _lastFallTimestampMs(0) {
     memset(_buffer, 0, sizeof(_buffer));
@@ -20,7 +25,7 @@ void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs,
     _confidenceThreshold = confidenceThreshold;
     _fallCooldownMs = fallCooldownMs;
     _minFallImpactMs2 = minFallImpactMs2;
-    _minForwardFallImpactMs2 = (minFallImpactMs2 > 10.0f) ? 10.0f : minFallImpactMs2;
+    _minForwardFallImpactMs2 = (minFallImpactMs2 > 9.0f) ? 9.0f : minFallImpactMs2;
     reset();
 }
 
@@ -28,6 +33,11 @@ void ActivityDetector::reset() {
     _writeIndex = 0;
     _sampleCount = 0;
     _samplesSinceLastEval = 0;
+    _eventTriggerArmed = false;
+    _eventEvaluationDue = false;
+    _postEventSamplesCountdown = 0;
+    _eventRefractoryCountdown = 0;
+    _prevAccMag = 1.0f;
     memset(_buffer, 0, sizeof(_buffer));
 }
 
@@ -44,6 +54,41 @@ void ActivityDetector::pushSample(float ax, float ay, float az, float gx, float 
         _sampleCount++;
     }
     _samplesSinceLastEval++;
+
+    // Dynamic shock & jerk detection for Event-Centric temporal alignment
+    float a_mag = sqrtf(ax * ax + ay * ay + az * az);
+    float jerk = fabsf(a_mag - _prevAccMag);
+    float g_mag = sqrtf(gx * gx + gy * gy + gz * gz);
+    _prevAccMag = a_mag;
+
+    if (_eventRefractoryCountdown > 0) {
+        _eventRefractoryCountdown--;
+    }
+
+    // Dynamic trigger conditions:
+    // 1. Acceleration peak >= 1.15g (~11.3 m/s²)
+    // 2. Jerk delta >= 0.35g (~3.4 m/s² per sample at 19 Hz)
+    // 3. Angular velocity magnitude >= 90 deg/s
+    const bool isDynamicShock = (a_mag >= 1.15f || jerk >= 0.35f || g_mag >= 90.0f);
+
+    if (_sampleCount >= MODEL_WINDOW_SAMPLES) {
+        if (isDynamicShock && _eventRefractoryCountdown == 0) {
+            // (Re)arm event-centric trigger: collect ~1.05s (20 samples at 19 Hz) post-shock
+            _eventTriggerArmed = true;
+            _postEventSamplesCountdown = 20;
+        }
+
+        if (_eventTriggerArmed) {
+            if (_postEventSamplesCountdown > 0) {
+                _postEventSamplesCountdown--;
+            }
+            if (_postEventSamplesCountdown == 0) {
+                _eventTriggerArmed = false;
+                _eventEvaluationDue = true;
+                _eventRefractoryCountdown = 25; // ~1.3s refractory period to debounce consecutive triggers
+            }
+        }
+    }
 }
 
 void ActivityDetector::pushFrame(const ImuRawFrame& frame) {
@@ -73,7 +118,11 @@ bool ActivityDetector::isEvaluationDue() const {
     if (_sampleCount < MODEL_WINDOW_SAMPLES) {
         return false;
     }
-    // 50% overlap evaluation step (e.g. every 19 samples for a 38-sample window at 19 Hz)
+    // Event-centric trigger (evaluates window centered on shock peak)
+    if (_eventEvaluationDue) {
+        return true;
+    }
+    // Fallback: 50% overlap evaluation step for steady-state continuous locomotion (walk, run, idle)
     const uint32_t stepSamples = (MODEL_WINDOW_SAMPLES > 1) ? (MODEL_WINDOW_SAMPLES / 2) : 1;
     return _samplesSinceLastEval >= stepSamples;
 }
@@ -292,6 +341,7 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
 
     uint32_t startUs = micros();
     _samplesSinceLastEval = 0;
+    _eventEvaluationDue = false;
 
     double features[MODEL_FEATURE_COUNT];
     computeFeatures(features);

@@ -191,6 +191,35 @@ void ActivityDetector::computeFeatures(double* featureVector) {
     featureVector[17] = ay_mean;
     featureVector[18] = az_mean;
 #endif
+#if MODEL_FEATURE_COUNT >= 22
+    // Chronological start and end sample indices in ring buffer
+    uint16_t oldestIdx = (_sampleCount < MODEL_WINDOW_SAMPLES) ? 0 : _writeIndex;
+    uint16_t newestIdx = (_writeIndex + MODEL_WINDOW_SAMPLES - 1) % MODEL_WINDOW_SAMPLES;
+    double ay_start = (double)_buffer[oldestIdx].ay;
+    double ay_end = (double)_buffer[newestIdx].ay;
+    double ay_delta_end_start = ay_end - ay_start;
+
+    // Energy distribution: first half vs second half
+    double first_half_energy = 0.0;
+    double second_half_energy = 0.0;
+    uint16_t halfN = N / 2;
+    for (uint16_t i = 0; i < N; ++i) {
+        uint16_t ringIdx = (oldestIdx + i) % MODEL_WINDOW_SAMPLES;
+        const Sample& s = _buffer[ringIdx];
+        double magSq = (double)s.ax * s.ax + (double)s.ay * s.ay + (double)s.az * s.az;
+        if (i < halfN) {
+            first_half_energy += magSq;
+        } else {
+            second_half_energy += magSq;
+        }
+    }
+    double acc_energy_half_diff = (first_half_energy - second_half_energy) * invN;
+    double gz_mean = sum_gz * invN;
+
+    featureVector[19] = ay_delta_end_start;
+    featureVector[20] = acc_energy_half_diff;
+    featureVector[21] = gz_mean;
+#endif
 }
 
 bool ActivityDetector::isUprightFlatFootStillness() const {

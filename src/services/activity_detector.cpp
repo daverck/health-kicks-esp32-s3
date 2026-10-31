@@ -214,7 +214,6 @@ void ActivityDetector::computeFeatures(double* featureVector) {
         }
     }
     double acc_energy_half_diff = (first_half_energy - second_half_energy) * invN;
-    double gz_mean = sum_gz * invN;
 
     featureVector[19] = ay_delta_end_start;
     featureVector[20] = acc_energy_half_diff;

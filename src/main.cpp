@@ -449,13 +449,18 @@ void loop() {
                             }
 
                             if (result.isFall) {
-                                Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Latency: %u us) ***\n",
-                                              result.className, result.confidence * 100.0f, result.inferenceTimeUs);
+                                Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Impact: %.1f m/s2, Latency: %u us) ***\n",
+                                              result.className, result.confidence * 100.0f, result.peakImpactMs2, result.inferenceTimeUs);
 
                                 // Trigger emergency haptic feedback alert
                                 haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 255, 500);
 
                                 if (bleServer.isConnected()) {
+                                    char diagBuf[64];
+                                    snprintf(diagBuf, sizeof(diagBuf), "AI_FALL:%s %u%% pk=%.1f",
+                                             result.className, (unsigned int)(result.confidence * 100.0f), result.peakImpactMs2);
+                                    bleServer.notifyStudioControl(diagBuf);
+
                                     // Notify connected mobile client over BLE with critical fall flags
                                     bleServer.notifyActivity(
                                         result.stateCode,
@@ -478,15 +483,22 @@ void loop() {
                                     hitlTriggerEpochSec = epochSec;
                                 }
                             } else if (result.stateCode != lastReportedActivityState) {
-                                Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Latency: %u us)\n",
-                                              result.className, result.confidence * 100.0f, result.inferenceTimeUs);
+                                Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Impact: %.1f m/s2, Latency: %u us)\n",
+                                              result.className, result.confidence * 100.0f, result.peakImpactMs2, result.inferenceTimeUs);
 
-                                bleServer.notifyActivity(
-                                    result.stateCode,
-                                    (uint8_t)(result.confidence * 100.0f),
-                                    epochSec,
-                                    0
-                                );
+                                if (bleServer.isConnected()) {
+                                    char diagBuf[64];
+                                    snprintf(diagBuf, sizeof(diagBuf), "AI:%s %u%% pk=%.1f",
+                                             result.className, (unsigned int)(result.confidence * 100.0f), result.peakImpactMs2);
+                                    bleServer.notifyStudioControl(diagBuf);
+
+                                    bleServer.notifyActivity(
+                                        result.stateCode,
+                                        (uint8_t)(result.confidence * 100.0f),
+                                        epochSec,
+                                        0
+                                    );
+                                }
                                 lastReportedActivityState = result.stateCode;
                                 if (bleServer.isHitlEnabled() && !hitlCapturePending) {
                                     hitlCapturePending = true;

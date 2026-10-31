@@ -18,6 +18,7 @@ struct ActivityDetectionResult {
     uint8_t stateCode;          // BLE state code (e.g., STATE_CODE_WALK, STATE_CODE_FALL_FORWARD)
     float confidence;           // Softmax/voting confidence score (0.0f to 1.0f)
     bool isFall;                // True if predicted activity is classified as a fall
+    float peakImpactMs2;        // Peak acceleration magnitude in m/s^2 observed in window
     uint32_t inferenceTimeUs;   // Time spent computing features and running model in microseconds
     double classScores[MODEL_CLASS_COUNT]; // Individual raw prediction scores for all classes
 };
@@ -107,7 +108,6 @@ private:
     uint32_t _fallCooldownMs;
     uint32_t _lastFallTimestampMs;
 
-    // Feature extraction and biomechanical verification routines
+    // Feature extraction routine
     void computeFeatures(double* featureVector);
-    bool isUprightFlatFootStillness() const;
 };

@@ -221,37 +221,6 @@ void ActivityDetector::computeFeatures(double* featureVector) {
 #endif
 }
 
-bool ActivityDetector::isUprightFlatFootStillness() const {
-    if (_sampleCount < 15) {
-        return false;
-    }
-
-    float sum_az = 0.0f;
-    float sum_h = 0.0f;
-    float sum_gyro = 0.0f;
-    const int K = 15; // ~0.79s at 19 Hz
-
-    for (int i = 0; i < K; ++i) {
-        int idx = (_writeIndex - K + i + MODEL_WINDOW_SAMPLES) % MODEL_WINDOW_SAMPLES;
-        const Sample& s = _buffer[idx];
-        sum_az += s.az;
-        sum_h += sqrtf(s.ax * s.ax + s.ay * s.ay);
-        sum_gyro += sqrtf(s.gx * s.gx + s.gy * s.gy + s.gz * s.gz);
-    }
-
-    float avg_az = sum_az / (float)K;
-    float avg_h = sum_h / (float)K;
-    float avg_gyro = sum_gyro / (float)K;
-
-    // Upright flat foot on floor: vertical acceleration along Z is approximately 1g (0.78g to 1.20g),
-    // horizontal components are small (< 0.40g), and gyroscope indicates no rotational movement (< 35 deg/s).
-    bool isVerticalUpright = (avg_az >= 0.78f && avg_az <= 1.20f);
-    bool isHorizontalFlat = (avg_h <= 0.40f);
-    bool isStill = (avg_gyro <= 35.0f);
-
-    return isVerticalUpright && isHorizontalFlat && isStill;
-}
-
 bool ActivityDetector::detect(ActivityDetectionResult& result) {
     if (!isWindowReady()) {
         return false;
@@ -349,47 +318,24 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
 
     bool isFallClass = MODEL_IS_FALL_CLASS[bestIdx];
 
-    // Additional biomechanical confirmation for fall:
-    // Peak acceleration must exceed the physical impact threshold (in m/s^2)
+    // Peak acceleration magnitude in m/s^2 observed in window
     // features[0] is acc_mag_max in g -> convert to m/s^2
     float peakImpactMs2 = (float)features[0] * GRAVITY_MS2;
-    float accMinG = (float)features[1];        // acc_mag_min
-    float gyroMaxDps = (float)features[5];     // gyro_mag_max
 
     if (isFallClass) {
-        // Biomechanical Sitting Guard:
-        // When sitting down, the user moves backwards into a chair, but at the end of the window,
-        // the foot is resting flat on the floor, upright, and stationary.
-        // If the foot is upright on the floor and peak impact is below extreme shock (< 26.0 m/s2 = 2.65g),
-        // this is a sitting transition, NOT a dangerous backward fall!
-        if (isUprightFlatFootStillness() && peakImpactMs2 < 26.0f) {
-            result.classIndex = -1;
-            result.className = "sit_down";
-            result.stateCode = STATE_CODE_SIT_DOWN;
-            result.confidence = confidence;
-            result.isFall = false;
-            result.inferenceTimeUs = micros() - startUs;
-            for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-                result.classScores[i] = probs[i];
-            }
-            return true;
-        }
-
-        // Forward falls (state code 0x10) often involve knees/hands absorbing impact first (~10-14 m/s2 at foot)
-        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? _minForwardFallImpactMs2 : _minFallImpactMs2;
-        if (peakImpactMs2 < requiredImpactMs2) {
-            return false;
-        }
-
-        // For forward fall with lower impact, verify accompanying pitch/rotational motion (threshold softened to 35 deg/s)
-        if (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10 && peakImpactMs2 < _minFallImpactMs2 && gyroMaxDps < 35.0f) {
-            return false;
-        }
-
-        // Debouncing / Cooldown logic for falls
+        // Debouncing / Cooldown logic for falls (prevents repeat burst notifications)
         if (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs < _fallCooldownMs)) {
             return false;
         }
+
+        // Forward falls (0x10) often involve knees/hands cushioning impact before the foot (~8-12 m/s2)
+        // If confidence is solid (>= 0.65), trust the trained Random Forest directly without hard impact veto.
+        // Otherwise, enforce minimum physical impact threshold.
+        float requiredImpactMs2 = (MODEL_CLASS_STATE_CODES[bestIdx] == 0x10) ? _minForwardFallImpactMs2 : _minFallImpactMs2;
+        if (confidence < 0.65f && peakImpactMs2 < requiredImpactMs2) {
+            return false;
+        }
+
         _lastFallTimestampMs = nowMs;
     }
 
@@ -400,6 +346,7 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     result.stateCode = MODEL_CLASS_STATE_CODES[bestIdx];
     result.confidence = confidence;
     result.isFall = isFallClass;
+    result.peakImpactMs2 = peakImpactMs2;
     result.inferenceTimeUs = elapsedUs;
 
     for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {

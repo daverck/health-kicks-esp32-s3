@@ -414,16 +414,7 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
             return false;
         }
 
-        // Falls (forward 0x10 and backward 0x11) involve knees/hands/buttocks cushioning impact before the foot (~8-12 m/s2)
-        // If confidence is solid (>= 0.65), trust the trained Random Forest directly without hard impact veto.
-        // Otherwise, enforce minimum physical impact threshold (softened for both forward and backward falls).
-        bool isForwardOrBackwardFall = (MODEL_CLASS_STATE_CODES[bestIdx] == STATE_CODE_FALL_FORWARD ||
-                                        MODEL_CLASS_STATE_CODES[bestIdx] == STATE_CODE_FALL_BACKWARD);
-        float requiredImpactMs2 = isForwardOrBackwardFall ? _minForwardFallImpactMs2 : _minFallImpactMs2;
-        if (confidence < 0.65f && peakImpactMs2 < requiredImpactMs2) {
-            return false;
-        }
-
+        // Physical impact threshold veto removed upon user request to evaluate pure ML performance.
         _lastFallTimestampMs = nowMs;
     }
 

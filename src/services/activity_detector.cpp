@@ -14,18 +14,14 @@ ActivityDetector::ActivityDetector()
       _prevAccMag(1.0f),
       _confidenceThreshold(0.50f),
       _fallConfidenceThreshold(0.65f),
-      _minFallImpactMs2(13.5f),
-      _minForwardFallImpactMs2(9.0f),
       _fallCooldownMs(5000),
       _lastFallTimestampMs(0) {
     memset(_buffer, 0, sizeof(_buffer));
 }
 
-void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs, float minFallImpactMs2) {
+void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs) {
     _confidenceThreshold = confidenceThreshold;
     _fallCooldownMs = fallCooldownMs;
-    _minFallImpactMs2 = minFallImpactMs2;
-    _minForwardFallImpactMs2 = (minFallImpactMs2 > 9.0f) ? 9.0f : minFallImpactMs2;
     reset();
 }
 

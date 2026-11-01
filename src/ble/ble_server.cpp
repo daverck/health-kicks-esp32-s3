@@ -397,30 +397,6 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
         return;
     }
 
-    // 2. SET_FALL_IMPACT <impact_ms2>
-    if (strncmp(pCmd, "SET_FALL_IMPACT", 15) == 0) {
-        float impact = 0.0f;
-        if (sscanf(pCmd + 15, "%f", &impact) == 1) {
-            if (impact >= MIN_FALL_IMPACT_MIN_MS2 && impact <= MIN_FALL_IMPACT_MAX_MS2) {
-                Serial.printf("[BLE] Device Control SET_FALL_IMPACT: %.2f m/s2 (%.2f g)\n", impact, impact / 9.80665f);
-                if (_onFallImpactConfig) {
-                    _onFallImpactConfig(impact);
-                }
-                char resp[32];
-                snprintf(resp, sizeof(resp), "FALL_IMPACT_OK %.1f", impact);
-                notifyStudioControl(resp);
-                return;
-            } else {
-                Serial.printf("[BLE] Device Control SET_FALL_IMPACT rejected: %.2f out of range [%.1f, %.1f]\n",
-                              impact, MIN_FALL_IMPACT_MIN_MS2, MIN_FALL_IMPACT_MAX_MS2);
-                notifyStudioControl("FALL_IMPACT_ERROR out_of_range");
-                return;
-            }
-        }
-        notifyStudioControl("FALL_IMPACT_ERROR invalid_params");
-        return;
-    }
-
     // 3. SET_HITL <enabled:0|1>
     if (strncmp(pCmd, "SET_HITL", 8) == 0) {
         int val = -1;

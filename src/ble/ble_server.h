@@ -10,7 +10,6 @@ typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t duration
 typedef std::function<void(const std::string& command)> StudioCommandCallback;
 typedef std::function<void()> CalibrationTriggerCallback;
 typedef std::function<void(bool enabled, uint16_t thresholdSec, uint16_t cooldownSec)> InactivityConfigCallback;
-typedef std::function<void(float minFallImpactMs2)> FallImpactConfigCallback;
 typedef std::function<void(bool enabled)> HitlConfigCallback;
 
 // Asynchronous BLE advertising restart flag (handled in loop() to avoid radio deadlocks)
@@ -70,7 +69,6 @@ public:
     void setStudioCommandCallback(StudioCommandCallback cb) { _onStudioCommand = cb; }
     void setCalibrationCallback(CalibrationTriggerCallback cb) { _onCalibration = cb; }
     void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
-    void setFallImpactConfigCallback(FallImpactConfigCallback cb) { _onFallImpactConfig = cb; }
     void setHitlConfigCallback(HitlConfigCallback cb) { _onHitlConfig = cb; }
     void setOtaStateChangeCallback(OtaStateChangeCallback cb) { _onOtaStateChange = cb; }
     bool isHitlEnabled() const { return _hitlEnabled; }
@@ -137,7 +135,6 @@ private:
     StudioCommandCallback _onStudioCommand;
     CalibrationTriggerCallback _onCalibration;
     InactivityConfigCallback _onInactivityConfig;
-    FallImpactConfigCallback _onFallImpactConfig;
     HitlConfigCallback _onHitlConfig;
     OtaStateChangeCallback _onOtaStateChange;
     bool _hitlEnabled = false;

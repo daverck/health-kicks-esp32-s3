@@ -65,6 +65,8 @@ jobs:
 
       - name: Verify Binary & Compute SHA-256 Checksum
         id: checksum
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
           BIN_PATH=".pio/build/esp32-s3-devkitc-1/firmware.bin"
           if [ ! -f "$BIN_PATH" ]; then
@@ -83,7 +85,7 @@ jobs:
           
           # Extract semantic version from include/config.h if not explicitly provided
           EXTRACTED_VERSION=$(grep '#define FIRMWARE_VERSION' include/config.h | awk -F'"' '{print $2}')
-          VERSION="${{ inputs.version }}"
+          VERSION="$INPUT_VERSION"
           if [ -z "$VERSION" ]; then
             VERSION="$EXTRACTED_VERSION"
           fi
@@ -106,16 +108,22 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload Single Latest Firmware to S3
+        env:
+          VERSION: ${{ steps.checksum.outputs.version }}
+          S3_BUCKET_ENV: ${{ env.S3_BUCKET }}
+          S3_DEST_KEY: ${{ env.S3_DESTINATION_KEY }}
+          SHA256_OUT: ${{ steps.checksum.outputs.sha256 }}
+          BUILD_DATE_OUT: ${{ steps.checksum.outputs.build_date }}
         run: |
           BIN_PATH=".pio/build/esp32-s3-devkitc-1/firmware.bin"
-          VERSION="${{ steps.checksum.outputs.version }}"
+          VERSION="$VERSION"
           
-          echo "Uploading firmware to s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}..."
+          echo "Uploading firmware to s3://$S3_BUCKET_ENV/$S3_DEST_KEY..."
           
           # Overwrite destination key so strictly ONE latest firmware file is retained on S3
-          aws s3 cp "$BIN_PATH" "s3://${{ env.S3_BUCKET }}/${{ env.S3_DESTINATION_KEY }}" \
-            --metadata "version=$VERSION,sha256=${{ steps.checksum.outputs.sha256 }},built_at=${{ steps.checksum.outputs.build_date }}" \
+          aws s3 cp "$BIN_PATH" "s3://$S3_BUCKET_ENV/$S3_DEST_KEY" \
+            --metadata "version=$VERSION,sha256=$SHA256_OUT,built_at=$BUILD_DATE_OUT" \
             --content-type "application/octet-stream"
           
           echo "Upload complete! Verified single latest firmware in S3:"
-          aws s3api head-object --bucket "${{ env.S3_BUCKET }}" --key "${{ env.S3_DESTINATION_KEY }}"
+          aws s3api head-object --bucket "$S3_BUCKET_ENV" --key "$S3_DEST_KEY"

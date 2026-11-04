@@ -28,8 +28,7 @@ jobs:
         run: |
           semgrep scan \
             --config=auto \
-            --config=p/c \
-            --config=p/cpp \
+            --config=p/security-audit \
             --config=p/owasp-top-ten \
             --sarif \
             --output=semgrep.sarif \
@@ -39,18 +38,18 @@ jobs:
             --exclude=".platformio" || true
 
       - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: semgrep.sarif
+          category: semgrep
         continue-on-error: true
 
       - name: Block on High/Critical Vulnerabilities
         run: |
           semgrep scan \
             --config=auto \
-            --config=p/c \
-            --config=p/cpp \
+            --config=p/security-audit \
             --config=p/owasp-top-ten \
             --error \
             --severity=ERROR \

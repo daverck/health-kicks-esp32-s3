@@ -19,7 +19,7 @@ ActivityDetector::ActivityDetector()
     memset(_buffer, 0, sizeof(_buffer));
 }
 
-void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs, float fallConfidenceThreshold = DEFAULT_FALL_CONFIDENCE_THRESHOLD) {
+void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs, float fallConfidenceThreshold) {
     _confidenceThreshold = confidenceThreshold;
     _fallCooldownMs = fallCooldownMs;
     _fallConfidenceThreshold = fallConfidenceThreshold;

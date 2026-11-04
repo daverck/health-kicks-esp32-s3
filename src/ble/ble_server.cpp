@@ -1,4 +1,5 @@
 #include "ble_server.h"
+#include <algorithm>
 
 volatile bool g_need_restart_advertising = false;
 

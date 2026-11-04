@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <algorithm>
 #include "config.h"
 #include "invariants.h"
 #include "sensors/imu_mpu6050.h"

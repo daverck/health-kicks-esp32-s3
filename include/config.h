@@ -83,9 +83,9 @@
 #define IMU_WOM_DURATION                    2        // Minimum duration count for motion event
 
 // Fall Detection Confidence Threshold Configuration
-#define DEFAULT_FALL_CONFIDENCE_THRESHOLD  0.65    // Default confidence threshold for fall detection
-#define MIN_FALL_CONFIDENCE_THRESHOLD      0.30    // Minimum allowed confidence threshold
-#define MAX_FALL_CONFIDENCE_THRESHOLD      0.90    // Maximum allowed confidence threshold
+#define DEFAULT_FALL_CONFIDENCE_THRESHOLD  0.65f   // Default confidence threshold for fall detection
+#define MIN_FALL_CONFIDENCE_THRESHOLD      0.30f   // Minimum allowed confidence threshold
+#define MAX_FALL_CONFIDENCE_THRESHOLD      0.90f   // Maximum allowed confidence threshold
 
 
 /**

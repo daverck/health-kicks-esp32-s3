@@ -19,9 +19,10 @@ ActivityDetector::ActivityDetector()
     memset(_buffer, 0, sizeof(_buffer));
 }
 
-void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs) {
+void ActivityDetector::begin(float confidenceThreshold, uint32_t fallCooldownMs, float fallConfidenceThreshold = DEFAULT_FALL_CONFIDENCE_THRESHOLD) {
     _confidenceThreshold = confidenceThreshold;
     _fallCooldownMs = fallCooldownMs;
+    _fallConfidenceThreshold = fallConfidenceThreshold;
     reset();
 }
 
@@ -405,6 +406,11 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     float peakImpactMs2 = (float)features[0] * GRAVITY_MS2;
 
     if (isFallClass) {
+        // Check if confidence meets the fall confidence threshold
+        if (confidence < _fallConfidenceThreshold) {
+            return false;
+        }
+
         // Debouncing / Cooldown logic for falls (prevents repeat burst notifications)
         if (_lastFallTimestampMs != 0 && (nowMs - _lastFallTimestampMs < _fallCooldownMs)) {
             return false;

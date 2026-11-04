@@ -80,6 +80,8 @@ public:
     // Getters / Configuration
     void setConfidenceThreshold(float threshold) { _confidenceThreshold = threshold; }
     float getConfidenceThreshold() const { return _confidenceThreshold; }
+    void setFallConfidenceThreshold(float threshold) { _fallConfidenceThreshold = threshold; }
+    float getFallConfidenceThreshold() const { return _fallConfidenceThreshold; }
     void setFallCooldown(uint32_t cooldownMs) { _fallCooldownMs = cooldownMs; }
     uint32_t getSampleCount() const { return _sampleCount; }
 

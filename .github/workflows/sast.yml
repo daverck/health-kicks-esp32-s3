@@ -1,0 +1,60 @@
+name: SAST Security Scan (Semgrep)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  semgrep-scan:
+    name: Semgrep C/C++ SAST Scan
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep SAST Scan with SARIF
+        run: |
+          semgrep scan \
+            --config=auto \
+            --config=p/c \
+            --config=p/cpp \
+            --config=p/owasp-top-ten \
+            --sarif \
+            --output=semgrep.sarif \
+            --exclude=".pio" \
+            --exclude="build" \
+            --exclude="dist" \
+            --exclude=".platformio" || true
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+        continue-on-error: true
+
+      - name: Block on High/Critical Vulnerabilities
+        run: |
+          semgrep scan \
+            --config=auto \
+            --config=p/c \
+            --config=p/cpp \
+            --config=p/owasp-top-ten \
+            --error \
+            --severity=ERROR \
+            --exclude=".pio" \
+            --exclude="build" \
+            --exclude="dist" \
+            --exclude=".platformio"

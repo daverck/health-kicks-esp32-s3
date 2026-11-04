@@ -159,10 +159,23 @@ void setup() {
 
     // Configure Edge AI activity detection engine
     configPrefs.begin(CONFIG_NVS_NAMESPACE, false);
-    activityDetector.begin(0.50f, 5000);
-    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%).\n",
+    
+    // Load fall confidence threshold from NVS or use default
+    float fallConfidenceThreshold = DEFAULT_FALL_CONFIDENCE_THRESHOLD;
+    if (configPrefs.isKey("fall_confidence_threshold")) {
+        fallConfidenceThreshold = configPrefs.getFloat("fall_confidence_threshold", DEFAULT_FALL_CONFIDENCE_THRESHOLD);
+        // Clamp to valid range
+        fallConfidenceThreshold = std::max(MIN_FALL_CONFIDENCE_THRESHOLD, 
+                                          std::min(MAX_FALL_CONFIDENCE_THRESHOLD, fallConfidenceThreshold));
+    } else {
+        // Save default value if not present
+        configPrefs.putFloat("fall_confidence_threshold", fallConfidenceThreshold);
+    }
+    
+    activityDetector.begin(0.50f, 5000, fallConfidenceThreshold);
+    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%, Fall Conf: %.2f).\n",
                   MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT,
-                  activityDetector.getConfidenceThreshold() * 100.0f);
+                  activityDetector.getConfidenceThreshold() * 100.0f, fallConfidenceThreshold);
 
     // Configure Dynamic IMU Tilt Calibrator (4.0s stillness window @ 19 Hz)
     imuCalibrator.begin(IMU_SAMPLE_FREQ_HZ, 4.0f);
@@ -219,6 +232,16 @@ void setup() {
     bleServer.setInactivityConfigCallback([](bool enabled, uint16_t threshSec, uint16_t coolSec) {
         PowerManager::recordActivity(millis());
         inactivityMonitor.configure(enabled, threshSec, coolSec);
+    });
+
+    bleServer.setFallConfidenceConfigCallback([](float threshold) {
+        PowerManager::recordActivity(millis());
+        // Validate and clamp threshold
+        threshold = std::max(MIN_FALL_CONFIDENCE_THRESHOLD, 
+                            std::min(MAX_FALL_CONFIDENCE_THRESHOLD, threshold));
+        activityDetector.setFallConfidenceThreshold(threshold);
+        configPrefs.putFloat("fall_confidence_threshold", threshold);
+        Serial.printf("[BLE] Fall confidence threshold updated to %.2f and persisted to NVS.\n", threshold);
     });
 
     bleServer.setOtaStateChangeCallback([](bool active) {

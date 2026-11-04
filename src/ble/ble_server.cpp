@@ -415,6 +415,29 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
         return;
     }
 
+    // 3b. SET_FALL_CONFIDENCE <threshold:float>
+    if (strncmp(pCmd, "SET_FALL_CONFIDENCE", 19) == 0) {
+        float threshold = 0.0f;
+        if (sscanf(pCmd + 19, "%f", &threshold) == 1) {
+            // Validate threshold is within allowed range
+            if (threshold >= MIN_FALL_CONFIDENCE_THRESHOLD && threshold <= MAX_FALL_CONFIDENCE_THRESHOLD) {
+                Serial.printf("[BLE] Device Control SET_FALL_CONFIDENCE: %.2f\n", threshold);
+                if (_onFallConfidenceConfig) {
+                    _onFallConfidenceConfig(threshold);
+                }
+                char resp[32];
+                snprintf(resp, sizeof(resp), "FALL_CONFIDENCE_OK %.2f", threshold);
+                notifyStudioControl(resp);
+                return;
+            } else {
+                notifyStudioControl("FALL_CONFIDENCE_ERROR out_of_range");
+                return;
+            }
+        }
+        notifyStudioControl("FALL_CONFIDENCE_ERROR invalid_params");
+        return;
+    }
+
     // 4. CALIBRATE
     if (strcasecmp(pCmd, "CALIBRATE") == 0 || strncasecmp(pCmd, "CALIB", 5) == 0) {
         Serial.println("[BLE] Device Control CALIBRATE command received");

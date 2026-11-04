@@ -82,6 +82,11 @@
 #define IMU_WOM_THRESHOLD                   20       // Motion threshold (1 LSB = 32 mg, 20 = ~640 mg)
 #define IMU_WOM_DURATION                    2        // Minimum duration count for motion event
 
+// Fall Detection Confidence Threshold Configuration
+#define DEFAULT_FALL_CONFIDENCE_THRESHOLD  0.65    // Default confidence threshold for fall detection
+#define MIN_FALL_CONFIDENCE_THRESHOLD      0.30    // Minimum allowed confidence threshold
+#define MAX_FALL_CONFIDENCE_THRESHOLD      0.90    // Maximum allowed confidence threshold
+
 
 /**
  * @brief Configure Deep Sleep wakeup via GPIO 14 button (ext1)

@@ -14,7 +14,7 @@ ActivityDetector::ActivityDetector()
       _prevAccMag(1.0f),
       _confidenceThreshold(0.50f),
       _fallConfidenceThreshold(0.65f),
-      _fallCooldownMs(5000),
+      _fallCooldownMs(3000),
       _lastFallTimestampMs(0) {
     memset(_buffer, 0, sizeof(_buffer));
 }

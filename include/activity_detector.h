@@ -30,12 +30,12 @@ public:
     /**
      * @brief Initializes the sliding window buffer and inference parameters.
      * @param confidenceThreshold Minimum probability required to confirm a nominal activity (default: 0.40f for 9-class ensemble).
-     * @param fallCooldownMs Minimum interval in ms between consecutive fall alerts (default: 5000 ms).
+     * @param fallCooldownMs Minimum interval in ms between consecutive fall alerts (default: 3000 ms).
      * @param fallConfidenceThreshold Minimum confidence threshold for fall detection.
      */
     void begin(
         float confidenceThreshold = 0.40f,
-        uint32_t fallCooldownMs = 5000,
+        uint32_t fallCooldownMs = 3000,
         float fallConfidenceThreshold = 0.65f
     );
 

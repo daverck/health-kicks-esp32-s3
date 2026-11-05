@@ -88,8 +88,8 @@
 #define MAX_FALL_CONFIDENCE_THRESHOLD      0.90f   // Maximum allowed confidence threshold
 
 // Fall Detection Cooldown Configuration
-#define DEFAULT_FALL_COOLDOWN_MS           5000UL  // Default cooldown between fall alerts (5 seconds)
-#define MIN_FALL_COOLDOWN_MS               1000UL  // Minimum allowed fall cooldown (1 second)
+#define DEFAULT_FALL_COOLDOWN_MS           3000UL  // Default cooldown between fall alerts (3 seconds)
+#define MIN_FALL_COOLDOWN_MS               500UL   // Minimum allowed fall cooldown (0.5 seconds)
 #define MAX_FALL_COOLDOWN_MS               60000UL // Maximum allowed fall cooldown (60 seconds)
 
 

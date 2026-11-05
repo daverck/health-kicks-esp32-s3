@@ -62,11 +62,11 @@ void ActivityDetector::pushSample(float ax, float ay, float az, float gx, float 
         _eventRefractoryCountdown--;
     }
 
-    // Dynamic trigger conditions:
-    // 1. Acceleration peak >= 1.15g (~11.3 m/s²)
-    // 2. Jerk delta >= 0.35g (~3.4 m/s² per sample at 19 Hz)
-    // 3. Angular velocity magnitude >= 90 deg/s
-    const bool isDynamicShock = (a_mag >= 1.15f || jerk >= 0.35f || g_mag >= 90.0f);
+    // Dynamic trigger conditions (relaxed to capture smooth posture transitions as well as impacts):
+    // 1. Acceleration deviation from 1.0g >= 0.08g (||a|| >= 1.08g or <= 0.92g unloading)
+    // 2. Jerk delta >= 0.15g (~1.5 m/s² per sample at 19 Hz)
+    // 3. Angular velocity magnitude >= 35 deg/s
+    const bool isDynamicShock = (fabsf(a_mag - 1.0f) >= 0.08f || jerk >= 0.15f || g_mag >= 35.0f);
 
     if (_sampleCount >= MODEL_WINDOW_SAMPLES) {
         if (isDynamicShock && _eventRefractoryCountdown == 0) {
@@ -119,8 +119,8 @@ bool ActivityDetector::isEvaluationDue() const {
     if (_eventEvaluationDue) {
         return true;
     }
-    // Fallback: 50% overlap evaluation step for steady-state continuous locomotion (walk, run, idle)
-    const uint32_t stepSamples = (MODEL_WINDOW_SAMPLES > 1) ? (MODEL_WINDOW_SAMPLES / 2) : 1;
+    // Fallback: 10 samples (~0.53s, matching 0.5s training step) overlap step for steady-state continuous locomotion
+    const uint32_t stepSamples = 10;
     return _samplesSinceLastEval >= stepSamples;
 }
 

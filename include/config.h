@@ -87,6 +87,11 @@
 #define MIN_FALL_CONFIDENCE_THRESHOLD      0.30f   // Minimum allowed confidence threshold
 #define MAX_FALL_CONFIDENCE_THRESHOLD      0.90f   // Maximum allowed confidence threshold
 
+// Fall Detection Cooldown Configuration
+#define DEFAULT_FALL_COOLDOWN_MS           5000UL  // Default cooldown between fall alerts (5 seconds)
+#define MIN_FALL_COOLDOWN_MS               1000UL  // Minimum allowed fall cooldown (1 second)
+#define MAX_FALL_COOLDOWN_MS               60000UL // Maximum allowed fall cooldown (60 seconds)
+
 
 /**
  * @brief Configure Deep Sleep wakeup via GPIO 14 button (ext1)

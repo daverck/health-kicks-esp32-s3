@@ -117,6 +117,9 @@ HealthKicksBleServer::HealthKicksBleServer()
       _onStudioCommand(nullptr),
       _onCalibration(nullptr),
       _onInactivityConfig(nullptr),
+      _onHitlConfig(nullptr),
+      _onFallConfidenceConfig(nullptr),
+      _onFallCooldownConfig(nullptr),
       _onOtaStateChange(nullptr) {}
 
 void HealthKicksBleServer::begin(const char* deviceName) {
@@ -436,6 +439,28 @@ void HealthKicksBleServer::handleStudioControlWrite(const uint8_t* data, size_t 
             }
         }
         notifyStudioControl("FALL_CONFIDENCE_ERROR invalid_params");
+        return;
+    }
+
+    // 3c. SET_FALL_COOLDOWN <cooldown_ms:uint32>
+    if (strncmp(pCmd, "SET_FALL_COOLDOWN", 17) == 0) {
+        unsigned int cooldownMs = 0;
+        if (sscanf(pCmd + 17, "%u", &cooldownMs) == 1) {
+            if (cooldownMs >= MIN_FALL_COOLDOWN_MS && cooldownMs <= MAX_FALL_COOLDOWN_MS) {
+                Serial.printf("[BLE] Device Control SET_FALL_COOLDOWN: %u ms\n", cooldownMs);
+                if (_onFallCooldownConfig) {
+                    _onFallCooldownConfig((uint32_t)cooldownMs);
+                }
+                char resp[32];
+                snprintf(resp, sizeof(resp), "FALL_COOLDOWN_OK %u", cooldownMs);
+                notifyStudioControl(resp);
+                return;
+            } else {
+                notifyStudioControl("FALL_COOLDOWN_ERROR out_of_range");
+                return;
+            }
+        }
+        notifyStudioControl("FALL_COOLDOWN_ERROR invalid_params");
         return;
     }
 

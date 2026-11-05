@@ -12,6 +12,7 @@ typedef std::function<void()> CalibrationTriggerCallback;
 typedef std::function<void(bool enabled, uint16_t thresholdSec, uint16_t cooldownSec)> InactivityConfigCallback;
 typedef std::function<void(bool enabled)> HitlConfigCallback;
 typedef std::function<void(float threshold)> FallConfidenceConfigCallback;
+typedef std::function<void(uint32_t cooldownMs)> FallCooldownConfigCallback;
 
 // Asynchronous BLE advertising restart flag (handled in loop() to avoid radio deadlocks)
 extern volatile bool g_need_restart_advertising;
@@ -72,6 +73,7 @@ public:
     void setInactivityConfigCallback(InactivityConfigCallback cb) { _onInactivityConfig = cb; }
     void setHitlConfigCallback(HitlConfigCallback cb) { _onHitlConfig = cb; }
     void setFallConfidenceConfigCallback(FallConfidenceConfigCallback cb) { _onFallConfidenceConfig = cb; }
+    void setFallCooldownConfigCallback(FallCooldownConfigCallback cb) { _onFallCooldownConfig = cb; }
     void setOtaStateChangeCallback(OtaStateChangeCallback cb) { _onOtaStateChange = cb; }
     bool isHitlEnabled() const { return _hitlEnabled; }
     void setHitlEnabled(bool enabled) { _hitlEnabled = enabled; }
@@ -139,6 +141,7 @@ private:
     InactivityConfigCallback _onInactivityConfig;
     HitlConfigCallback _onHitlConfig;
     FallConfidenceConfigCallback _onFallConfidenceConfig;
+    FallCooldownConfigCallback _onFallCooldownConfig;
     OtaStateChangeCallback _onOtaStateChange;
     bool _hitlEnabled = false;
 };

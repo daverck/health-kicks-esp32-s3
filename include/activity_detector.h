@@ -84,6 +84,7 @@ public:
     void setFallConfidenceThreshold(float threshold) { _fallConfidenceThreshold = threshold; }
     float getFallConfidenceThreshold() const { return _fallConfidenceThreshold; }
     void setFallCooldown(uint32_t cooldownMs) { _fallCooldownMs = cooldownMs; }
+    uint32_t getFallCooldown() const { return _fallCooldownMs; }
     uint32_t getSampleCount() const { return _sampleCount; }
 
 private:

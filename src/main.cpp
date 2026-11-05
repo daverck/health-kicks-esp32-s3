@@ -172,11 +172,21 @@ void setup() {
         // Save default value if not present
         configPrefs.putFloat("fall_confidence_threshold", fallConfidenceThreshold);
     }
+
+    // Load fall cooldown from NVS or use default
+    uint32_t fallCooldownMs = DEFAULT_FALL_COOLDOWN_MS;
+    if (configPrefs.isKey("fall_cooldown_ms")) {
+        fallCooldownMs = configPrefs.getUInt("fall_cooldown_ms", DEFAULT_FALL_COOLDOWN_MS);
+        fallCooldownMs = std::max((uint32_t)MIN_FALL_COOLDOWN_MS,
+                                  std::min((uint32_t)MAX_FALL_COOLDOWN_MS, fallCooldownMs));
+    } else {
+        configPrefs.putUInt("fall_cooldown_ms", fallCooldownMs);
+    }
     
-    activityDetector.begin(0.50f, 5000, fallConfidenceThreshold);
-    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%, Fall Conf: %.2f).\n",
+    activityDetector.begin(0.50f, fallCooldownMs, fallConfidenceThreshold);
+    Serial.printf("[EDGE-AI] Activity classifier ready (Window: %.1fs / %d samples, %d classes, Thresh: %.0f%%, Fall Conf: %.2f, Fall Cooldown: %u ms).\n",
                   MODEL_WINDOW_SIZE_SEC, MODEL_WINDOW_SAMPLES, MODEL_CLASS_COUNT,
-                  activityDetector.getConfidenceThreshold() * 100.0f, fallConfidenceThreshold);
+                  activityDetector.getConfidenceThreshold() * 100.0f, fallConfidenceThreshold, fallCooldownMs);
 
     // Configure Dynamic IMU Tilt Calibrator (4.0s stillness window @ 19 Hz)
     imuCalibrator.begin(IMU_SAMPLE_FREQ_HZ, 4.0f);
@@ -243,6 +253,15 @@ void setup() {
         activityDetector.setFallConfidenceThreshold(threshold);
         configPrefs.putFloat("fall_confidence_threshold", threshold);
         Serial.printf("[BLE] Fall confidence threshold updated to %.2f and persisted to NVS.\n", threshold);
+    });
+
+    bleServer.setFallCooldownConfigCallback([](uint32_t cooldownMs) {
+        PowerManager::recordActivity(millis());
+        cooldownMs = std::max((uint32_t)MIN_FALL_COOLDOWN_MS,
+                              std::min((uint32_t)MAX_FALL_COOLDOWN_MS, cooldownMs));
+        activityDetector.setFallCooldown(cooldownMs);
+        configPrefs.putUInt("fall_cooldown_ms", cooldownMs);
+        Serial.printf("[BLE] Fall cooldown updated to %u ms and persisted to NVS.\n", cooldownMs);
     });
 
     bleServer.setOtaStateChangeCallback([](bool active) {

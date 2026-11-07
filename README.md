@@ -1,52 +1,52 @@
-# health-kicks-esp32-s3 : Firmware Embarqué Chaussure Connectée
+# health-kicks-esp32-s3: Connected Shoe Embedded Firmware
 
-Ce dépôt contient le firmware unifié pour la chaussure connectée **HealthKicks**, conçu pour le microcontrôleur **ESP32-S3-N16R8** (16 MB Flash Quad/Octal, 8 MB PSRAM Octal). Il remplace l'ancienne architecture hybride Raspberry Pi + Arduino Nano.
+This repository contains the unified firmware for the **HealthKicks** connected shoe, designed for the **ESP32-S3-N16R8** microcontroller (16 MB Quad/Octal Flash, 8 MB Octal PSRAM). It replaces the legacy hybrid Raspberry Pi + Arduino Nano architecture.
 
 ---
 
-## 1. Câblage Matériel & Broches (ESP32-S3-N16R8)
+## 1. Hardware Pinout & Wiring (ESP32-S3-N16R8)
 
-### A. Avertissement Critique : Mémoire Octal SPI (N16R8)
+### A. Critical Warning: Octal SPI Memory (N16R8)
 > [!CAUTION]
-> Sur les modules ESP32-S3 équipés de PSRAM et Flash Octale (N16R8), les broches **GPIO 33, 34, 35, 36 et 37** sont directement câblées en interne au bus mémoire Octal SPI.
-> **IL EST FORMELLEMENT INTERDIT D'UTILISER CES BROCHES EN TANT QUE GPIO GÉNÉRAUX.** Tout raccordement sur ces broches corrompt la mémoire et cause un arrêt immédiat du CPU.
+> On ESP32-S3 modules equipped with Octal PSRAM and Flash (N16R8), pins **GPIO 33, 34, 35, 36, and 37** are hardwired internally to the Octal SPI memory bus.
+> **DO NOT USE THESE PINS AS GENERAL PURPOSE GPIOS UNDER ANY CIRCUMSTANCES.** Connecting external signals to these pins causes bus corruption and immediate CPU crash/panics.
 
-### B. Tableau Synthétique des Broches
+### B. Pinout Summary Table
 
-| Composant | Broche Composant | Broche ESP32-S3 | Type / Fonction | Remarques |
+| Component | Component Pin | ESP32-S3 Pin | Type / Function | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| **MPU-6050 (IMU)** | VCC | 3V3 | Alimentation | Régulée 3.3V |
-| **MPU-6050 (IMU)** | GND | GND | Masse | Masse commune |
-| **MPU-6050 (IMU)** | **SDA** | **GPIO 4** | I2C Data (RTC IO 4) | Pull-up 4.7 kΩ vers 3.3V |
-| **MPU-6050 (IMU)** | **SCL** | **GPIO 5** | I2C Clock (RTC IO 5) | I2C Fast Mode 400 kHz, pull-up 4.7 kΩ |
-| **MPU-6050 (IMU)** | AD0 | GND | Adresse I2C | Fixe l'adresse à `0x68` |
-| **MPU-6050 (IMU)** | INT | **GPIO 6** | GPIO Interrupt | Optionnel (Wake-on-motion) |
-| **Vibreur Haptique** | Gate (MOSFET) | **GPIO 7** | LEDC PWM (0-255) | Fréquence 10 kHz, Timer 0 |
-| **LED Bleue Statut** | Anode (+ R 100 Ω)| **GPIO 13** | Output (Actif Haut) | BLE (appairage/connecté/déconnecté), Calibration, Studio |
-| **Bouton Appairage** | Contact | **GPIO 14** | RTC IO 14 (Input) | Pull-up interne, actif bas (GND), réveil `ext1` |
-| **LED RGB Statut** | Data In | **GPIO 48** | RMT / WS2812 | LED RGB embarquée sur DevKitC-1 |
-| **Mesure Batterie** | Diviseur $V_{bat}$ | **GPIO 10** | ADC1_CH9 | Diviseur 2x 100 kΩ ($V_{bat}/2$) |
-| **Octal Flash/PSRAM**| - | **GPIO 33 à 37** | **INTERDIT** | **Dédié Flash & PSRAM Octal SPI** |
-| **Strapping Pins** | - | **GPIO 0, 45, 46** | Boot Strapping | Ne pas connecter de charge externe |
-| **USB Natif CDC** | USB D- / D+ | **GPIO 19, 20** | USB CDC/JTAG | Moniteur série & flash |
+| **MPU-6050 (IMU)** | VCC | 3V3 | Power | Regulated 3.3V |
+| **MPU-6050 (IMU)** | GND | GND | Ground | Common ground |
+| **MPU-6050 (IMU)** | **SDA** | **GPIO 4** | I2C Data (RTC IO 4) | 4.7 kΩ pull-up to 3.3V |
+| **MPU-6050 (IMU)** | **SCL** | **GPIO 5** | I2C Clock (RTC IO 5) | I2C Fast Mode 400 kHz, 4.7 kΩ pull-up |
+| **MPU-6050 (IMU)** | AD0 | GND | I2C Address | Sets I2C address to `0x68` |
+| **MPU-6050 (IMU)** | INT | **GPIO 6** | GPIO Interrupt | Optional (Wake-on-motion) |
+| **Haptic Motor** | Gate (MOSFET) | **GPIO 7** | LEDC PWM (0-255) | 10 kHz frequency, Timer 0 |
+| **Blue Status LED** | Anode (+ R 100 Ω)| **GPIO 13** | Output (Active High) | BLE (pairing/connected/disconnected), Calibration, Studio |
+| **Pairing Button** | Contact | **GPIO 14** | RTC IO 14 (Input) | Internal pull-up, active low (GND), `ext1` wakeup |
+| **RGB Status LED** | Data In | **GPIO 48** | RMT / WS2812 | Onboard RGB LED on DevKitC-1 |
+| **Battery Sense** | Divider $V_{bat}$ | **GPIO 10** | ADC1_CH9 | 2x 100 kΩ divider ($V_{bat}/2$) |
+| **Octal Flash/PSRAM**| - | **GPIO 33 to 37** | **PROHIBITED** | **Dedicated to Flash & Octal SPI PSRAM** |
+| **Strapping Pins** | - | **GPIO 0, 45, 46** | Boot Strapping | Do not connect external load |
+| **Native USB CDC** | USB D- / D+ | **GPIO 19, 20** | USB CDC/JTAG | Serial monitor & flash |
 
-### C. Schéma Fonctionnel Global d'Interconnexion
+### C. Overall System Interconnection Diagram
 
 ```mermaid
 graph LR
-    subgraph ESP32["ESP32-S3-N16R8 (Microcontrôleur)"]
+    subgraph ESP32["ESP32-S3-N16R8 (Microcontroller)"]
         3V3["3.3V"]
-        GND["GND (Masse)"]
+        GND["GND (Ground)"]
         GPIO4["GPIO 4 (I2C SDA)"]
         GPIO5["GPIO 5 (I2C SCL)"]
         GPIO6["GPIO 6 (INT / Wakeup ext0)"]
         GPIO7["GPIO 7 (LEDC PWM Out)"]
-        GPIO13["GPIO 13 (LED Statut Bleue)"]
-        GPIO14["GPIO 14 (Bouton / Wakeup ext1)"]
-        GPIO10["GPIO 10 (ADC1_CH9 Batterie)"]
+        GPIO13["GPIO 13 (Blue Status LED)"]
+        GPIO14["GPIO 14 (Button / Wakeup ext1)"]
+        GPIO10["GPIO 10 (ADC1_CH9 Battery)"]
     end
 
-    subgraph IMU["Module IMU (MPU-6050)"]
+    subgraph IMU["IMU Module (MPU-6050)"]
         IMU_VCC["VCC"]
         IMU_GND["GND"]
         IMU_SDA["SDA"]
@@ -55,24 +55,24 @@ graph LR
         IMU_AD0["AD0 (GND = Addr 0x68)"]
     end
 
-    subgraph HAPTIC["Module Vibreur Haptique"]
-        MOT_POS["Moteur (+)"]
-        MOT_NEG["Moteur (-)"]
+    subgraph HAPTIC["Haptic Actuator Module"]
+        MOT_POS["Motor (+)"]
+        MOT_NEG["Motor (-)"]
         MOSFET["N-MOSFET (AO3400 / 2N7002)"]
-        DIODE["Diode Roue Libre (1N4148 / SS14)"]
+        DIODE["Flyback Diode (1N4148 / SS14)"]
     end
 
-    subgraph LED["LED Bleue de Statut"]
-        R_LED["Résistance 100 Ω"]
-        LED_BL["LED Bleue (Anode/Cathode)"]
+    subgraph LED["Blue Status LED"]
+        R_LED["100 Ω Resistor"]
+        LED_BL["Blue LED (Anode/Cathode)"]
     end
 
-    subgraph BTN["Bouton / Interrupteur"]
-        SW_1["Broche Signal"]
-        SW_2["Broche GND"]
+    subgraph BTN["Push Button / Switch"]
+        SW_1["Signal Pin"]
+        SW_2["GND Pin"]
     end
 
-    %% Alimentations & Contrôles
+    %% Power & Controls
     3V3 --> IMU_VCC
     3V3 --> MOT_POS
     GND --> IMU_GND
@@ -90,45 +90,45 @@ graph LR
     SW_1 --> GPIO14
 ```
 
-### D. Schéma Électronique Détaillé des Composants
+### D. Detailed Component Wiring Schematics
 
 ```text
 ==================================================================================================
-                              SCHÉMA DE CÂBLAGE COMPLET - ESP32-S3
+                              COMPLETE WIRING SCHEMATIC - ESP32-S3
 ==================================================================================================
 
-1. MODULE IMU (MPU-6050) - BUS I2C ET INTERRUPTION WOM
+1. IMU MODULE (MPU-6050) - I2C BUS AND WOM INTERRUPT
 --------------------------------------------------------------------------------------------------
-   ESP32-S3                                                Module MPU-6050
+   ESP32-S3                                                MPU-6050 Module
   +-----------+                                           +---------------+
   |      3.3V |------------------------------------------>| VCC           |
   |       GND |-------------------+---------------------->| GND           |
   |           |                   |                       | AD0           | (GND = Addr 0x68)
   |           |       3.3V        |                       |               |
   |           |        |          |                       |               |
-  |           |       [4.7k]      |                       |               | (Résistance Pull-up I2C)
+  |           |       [4.7k]      |                       |               | (I2C Pull-up resistor)
   |    GPIO 4 |--------+--------------------------------->| SDA           |
   |           |        |                                  |               |
   |           |       3.3V                                |               |
   |           |        |                                  |               |
-  |           |       [4.7k]                              |               | (Résistance Pull-up I2C)
+  |           |       [4.7k]                              |               | (I2C Pull-up resistor)
   |    GPIO 5 |--------+--------------------------------->| SCL           |
   |           |                                           |               |
-  |    GPIO 6 |<------------------------------------------| INT           | (Réveil WOM / ext0)
+  |    GPIO 6 |<------------------------------------------| INT           | (WOM Wakeup / ext0)
   +-----------+                                           +---------------+
 
 
-2. MODULE VIBREUR HAPTIQUE (DISCRET OU BREAKOUT)
+2. HAPTIC VIBRATOR MODULE (DISCRETE OR BREAKOUT)
 --------------------------------------------------------------------------------------------------
-   ESP32-S3                                                Étage de Puissance Moteur
-  +-----------+                                           +3.3V (ou VBAT)
+   ESP32-S3                                                Motor Power Stage
+  +-----------+                                           +3.3V (or VBAT)
   |           |                                             |
   |           |                                             +--------+
   |           |                                             |        |
   |           |                                           +---+    +---+
-  |           |                                           | + |    | A | Diode de roue libre
-  |           |                                    Moteur | M |    |   | 1N4148 / SS14
-  |           |                                   Vibreur | - |    | K | (Cathode vers +3.3V)
+  |           |                                           | + |    | A | Flyback diode
+  |           |                                    Haptic | M |    |   | 1N4148 / SS14
+  |           |                                     Motor | - |    | K | (Cathode to +3.3V)
   |           |                                           +---+    +---+
   |           |                                             |        |
   |           |                                             +--------+
@@ -143,147 +143,148 @@ graph LR
   +-----------+                                           |
                                                          GND
 
-   *Note pour module vibrant pré-assemblé (ex: breakout Grove / Keyes) :*
+   *Note for pre-assembled vibration breakout (e.g. Grove / Keyes breakout):*
    - VCC -> 3.3V
    - GND -> GND
    - IN / SIG -> GPIO 7
 
 
-3. BOUTON POUSSOIR / INTERRUPTEUR (APPAIRAGE & RÉVEIL DEEP SLEEP)
+3. PUSH BUTTON / SWITCH (PAIRING & DEEP SLEEP WAKEUP)
 --------------------------------------------------------------------------------------------------
-   ESP32-S3                                                Bouton Poussoir
+   ESP32-S3                                                Push Button
   +-----------+                                           +---------------+
-  |   GPIO 14 |------------------------------------------>| Contact A     | (Actif bas)
-  |       GND |------------------------------------------>| Contact B     | (Pull-up interne active)
+  |   GPIO 14 |------------------------------------------>| Contact A     | (Active Low)
+  |       GND |------------------------------------------>| Contact B     | (Active internal pull-up)
   +-----------+                                           +---------------+
 
 
-4. LED BLEUE DE STATUT (BLE, CALIBRATION, STUDIO)
+4. BLUE STATUS LED (BLE, CALIBRATION, STUDIO)
 --------------------------------------------------------------------------------------------------
-   ESP32-S3                                                LED Bleue + Résistance Série
+   ESP32-S3                                                Blue LED + Series Resistor
   +-----------+                                           
-  |   GPIO 13 |----------------[\/\/\]------------------->| Anode (+)     | LED Bleue
+  |   GPIO 13 |----------------[\/\/\]------------------->| Anode (+)     | Blue LED
   |           |                 100 Ω                     | Cathode (-)   |
   |       GND |------------------------------------------>|               |
   +-----------+                                           +---------------+
 
 
-5. DIVISEUR DE TENSION MESURE BATTERIE (OPTIONNEL)
+5. BATTERY MEASUREMENT VOLTAGE DIVIDER (OPTIONAL)
 --------------------------------------------------------------------------------------------------
-   ESP32-S3                                                Batterie LiPo (3.7V - 4.2V)
+   ESP32-S3                                                LiPo Battery (3.7V - 4.2V)
   +-----------+                                           +VBAT
   |           |                                             |
   |           |                                           [100k] (1%)
   |           |                                             |
-  |   GPIO 10 |---------------------------------------------+ (Tension max = VBAT / 2 = 2.1V)
+  |   GPIO 10 |---------------------------------------------+ (Max voltage = VBAT / 2 = 2.1V)
   |           |                                             |
   |           |                                           [100k] (1%)
   |           |                                             |
   |       GND |---------------------------------------------+
   +-----------+                                            GND
 ==================================================================================================
+```
 
-### E. Recommandations de Montage & Transistor Vibreur
-Pour garantir la pleine saturation du transistor avec le niveau logique 3.3V de l'ESP32-S3 :
-- Utiliser un MOSFET N-Channel à très bas seuil de déclenchement (*Logic-Level* $V_{gs(th)} < 1.8\text{V}$, idéalement **AO3400**, **IRLML2502** ou **2N7002** à faible $V_{gs(th)}$).
-- **Gate** : Résistance de limitation de 100 Ω connectée à **GPIO 7**.
-- **Pull-down Gate** : Résistance de 100 kΩ entre Gate et GND pour éviter toute impulsion au démarrage ou en Deep Sleep.
-- **Diode de roue libre** : Diode de redressement rapide (1N4148 ou diode Schottky SS14/BAT43) placée en parallèle inverse aux bornes du moteur pour absorber les surtensions inductives.
-- **Module IMU MPU-6050** : Si le module MPU-6050 intègre déjà des résistances de pull-up I2C internes de 4.7 kΩ vers 3.3V, les résistances externes peuvent être omises. La broche `AD0` doit impérativement être reliée à `GND` pour fixer l'adresse I2C à `0x68`.
+### E. Assembly & Transistor Recommendations
+To guarantee full transistor saturation with the ESP32-S3 3.3V logic level:
+- Use a logic-level N-Channel MOSFET with a low gate threshold ($V_{gs(th)} < 1.8\text{V}$, ideally **AO3400**, **IRLML2502**, or low-$V_{gs(th)}$ **2N7002**).
+- **Gate**: 100 Ω current limiting resistor connected to **GPIO 7**.
+- **Gate Pull-down**: 100 kΩ resistor between Gate and GND to avoid spurious pulses during power-up or deep sleep.
+- **Flyback Diode**: Fast switching diode (1N4148 or Schottky diode SS14/BAT43) placed in anti-parallel across the motor terminals to absorb inductive voltage spikes.
+- **MPU-6050 IMU Module**: If the MPU-6050 module includes onboard 4.7 kΩ pull-up resistors to 3.3V, external pull-ups can be omitted. The `AD0` pin must be wired to `GND` to set the I2C address to `0x68`.
 
-### F. Comportement & Signaux Visuels de la LED Bleue (GPIO 13)
+### F. Blue Status LED Behavior & Visual Signals (GPIO 13)
 
-La LED de statut bleue (`LedDriver`) fonctionne selon une machine à états non-bloquante avec priorisation des états matériels et logiciels :
+The blue status LED (`LedDriver`) operates on a non-blocking state machine with hardware and software priority:
 
-| Événement / État | Comportement LED (GPIO 13) | Fréquence / Temporisation | Objectif & Contexte |
+| Event / State | LED Behavior (GPIO 13) | Frequency / Timing | Purpose & Context |
 | :--- | :--- | :--- | :--- |
-| **Calibration IMU en cours** | **Allumée Fixe (Solid ON)** | Continue pendant la capture | Signale l'immobilité requise pour le calibrage des offsets |
-| **Capture Studio en cours** | **Allumée Fixe (Solid ON)** | Continue pendant l'enregistrement | Signale la capture cinématique brute haute fréquence (54 Hz) |
-| **BLE en attente d'appairage** | **Clignotement régulier** | $2\,\text{Hz}$ (250 ms ON / 250 ms OFF) | Mode *Advertising*, prêt pour connexion smartphone |
-| **BLE Connecté** | **Allumée Fixe 2 secondes** | Fixe 2000 ms puis extinction (OFF) | Confirmation visuelle de liaison, puis économie batterie |
-| **BLE Déconnecté** | **Double flash rapide** | 2 pulses (100 ms ON / 100 ms OFF) | Alerte de perte de liaison avant reprise d'appairage |
+| **IMU Calibration in progress** | **Solid ON** | Continuous during capture | Signals the required stillness for sensor offset calibration |
+| **Studio Capture in progress** | **Solid ON** | Continuous during recording | Signals high-frequency raw kinematic capture (54 Hz) |
+| **BLE Waiting for Pairing** | **Regular Blink** | $2\,\text{Hz}$ (250 ms ON / 250 ms OFF) | *Advertising* mode, ready for smartphone connection |
+| **BLE Connected** | **Solid ON for 2 seconds** | Solid 2000 ms then turns OFF | Visual link confirmation, then power saving |
+| **BLE Disconnected** | **Rapid Double Flash** | 2 pulses (100 ms ON / 100 ms OFF) | Link loss alert before returning to advertising |
 
 
 ---
 
-## 2. Compilation & Flash avec PlatformIO
+## 2. PlatformIO Build & Flash
 
-Ce projet utilise [PlatformIO](https://platformio.org/).
+This project uses [PlatformIO](https://platformio.org/).
 
-### Commandes de base :
+### Basic Commands:
 ```bash
-# Compilation du firmware
+# Firmware compilation
 pio run
 
-# Flash sur l'ESP32-S3
+# Flash to ESP32-S3
 pio run --target upload
 
-# Ouverture du moniteur série USB CDC (115200 bauds)
+# Open USB CDC serial monitor (115200 baud)
 pio run --target monitor
 ```
 
 ---
 
-## 3. Conformité aux Contrats GATT BLE
+## 3. BLE GATT Contract Compliance
 
-Le serveur BLE implémente les spécifications contractuelles définies dans `contracts/ble_gatt_specs.md` :
-- **Service Footwear** : `7a5a0001-c529-4d64-8848-18e5904de22a`
-- **Activity Detection** : `7a5a0002-...` (READ, NOTIFY - 7 octets Big-Endian)
-- **Haptic Command** : `7a5a0003-...` (WRITE, WRITE_NR - 4 octets Big-Endian)
-- **Studio Control** : `7a5a0004-...` (WRITE, NOTIFY - ASCII UTF-8)
-- **Studio Data Burst** : `7a5a0005-...` (NOTIFY - Paquets MTU-adaptés avec CRC32)
+The BLE server implements the contractual specifications defined in `contracts/ble_gatt_specs.md`:
+- **Footwear Service**: `7a5a0001-c529-4d64-8848-18e5904de22a`
+- **Activity Detection**: `7a5a0002-...` (READ, NOTIFY - 7 bytes Big-Endian)
+- **Haptic Command**: `7a5a0003-...` (WRITE, WRITE_NR - 4 bytes Big-Endian)
+- **Studio Control**: `7a5a0004-...` (WRITE, NOTIFY - ASCII UTF-8)
+- **Studio Data Burst**: `7a5a0005-...` (NOTIFY - MTU-adapted packets with CRC32)
 
 ---
 
-## 4. Edge AI : Export et Transpilation du Modèle (`activity_model_generated.h`)
+## 4. Edge AI: Model Export and Transpilation (`activity_model_generated.h`)
 
-Le firmware embarque directement le modèle d'inférence d'activité et de détection de chute (Random Forest scikit-learn) transpilé en C pur header-only (`include/activity_model_generated.h`) via `m2cgen`.
+The firmware directly embeds the activity inference and fall detection model (scikit-learn Random Forest) transpiled to pure C header-only format (`include/activity_model_generated.h`) via `m2cgen`.
 
-### A. Méthode Recommandée : Pipeline Automatisé MLOps (`update_edge_model.py`)
+### A. Recommended Method: Automated MLOps Pipeline (`update_edge_model.py`)
 
-La manière la plus simple et sécurisée de mettre à jour le modèle embarqué est d'exécuter le script d'orchestration MLOps depuis le dossier `health-kicks/` :
+The most reliable and automated approach to update the embedded model is running the MLOps orchestration script from the `health-kicks/` directory:
 
 ```powershell
 cd ../health-kicks
 
-# Ingestion DynamoDB/Postgres + Entraînement 5-Fold CV + Quality Gate + Transpilation C + Build firmware PlatformIO
+# DynamoDB/Postgres ingestion + 5-Fold CV Training + Quality Gate + C Transpilation + PlatformIO firmware build
 uv run python -m scripts.update_edge_model
 
-# En mode démonstration hors-ligne (synthétique, sans identifiants AWS)
+# In offline demonstration mode (synthetic data, no AWS credentials needed)
 uv run python -m scripts.update_edge_model --synthetic
 
-# Pour re-transpiler un modèle existant sans ré-entraîner
+# To re-transpile an existing model without re-training
 uv run python -m scripts.update_edge_model --skip-train
 ```
 
-Ce script vérifie automatiquement la compilation du firmware via PlatformIO (`pio run`) et s'assure que la mémoire Flash et la RAM de l'ESP32-S3 restent dans les limites autorisées.
+This script automatically verifies firmware compilation with PlatformIO (`pio run`) and ensures that Flash memory and RAM usage on the ESP32-S3 stay within limits.
 
 ---
 
-## B. Méthode Manuelle : Script d'Export Dédié (`tools/export_model_to_c.py`)
+## B. Manual Method: Dedicated Export Script (`tools/export_model_to_c.py`)
 
-Si vous disposez déjà d'un fichier de modèle entraîné `.joblib` et souhaitez uniquement générer le header C++ :
+If you already have a trained `.joblib` model file and only wish to generate the C++ header:
 
-#### 1. Prérequis Python
+#### 1. Python Prerequisites
 ```bash
 pip install m2cgen joblib scikit-learn numpy
-# (ou avec uv dans le projet backend: uv run ...)
+# (or using uv in the backend project: uv run ...)
 ```
 
-#### 2. Utilisation du script d'export
+#### 2. Using the Export Script
 ```bash
-# Export standard (cherche automatiquement activity_classifier.joblib -> include/activity_model_generated.h)
+# Standard export (automatically searches activity_classifier.joblib -> include/activity_model_generated.h)
 python tools/export_model_to_c.py
 
-# Export avec chemins personnalisés
+# Export with custom paths
 python tools/export_model_to_c.py --model path/to/model.joblib --output include/activity_model_generated.h
 ```
 
-#### 3. Options disponibles
-* `--model <chemin>` : Chemin vers le fichier `.joblib` du modèle entraîné (Recherche automatique par défaut dans `scripts/models/`, `../health-kicks/scripts/models/`, `../health-kicks-edge-script/models/`).
-* `--output <chemin>` : Chemin du fichier header C généré (Défaut : `include/activity_model_generated.h`).
+#### 3. Available Options
+* `--model <path>`: Path to the trained model `.joblib` file (Default automatic search in `scripts/models/`, `../health-kicks/scripts/models/`, `../health-kicks-edge-script/models/`).
+* `--output <path>`: Path of the generated C header file (Default: `include/activity_model_generated.h`).
 
-### C. Workflow après mise à jour du modèle
-1. Entraîner et exporter le modèle (automatique via `update_edge_model.py` ou manuel via `export_model_to_c.py`).
-2. Vérifier la compilation du firmware avec `pio run`.
-3. Flasher l'ESP32-S3 via USB CDC avec `pio run --target upload`.
+### C. Workflow After Updating the Model
+1. Train and export the model (automated via `update_edge_model.py` or manual via `export_model_to_c.py`).
+2. Verify firmware compilation with `pio run`.
+3. Flash the ESP32-S3 via USB CDC with `pio run --target upload`.

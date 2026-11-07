@@ -9,16 +9,16 @@ public:
     HapticDriver();
 
     /**
-     * @brief Initialise le GPIO à l'état BAS avant d'attacher le canal LEDC PWM (anti-glitch au boot).
+     * @brief Initializes GPIO to LOW state before attaching the LEDC PWM channel (anti-glitch on boot).
      */
     void init(int pin = PIN_HAPTIC_PWM);
     void begin(int pin = PIN_HAPTIC_PWM) { init(pin); }
 
     /**
-     * @brief Déclenche un motif haptique.
-     * @param pattern 0 = continu, 1 = double pulse, 2 = pulsation alerte.
-     * @param intensity Intensité PWM (0-255).
-     * @param durationMs Durée totale de la stimulation en millisecondes.
+     * @brief Triggers a haptic pattern.
+     * @param pattern 0 = continuous, 1 = double pulse, 2 = alert pulsation.
+     * @param intensity PWM intensity (0-255).
+     * @param durationMs Total duration of stimulation in milliseconds.
      */
     void play(uint8_t pattern, uint8_t intensity, uint16_t durationMs);
     void trigger(uint8_t pattern, uint8_t intensity, uint16_t durationMs) {
@@ -26,22 +26,22 @@ public:
     }
 
     /**
-     * @brief Applique directement une intensité PWM continue.
+     * @brief Directly applies continuous PWM intensity.
      */
     void setIntensity(uint8_t intensity);
 
     /**
-     * @brief Coupe immédiatement le vibreur et réinitialise l'état.
+     * @brief Immediately stops vibration and resets state.
      */
     void stop();
 
     /**
-     * @brief Boucle de mise à jour non-bloquante basée sur millis() pour extinction automatique.
+     * @brief Non-blocking update loop based on millis() for automatic timeout/stop.
      */
     void update();
 
     /**
-     * @brief Routine de test progressif (Ramp-up) sur demande.
+     * @brief Progressive ramp-up test routine on demand.
      */
     void testRampUp();
 

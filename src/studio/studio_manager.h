@@ -26,17 +26,17 @@ public:
     void begin(HealthKicksBleServer* bleServer, HapticDriver* haptic, ImuMpu6050* imu, ImuCalibrator* calibrator = nullptr);
 
     /**
-     * @brief Parse et traite une commande Studio Control (ex: "START walk 5.0 <uuid>" ou "CANCEL").
+     * @brief Parses and processes a Studio Control command (e.g. "START walk 5.0 <uuid>" or "CANCEL").
      */
     void handleCommand(const std::string& command);
 
     /**
-     * @brief Boucle de mise à jour non bloquante appelée à chaque itération de loop().
+     * @brief Non-blocking update loop called at each loop() iteration.
      */
     void update();
 
     /**
-     * @brief Annule la session Studio en cours.
+     * @brief Cancels current Studio session.
      */
     void cancel();
 
@@ -44,7 +44,7 @@ public:
     bool isBusy() const { return _state != StudioState::IDLE; }
 
     /**
-     * @brief Diffuse une salve de trames IMU acquises en mode Human-in-the-Loop (HITL).
+     * @brief Streams a burst of IMU frames acquired in Human-in-the-Loop (HITL) mode.
      */
     void streamHitlBurst(const std::vector<ImuRawFrame>& frames, const std::string& sessionId);
 

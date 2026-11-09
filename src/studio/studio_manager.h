@@ -49,6 +49,10 @@ public:
     void streamHitlBurst(const std::vector<ImuRawFrame>& frames, const std::string& sessionId);
 
 private:
+    void handleStartCommand(const std::string& command);
+    void handleFinishCommand();
+    void handleCancelCommand();
+
     void startCountdown();
     void startRecording();
     void finishRecordingAndStreamBurst();

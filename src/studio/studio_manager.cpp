@@ -30,62 +30,74 @@ void StudioManager::handleCommand(const std::string& command) {
     Serial.printf("[STUDIO] Command received: \"%s\"\n", command.c_str());
 
     if (command.rfind("START", 0) == 0) {
-        std::istringstream iss(command);
-        std::string startWord, label, durStr, sessId;
-        iss >> startWord >> label >> durStr >> sessId;
-
-        float dur = 5.0f;
-        if (!durStr.empty()) {
-            char* endPtr = nullptr;
-            float parsed = strtof(durStr.c_str(), &endPtr);
-            if (endPtr != durStr.c_str()) {
-                dur = parsed;
-            }
-        }
-        if (dur < 2.0f) dur = 2.0f;
-        if (dur > 30.0f) dur = 30.0f;
-        if (label.empty()) label = "unlabeled";
-        if (sessId.empty()) sessId = "default-session-id";
-
-        if (_state != StudioState::IDLE) {
-            if (sessId == _sessionId) {
-                Serial.println("[STUDIO] Duplicate START command for same session: ignored.");
-                return;
-            }
-            Serial.println("[STUDIO] Rejected: session already in progress.");
-            _bleServer->notifyStudioControl("ERROR busy");
-            return;
-        }
-
-        if (_calibrator && !_calibrator->isLiveCalibrated()) {
-            Serial.println("[STUDIO] Rejected: IMU not calibrated for studio session.");
-            if (_bleServer) {
-                _bleServer->notifyStudioControl("ERROR not_calibrated");
-            }
-            return;
-        }
-
-        _label = label;
-        _durationSec = dur;
-        _sessionId = sessId;
-
-        startCountdown();
+        handleStartCommand(command);
     } else if (command == "FINISH") {
-        if (_state != StudioState::RECORDING) {
-            _bleServer->notifyStudioControl("ERROR not_recording");
-            return;
-        }
-
-        if (millis() - _recordingStartTimeMs < 2000) {
-            _bleServer->notifyStudioControl("ERROR minimum_duration");
-            return;
-        }
-
-        Serial.println("[STUDIO] FINISH command received -> Requesting burst completion in main loop.");
-        _finishRequested = true;
+        handleFinishCommand();
     } else if (command == "CANCEL") {
-        cancel();
+        handleCancelCommand();
     }
+}
+
+void StudioManager::handleStartCommand(const std::string& command) {
+    std::istringstream iss(command);
+    std::string startWord, label, durStr, sessId;
+    iss >> startWord >> label >> durStr >> sessId;
+
+    float dur = 5.0f;
+    if (!durStr.empty()) {
+        char* endPtr = nullptr;
+        float parsed = strtof(durStr.c_str(), &endPtr);
+        if (endPtr != durStr.c_str()) {
+            dur = parsed;
+        }
+    }
+    if (dur < 2.0f) dur = 2.0f;
+    if (dur > 30.0f) dur = 30.0f;
+    if (label.empty()) label = "unlabeled";
+    if (sessId.empty()) sessId = "default-session-id";
+
+    if (_state != StudioState::IDLE) {
+        if (sessId == _sessionId) {
+            Serial.println("[STUDIO] Duplicate START command for same session: ignored.");
+            return;
+        }
+        Serial.println("[STUDIO] Rejected: session already in progress.");
+        _bleServer->notifyStudioControl("ERROR busy");
+        return;
+    }
+
+    if (_calibrator && !_calibrator->isLiveCalibrated()) {
+        Serial.println("[STUDIO] Rejected: IMU not calibrated for studio session.");
+        if (_bleServer) {
+            _bleServer->notifyStudioControl("ERROR not_calibrated");
+        }
+        return;
+    }
+
+    _label = label;
+    _durationSec = dur;
+    _sessionId = sessId;
+
+    startCountdown();
+}
+
+void StudioManager::handleFinishCommand() {
+    if (_state != StudioState::RECORDING) {
+        _bleServer->notifyStudioControl("ERROR not_recording");
+        return;
+    }
+
+    if (millis() - _recordingStartTimeMs < 2000) {
+        _bleServer->notifyStudioControl("ERROR minimum_duration");
+        return;
+    }
+
+    Serial.println("[STUDIO] FINISH command received -> Requesting burst completion in main loop.");
+    _finishRequested = true;
+}
+
+void StudioManager::handleCancelCommand() {
+    cancel();
 }
 
 void StudioManager::startCountdown() {

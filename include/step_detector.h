@@ -121,6 +121,16 @@ private:
 
     void updateGct(uint32_t instantGct, uint8_t activityState);
 
+    /**
+     * @brief Checks whether the activity state allows counting steps (excludes idle, sitting, falls).
+     */
+    static bool isSteppingEligibleActivity(uint8_t stateCode);
+
+    /**
+     * @brief Increments total steps and attributes the count to the specific gait activity.
+     */
+    void recordStepForActivity(uint8_t activityState);
+
     CadenceTracker _cadenceTracker;
 };
 

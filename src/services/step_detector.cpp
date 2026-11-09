@@ -115,19 +115,32 @@ bool StepDetector::processSample(float ax, float ay, float az, float gy, uint8_t
 
     // 3. Activity Context Gating (Edge AI)
     // If state is idle, seated, or any fall variant, dismiss step
-    if (currentActivityState == STATE_CODE_IDLE ||
-        currentActivityState == STATE_CODE_SIT_DOWN ||
-        currentActivityState == STATE_CODE_FALL_FORWARD ||
-        currentActivityState == STATE_CODE_FALL_BACKWARD ||
-        currentActivityState == STATE_CODE_FALL_LATERAL ||
-        currentActivityState == STATE_CODE_FALL_GENERIC) {
+    if (!isSteppingEligibleActivity(currentActivityState)) {
         return false;
     }
 
     // Count step and attribute according to active gait classification
+    recordStepForActivity(currentActivityState);
+
+    // Record step timestamp for sliding window cadence estimation
+    _cadenceTracker.addStepTimestamp(nowMs);
+
+    return true;
+}
+
+bool StepDetector::isSteppingEligibleActivity(uint8_t stateCode) {
+    return stateCode != STATE_CODE_IDLE &&
+           stateCode != STATE_CODE_SIT_DOWN &&
+           stateCode != STATE_CODE_FALL_FORWARD &&
+           stateCode != STATE_CODE_FALL_BACKWARD &&
+           stateCode != STATE_CODE_FALL_LATERAL &&
+           stateCode != STATE_CODE_FALL_GENERIC;
+}
+
+void StepDetector::recordStepForActivity(uint8_t activityState) {
     _totalSteps++;
 
-    switch (currentActivityState) {
+    switch (activityState) {
         case STATE_CODE_WALK:
             _walkSteps++;
             break;
@@ -142,11 +155,6 @@ bool StepDetector::processSample(float ax, float ay, float az, float gy, uint8_t
             _unclassifiedSteps++;
             break;
     }
-
-    // Record step timestamp for sliding window cadence estimation
-    _cadenceTracker.addStepTimestamp(nowMs);
-
-    return true;
 }
 
 void StepDetector::updateGct(uint32_t instantGct, uint8_t activityState) {

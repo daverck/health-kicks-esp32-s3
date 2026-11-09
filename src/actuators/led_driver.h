@@ -81,4 +81,8 @@ private:
     bool _currentPinState;
 
     void setPinState(bool high);
+    void updateOtaPattern(uint32_t nowMs);
+    void updateAdvertisingPattern(uint32_t nowMs);
+    void updateConnectedPattern(uint32_t nowMs);
+    void updateDisconnectedPattern(uint32_t nowMs);
 };

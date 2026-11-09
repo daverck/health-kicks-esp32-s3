@@ -6,6 +6,36 @@ static volatile uint8_t s_pending_pattern = 0;
 static volatile uint16_t s_pending_duration = 0;
 static volatile uint8_t s_pending_intensity = 0;
 
+static void executeDoublePulse(int pin) {
+    // Double pulse: 2 crisp distinct vibration pulses with inter-pulse pause
+    digitalWrite(pin, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(220));
+    digitalWrite(pin, LOW);
+    vTaskDelay(pdMS_TO_TICKS(140));
+    digitalWrite(pin, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(220));
+    digitalWrite(pin, LOW);
+}
+
+static void executeAlertPulse(int pin) {
+    // Triple alert pulses
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(pin, HIGH);
+        vTaskDelay(pdMS_TO_TICKS(180));
+        digitalWrite(pin, LOW);
+        if (i < 2) {
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
+    }
+}
+
+static void executeContinuousDrive(int pin, uint16_t durationMs) {
+    // Direct continuous drive for requested duration
+    digitalWrite(pin, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(durationMs > 0 ? durationMs : 200));
+    digitalWrite(pin, LOW);
+}
+
 static void haptic_task(void* pvParameters) {
     while (true) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -13,30 +43,17 @@ static void haptic_task(void* pvParameters) {
         Serial.printf("[HAPTIC] Activating GPIO %d (pattern=%u, dur=%d ms, val=%d)\n", 
                       PIN_HAPTIC_PWM, s_pending_pattern, s_pending_duration, s_pending_intensity);
 
-        if (s_pending_pattern == HAPTIC_PATTERN_DOUBLE_PULSE) {
-            // Double pulse: 2 crisp distinct vibration pulses with inter-pulse pause
-            digitalWrite(PIN_HAPTIC_PWM, HIGH);
-            vTaskDelay(pdMS_TO_TICKS(220));
-            digitalWrite(PIN_HAPTIC_PWM, LOW);
-            vTaskDelay(pdMS_TO_TICKS(140));
-            digitalWrite(PIN_HAPTIC_PWM, HIGH);
-            vTaskDelay(pdMS_TO_TICKS(220));
-            digitalWrite(PIN_HAPTIC_PWM, LOW);
-        } else if (s_pending_pattern == HAPTIC_PATTERN_ALERT_PULSE) {
-            // Triple alert pulses
-            for (int i = 0; i < 3; i++) {
-                digitalWrite(PIN_HAPTIC_PWM, HIGH);
-                vTaskDelay(pdMS_TO_TICKS(180));
-                digitalWrite(PIN_HAPTIC_PWM, LOW);
-                if (i < 2) {
-                    vTaskDelay(pdMS_TO_TICKS(100));
-                }
-            }
-        } else {
-            // Direct continuous drive for requested duration
-            digitalWrite(PIN_HAPTIC_PWM, HIGH);
-            vTaskDelay(pdMS_TO_TICKS(s_pending_duration > 0 ? s_pending_duration : 200));
-            digitalWrite(PIN_HAPTIC_PWM, LOW);
+        switch (s_pending_pattern) {
+            case HAPTIC_PATTERN_DOUBLE_PULSE:
+                executeDoublePulse(PIN_HAPTIC_PWM);
+                break;
+            case HAPTIC_PATTERN_ALERT_PULSE:
+                executeAlertPulse(PIN_HAPTIC_PWM);
+                break;
+            case HAPTIC_PATTERN_CONTINUOUS:
+            default:
+                executeContinuousDrive(PIN_HAPTIC_PWM, s_pending_duration);
+                break;
         }
 
         Serial.println("[HAPTIC] Vibration completed, GPIO LOW");

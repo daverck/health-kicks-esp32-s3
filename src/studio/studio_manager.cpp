@@ -2,6 +2,22 @@
 #include "burst_packet_transmitter.h"
 #include <sstream>
 
+static inline ImuRawFrame encodeImuRawFrame(
+    uint16_t elapsedMs,
+    float ax_g, float ay_g, float az_g,
+    float gx_dps, float gy_dps, float gz_dps
+) {
+    ImuRawFrame frame;
+    frame.delta_ms = htons(elapsedMs);
+    frame.ax = htons((int16_t)roundf(ax_g * 1000.0f));
+    frame.ay = htons((int16_t)roundf(ay_g * 1000.0f));
+    frame.az = htons((int16_t)roundf(az_g * 1000.0f));
+    frame.gx = htons((int16_t)roundf(gx_dps * 10.0f));
+    frame.gy = htons((int16_t)roundf(gy_dps * 10.0f));
+    frame.gz = htons((int16_t)roundf(gz_dps * 10.0f));
+    return frame;
+}
+
 StudioManager::StudioManager()
     : _bleServer(nullptr),
       _haptic(nullptr),
@@ -109,10 +125,18 @@ void StudioManager::startCountdown() {
         _bleServer->requestFastBurstConnectionParams();
     }
 
-    _state = StudioState::COUNTDOWN_PULSE_1;
+    triggerCountdownStep(StudioState::COUNTDOWN_PULSE_1, "1/3");
+}
+
+void StudioManager::triggerCountdownStep(StudioState nextState, const char* stepStr) {
+    _state = nextState;
     _stepTimestampMs = millis();
-    Serial.println("[STUDIO] Countdown: 1/3");
-    _bleServer->notifyStudioControl("COUNTDOWN 1/3");
+    Serial.printf("[STUDIO] Countdown: %s\n", stepStr);
+    if (_bleServer) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "COUNTDOWN %s", stepStr);
+        _bleServer->notifyStudioControl(buf);
+    }
     if (_haptic) {
         _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 220, 200);
     }
@@ -148,25 +172,13 @@ void StudioManager::update() {
 
         case StudioState::COUNTDOWN_PULSE_1:
             if (now - _stepTimestampMs >= 1000) {
-                _state = StudioState::COUNTDOWN_PULSE_2;
-                _stepTimestampMs = now;
-                Serial.println("[STUDIO] Countdown: 2/3");
-                _bleServer->notifyStudioControl("COUNTDOWN 2/3");
-                if (_haptic) {
-                    _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 220, 200);
-                }
+                triggerCountdownStep(StudioState::COUNTDOWN_PULSE_2, "2/3");
             }
             break;
 
         case StudioState::COUNTDOWN_PULSE_2:
             if (now - _stepTimestampMs >= 1000) {
-                _state = StudioState::COUNTDOWN_PULSE_3;
-                _stepTimestampMs = now;
-                Serial.println("[STUDIO] Countdown: 3/3");
-                _bleServer->notifyStudioControl("COUNTDOWN 3/3");
-                if (_haptic) {
-                    _haptic->play(HAPTIC_PATTERN_CONTINUOUS, 220, 200);
-                }
+                triggerCountdownStep(StudioState::COUNTDOWN_PULSE_3, "3/3");
             }
             break;
 
@@ -194,17 +206,11 @@ void StudioManager::update() {
                             _calibrator->applyCalibration(ax_g, ay_g, az_g, gx_dps, gy_dps, gz_dps);
                         }
 
-                        // Encode in standard network byte order (Big-Endian)
-                        ImuRawFrame frame;
-                        frame.delta_ms = htons((uint16_t)elapsed);
-                        frame.ax = htons((int16_t)roundf(ax_g * 1000.0f));
-                        frame.ay = htons((int16_t)roundf(ay_g * 1000.0f));
-                        frame.az = htons((int16_t)roundf(az_g * 1000.0f));
-                        frame.gx = htons((int16_t)roundf(gx_dps * 10.0f));
-                        frame.gy = htons((int16_t)roundf(gy_dps * 10.0f));
-                        frame.gz = htons((int16_t)roundf(gz_dps * 10.0f));
-
-                        _frames.push_back(frame);
+                        _frames.push_back(encodeImuRawFrame(
+                            (uint16_t)elapsed,
+                            ax_g, ay_g, az_g,
+                            gx_dps, gy_dps, gz_dps
+                        ));
                     }
                 }
             }

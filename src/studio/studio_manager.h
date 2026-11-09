@@ -54,6 +54,7 @@ private:
     void handleCancelCommand();
 
     void startCountdown();
+    void triggerCountdownStep(StudioState nextState, const char* stepStr);
     void startRecording();
     void finishRecordingAndStreamBurst();
     void sendBurstPackets();

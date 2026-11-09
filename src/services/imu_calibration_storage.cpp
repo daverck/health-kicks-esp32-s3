@@ -12,15 +12,15 @@ bool ImuCalibrationStorage::saveCalibration(const float r[3][3], float gbx, floa
 
     _prefs.putBool("valid", true);
     _prefs.putInt("step", step);
-    _prefs.putFloat("r00", r[0][0]);
-    _prefs.putFloat("r01", r[0][1]);
-    _prefs.putFloat("r02", r[0][2]);
-    _prefs.putFloat("r10", r[1][0]);
-    _prefs.putFloat("r11", r[1][1]);
-    _prefs.putFloat("r12", r[1][2]);
-    _prefs.putFloat("r20", r[2][0]);
-    _prefs.putFloat("r21", r[2][1]);
-    _prefs.putFloat("r22", r[2][2]);
+
+    char key[4];
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            snprintf(key, sizeof(key), "r%d%d", i, j);
+            _prefs.putFloat(key, r[i][j]);
+        }
+    }
+
     _prefs.putFloat("gbx", gbx);
     _prefs.putFloat("gby", gby);
     _prefs.putFloat("gbz", gbz);
@@ -42,17 +42,13 @@ bool ImuCalibrationStorage::loadCalibration(float r[3][3], float& gbx, float& gb
         return false;
     }
 
-    r[0][0] = _prefs.getFloat("r00", 1.0f);
-    r[0][1] = _prefs.getFloat("r01", 0.0f);
-    r[0][2] = _prefs.getFloat("r02", 0.0f);
-
-    r[1][0] = _prefs.getFloat("r10", 0.0f);
-    r[1][1] = _prefs.getFloat("r11", 1.0f);
-    r[1][2] = _prefs.getFloat("r12", 0.0f);
-
-    r[2][0] = _prefs.getFloat("r20", 0.0f);
-    r[2][1] = _prefs.getFloat("r21", 0.0f);
-    r[2][2] = _prefs.getFloat("r22", 1.0f);
+    char key[4];
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            snprintf(key, sizeof(key), "r%d%d", i, j);
+            r[i][j] = _prefs.getFloat(key, (i == j) ? 1.0f : 0.0f);
+        }
+    }
 
     gbx = _prefs.getFloat("gbx", 0.0f);
     gby = _prefs.getFloat("gby", 0.0f);

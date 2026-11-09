@@ -6,6 +6,7 @@
 #include <math.h>
 #include "invariants.h"
 #include "activity_model_generated.h"
+#include "imu_feature_extractor.h"
 
 /**
  * @file activity_detector.h
@@ -88,16 +89,7 @@ public:
     uint32_t getSampleCount() const { return _sampleCount; }
 
 private:
-    struct Sample {
-        float ax;
-        float ay;
-        float az;
-        float gx;
-        float gy;
-        float gz;
-    };
-
-    Sample _buffer[MODEL_WINDOW_SAMPLES];
+    ImuSample _buffer[MODEL_WINDOW_SAMPLES];
     uint16_t _writeIndex;
     uint32_t _sampleCount;
     uint32_t _samplesSinceLastEval;

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include "invariants.h"
+#include "cadence_tracker.h"
 
 /**
  * @file step_detector.h
@@ -15,9 +16,9 @@ class StepDetector {
 public:
     static constexpr float DEFAULT_STEP_THRESHOLD_G = 0.35f;  // a_vert threshold above 1.0g (Az > 1.35g)
     static constexpr uint32_t DEFAULT_REFRACTORY_MS = 260;    // Minimum refractory / debounce time between steps
-    static constexpr uint32_t CADENCE_WINDOW_MS = 5000;       // 5.0 seconds sliding window for cadence
-    static constexpr uint32_t CADENCE_TIMEOUT_MS = 3000;      // Zero cadence if no step within 3.0 seconds
-    static constexpr size_t MAX_CADENCE_HISTORY = 32;         // Maximum step timestamps in ring buffer
+    static constexpr uint32_t CADENCE_WINDOW_MS = CadenceTracker::DEFAULT_CADENCE_WINDOW_MS;
+    static constexpr uint32_t CADENCE_TIMEOUT_MS = CadenceTracker::DEFAULT_CADENCE_TIMEOUT_MS;
+    static constexpr size_t MAX_CADENCE_HISTORY = CadenceTracker::MAX_CADENCE_HISTORY;
 
     StepDetector();
 
@@ -78,6 +79,8 @@ public:
     uint16_t getUnclassifiedSteps() const { return _unclassifiedSteps; }
     uint32_t getLastStepTimeMs() const { return _lastStepTimeMs; }
     uint16_t getAverageGctMs() const { return _lastGctMs; }
+    CadenceTracker& getCadenceTracker() { return _cadenceTracker; }
+    const CadenceTracker& getCadenceTracker() const { return _cadenceTracker; }
 
     /**
      * @brief Resets all step accumulators, GCT history, and cadence history.
@@ -118,12 +121,6 @@ private:
 
     void updateGct(uint32_t instantGct, uint8_t activityState);
 
-    // Ring buffer for cadence sliding window
-    uint32_t _stepTimestamps[MAX_CADENCE_HISTORY];
-    size_t _timestampHead;
-    size_t _timestampCount;
-
-    void addStepTimestamp(uint32_t timestampMs);
-    void cleanCadenceBuffer(uint32_t nowMs);
+    CadenceTracker _cadenceTracker;
 };
 

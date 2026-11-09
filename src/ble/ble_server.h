@@ -144,4 +144,6 @@ private:
     FallCooldownConfigCallback _onFallCooldownConfig;
     OtaStateChangeCallback _onOtaStateChange;
     bool _hitlEnabled = false;
+
+    friend class DeviceControlParser;
 };

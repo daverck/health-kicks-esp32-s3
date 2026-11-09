@@ -31,6 +31,20 @@ static const uint8_t MPU_INT_EN_MOT          = 0x40; // Enable motion detection 
 static const uint8_t MPU_MOT_DETECT_CTRL_VAL = 0x15; // Accel power-on delay for motion detection
 static const uint8_t MPU_SAMPLE_DIV_50HZ     = 19;   // 1000 Hz / (1 + 19) = 50 Hz nominal sampling rate
 
+// Static Conversion & Validation Helpers
+static inline bool isValidWhoAmI(uint8_t who) {
+    // 0x68 is nominal, some silicon revisions return 0x70/0x72
+    return who == 0x68 || who == 0x70 || who == 0x72;
+}
+
+static inline int16_t scaleAccelMilliG(int16_t rawLsb) {
+    return (int16_t)(((int32_t)rawLsb * 1000) / 4096);
+}
+
+static inline int16_t scaleGyroTenthDps(int16_t rawLsb) {
+    return (int16_t)(((int32_t)rawLsb * 100) / 1310);
+}
+
 ImuMpu6050::ImuMpu6050() : _address(IMU_I2C_ADDR), _wire(&Wire) {}
 
 bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
@@ -54,7 +68,7 @@ bool ImuMpu6050::begin(int sdaPin, int sclPin, uint32_t frequency) {
 
     // 3. Verify WHO_AM_I
     uint8_t who = readWhoAmI();
-    if (who != 0x68 && who != 0x70 && who != 0x72) { // 0x68 is nominal, some silicon revisions return 0x70/0x72
+    if (!isValidWhoAmI(who)) {
         log_e("Invalid IMU WHO_AM_I: 0x%02X (expected 0x68)", who);
         return false;
     }
@@ -132,13 +146,13 @@ bool ImuMpu6050::readFrame(ImuRawFrame& frame, uint16_t deltaMs) {
     // Scale factors matching contracts/ble_gatt_specs.md:
     // - Acceleration: milli-g (x1000) from +/- 8g scale (4096 LSB/g)
     // - Gyroscope: tenths of deg/s (x10) from +/- 250 dps scale (131.0 LSB/dps)
-    int16_t milli_ax = (int16_t)(((int32_t)ax * 1000) / 4096);
-    int16_t milli_ay = (int16_t)(((int32_t)ay * 1000) / 4096);
-    int16_t milli_az = (int16_t)(((int32_t)az * 1000) / 4096);
+    int16_t milli_ax = scaleAccelMilliG(ax);
+    int16_t milli_ay = scaleAccelMilliG(ay);
+    int16_t milli_az = scaleAccelMilliG(az);
 
-    int16_t dixieme_gx = (int16_t)(((int32_t)gx * 100) / 1310);
-    int16_t dixieme_gy = (int16_t)(((int32_t)gy * 100) / 1310);
-    int16_t dixieme_gz = (int16_t)(((int32_t)gz * 100) / 1310);
+    int16_t dixieme_gx = scaleGyroTenthDps(gx);
+    int16_t dixieme_gy = scaleGyroTenthDps(gy);
+    int16_t dixieme_gz = scaleGyroTenthDps(gz);
 
     // Big-Endian network encoding for BLE packet transmission
     frame.delta_ms = htons(deltaMs);

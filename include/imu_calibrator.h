@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
-#include <Preferences.h>
 #include <functional>
+#include "imu_calibration_storage.h"
 
 /**
  * @file imu_calibrator.h
@@ -158,7 +158,7 @@ private:
     float _r[3][3];
 
     CalibrationCompleteCallback _onComplete;
-    Preferences _prefs;
+    ImuCalibrationStorage _storage;
 
     bool checkStillness(float ax, float ay, float az, float gx, float gy, float gz) const;
     void computeAndApplyAlignment(int step);

@@ -1,7 +1,5 @@
 #include "imu_calibrator.h"
 
-static const char* NVS_NAMESPACE = "hk_calib_v2";
-
 ImuCalibrator::ImuCalibrator()
     : _phase(CALIB_WAITING_INITIAL_IDLE),
       _isCalibrated(false),
@@ -279,67 +277,15 @@ void ImuCalibrator::triggerManualCalibration() {
 }
 
 void ImuCalibrator::saveToNvs(int step) {
-    if (!_prefs.begin(NVS_NAMESPACE, false)) {
-        log_e("Failed to open NVS namespace %s for writing", NVS_NAMESPACE);
-        return;
-    }
-
-    _prefs.putBool("valid", true);
-    _prefs.putInt("step", step);
-    _prefs.putFloat("r00", _r[0][0]);
-    _prefs.putFloat("r01", _r[0][1]);
-    _prefs.putFloat("r02", _r[0][2]);
-    _prefs.putFloat("r10", _r[1][0]);
-    _prefs.putFloat("r11", _r[1][1]);
-    _prefs.putFloat("r12", _r[1][2]);
-    _prefs.putFloat("r20", _r[2][0]);
-    _prefs.putFloat("r21", _r[2][1]);
-    _prefs.putFloat("r22", _r[2][2]);
-    _prefs.putFloat("gbx", _gyroBiasX);
-    _prefs.putFloat("gby", _gyroBiasY);
-    _prefs.putFloat("gbz", _gyroBiasZ);
-    _prefs.end();
-
-    log_i("Saved calibration matrix (step %d) and gyro bias [%.2f, %.2f, %.2f] to NVS namespace %s",
-          step, _gyroBiasX, _gyroBiasY, _gyroBiasZ, NVS_NAMESPACE);
+    _storage.saveCalibration(_r, _gyroBiasX, _gyroBiasY, _gyroBiasZ, step);
 }
 
 bool ImuCalibrator::loadFromNvs() {
-    if (!_prefs.begin(NVS_NAMESPACE, true)) {
-        return false;
-    }
-
-    bool isValid = _prefs.getBool("valid", false);
-    if (!isValid || !_prefs.isKey("gbx") || !_prefs.isKey("gby") || !_prefs.isKey("gbz")) {
-        _prefs.end();
-        return false;
-    }
-
-    _r[0][0] = _prefs.getFloat("r00", 1.0f);
-    _r[0][1] = _prefs.getFloat("r01", 0.0f);
-    _r[0][2] = _prefs.getFloat("r02", 0.0f);
-
-    _r[1][0] = _prefs.getFloat("r10", 0.0f);
-    _r[1][1] = _prefs.getFloat("r11", 1.0f);
-    _r[1][2] = _prefs.getFloat("r12", 0.0f);
-
-    _r[2][0] = _prefs.getFloat("r20", 0.0f);
-    _r[2][1] = _prefs.getFloat("r21", 0.0f);
-    _r[2][2] = _prefs.getFloat("r22", 1.0f);
-
-    _gyroBiasX = _prefs.getFloat("gbx", 0.0f);
-    _gyroBiasY = _prefs.getFloat("gby", 0.0f);
-    _gyroBiasZ = _prefs.getFloat("gbz", 0.0f);
-
-    _prefs.end();
-    return true;
+    return _storage.loadCalibration(_r, _gyroBiasX, _gyroBiasY, _gyroBiasZ);
 }
 
 void ImuCalibrator::reset() {
-    if (_prefs.begin(NVS_NAMESPACE, false)) {
-        _prefs.clear();
-        _prefs.end();
-    }
+    _storage.clear();
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {

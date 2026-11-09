@@ -3,6 +3,64 @@
 // Earth gravity constant for converting acceleration between g and m/s^2
 static const float GRAVITY_MS2 = 9.80665f;
 
+static inline float milliGToG(int16_t milliG) {
+    return (float)milliG / 1000.0f;
+}
+
+static inline float tenthDpsToDps(int16_t tenthDps) {
+    return (float)tenthDps / 10.0f;
+}
+
+static void normalizeClassProbabilities(
+    const double scores[MODEL_CLASS_COUNT],
+    double probs[MODEL_CLASS_COUNT],
+    int& outBestIdx,
+    double& outBestProb
+) {
+    // Sum scores to check if model outputs normalized probabilities (RandomForest/ExtraTrees sum to 1.0)
+    // or unnormalized logits (MLP/Linear models)
+    double sum = 0.0;
+    for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+        sum += scores[i];
+    }
+
+    outBestIdx = 0;
+    outBestProb = 0.0;
+
+    if (sum >= 0.85 && sum <= 1.15) {
+        // Model directly outputs normalized class probabilities from tree voting (RandomForest)
+        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+            probs[i] = scores[i] / sum;
+            if (probs[i] > outBestProb) {
+                outBestProb = probs[i];
+                outBestIdx = i;
+            }
+        }
+    } else {
+        // Unbounded logits: compute numerically stable Softmax
+        double max_val = scores[0];
+        for (int i = 1; i < MODEL_CLASS_COUNT; ++i) {
+            if (scores[i] > max_val) {
+                max_val = scores[i];
+            }
+        }
+        double exp_sum = 0.0;
+        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+            probs[i] = exp(scores[i] - max_val);
+            exp_sum += probs[i];
+        }
+        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
+            if (exp_sum > 0.0) {
+                probs[i] /= exp_sum;
+            }
+            if (probs[i] > outBestProb) {
+                outBestProb = probs[i];
+                outBestIdx = i;
+            }
+        }
+    }
+}
+
 ActivityDetector::ActivityDetector()
     : _writeIndex(0),
       _sampleCount(0),
@@ -100,13 +158,13 @@ void ActivityDetector::pushFrame(const ImuRawFrame& frame) {
     int16_t raw_gy = (int16_t)ntohs(frame.gy);
     int16_t raw_gz = (int16_t)ntohs(frame.gz);
 
-    float ax = (float)raw_ax / 1000.0f;
-    float ay = (float)raw_ay / 1000.0f;
-    float az = (float)raw_az / 1000.0f;
+    float ax = milliGToG(raw_ax);
+    float ay = milliGToG(raw_ay);
+    float az = milliGToG(raw_az);
 
-    float gx = (float)raw_gx / 10.0f;
-    float gy = (float)raw_gy / 10.0f;
-    float gz = (float)raw_gz / 10.0f;
+    float gx = tenthDpsToDps(raw_gx);
+    float gy = tenthDpsToDps(raw_gy);
+    float gz = tenthDpsToDps(raw_gz);
 
     pushSample(ax, ay, az, gx, gy, gz);
 }
@@ -144,49 +202,10 @@ bool ActivityDetector::detect(ActivityDetectionResult& result) {
     memset(scores, 0, sizeof(scores));
     evaluate_model(features, scores);
 
-    // Sum scores to check if model outputs normalized probabilities (RandomForest/ExtraTrees sum to 1.0)
-    // or unnormalized logits (MLP/Linear models)
-    double sum = 0.0;
-    for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-        sum += scores[i];
-    }
-
     double probs[MODEL_CLASS_COUNT];
     int bestIdx = 0;
     double bestProb = 0.0;
-
-    if (sum >= 0.85 && sum <= 1.15) {
-        // Model directly outputs normalized class probabilities from tree voting (RandomForest)
-        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-            probs[i] = scores[i] / sum;
-            if (probs[i] > bestProb) {
-                bestProb = probs[i];
-                bestIdx = i;
-            }
-        }
-    } else {
-        // Unbounded logits: compute numerically stable Softmax
-        double max_val = scores[0];
-        for (int i = 1; i < MODEL_CLASS_COUNT; ++i) {
-            if (scores[i] > max_val) {
-                max_val = scores[i];
-            }
-        }
-        double exp_sum = 0.0;
-        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-            probs[i] = exp(scores[i] - max_val);
-            exp_sum += probs[i];
-        }
-        for (int i = 0; i < MODEL_CLASS_COUNT; ++i) {
-            if (exp_sum > 0.0) {
-                probs[i] /= exp_sum;
-            }
-            if (probs[i] > bestProb) {
-                bestProb = probs[i];
-                bestIdx = i;
-            }
-        }
-    }
+    normalizeClassProbabilities(scores, probs, bestIdx, bestProb);
 
     float confidence = (float)bestProb;
     if (confidence > 1.0f) confidence = 1.0f;

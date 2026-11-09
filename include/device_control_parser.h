@@ -19,4 +19,11 @@ public:
      * @param length Number of bytes received.
      */
     static void parseAndExecute(HealthKicksBleServer* server, const uint8_t* data, size_t length);
+
+private:
+    static bool handleInactivityConfig(HealthKicksBleServer* server, const char* pCmd);
+    static bool handleHitlConfig(HealthKicksBleServer* server, const char* pCmd);
+    static bool handleFallConfidenceConfig(HealthKicksBleServer* server, const char* pCmd);
+    static bool handleFallCooldownConfig(HealthKicksBleServer* server, const char* pCmd);
+    static bool handleCalibration(HealthKicksBleServer* server, const char* pCmd);
 };

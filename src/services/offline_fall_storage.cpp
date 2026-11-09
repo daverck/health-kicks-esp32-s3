@@ -7,7 +7,7 @@ static Preferences s_prefs;
 static const char* NVS_NAMESPACE = "hk_falls";
 
 OfflineFallStorage::OfflineFallStorage()
-    : _count(0), _head(0), _initialized(false) {}
+    : _bufferIndex(MAX_FALLS), _initialized(false) {}
 
 OfflineFallStorage::~OfflineFallStorage() {
     if (_initialized) {
@@ -20,14 +20,13 @@ bool OfflineFallStorage::begin() {
         Serial.println("[NVS-FALL] Failed to initialize NVS namespace!");
         return false;
     }
-    _count = s_prefs.getUChar("count", 0);
-    _head = s_prefs.getUChar("head", 0);
-    if (_count > MAX_FALLS) _count = MAX_FALLS;
-    if (_head >= MAX_FALLS) _head = 0;
+    uint8_t savedCount = s_prefs.getUChar("count", 0);
+    uint8_t savedHead = s_prefs.getUChar("head", 0);
+    _bufferIndex.restore(savedHead, savedCount);
     _initialized = true;
 
-    if (_count > 0) {
-        Serial.printf("[NVS-FALL] Initialized: %u pending offline fall alert(s) in flash memory.\n", _count);
+    if (!_bufferIndex.isEmpty()) {
+        Serial.printf("[NVS-FALL] Initialized: %u pending offline fall alert(s) in flash memory.\n", _bufferIndex.count());
     }
     return true;
 }
@@ -42,8 +41,9 @@ bool OfflineFallStorage::saveFall(uint8_t stateCode, uint8_t confidence, uint32_
     record.confidence = confidence;
     record.timestampSec = timestampSec;
 
+    uint8_t writeSlot = _bufferIndex.advanceWrite();
     char key[16];
-    snprintf(key, sizeof(key), "fall_%u", _head);
+    snprintf(key, sizeof(key), "fall_%u", writeSlot);
 
     size_t written = s_prefs.putBytes(key, &record, sizeof(record));
     if (written != sizeof(record)) {
@@ -51,39 +51,34 @@ bool OfflineFallStorage::saveFall(uint8_t stateCode, uint8_t confidence, uint32_
         return false;
     }
 
-    _head = (_head + 1) % MAX_FALLS;
-    if (_count < MAX_FALLS) {
-        _count++;
-    }
-
-    s_prefs.putUChar("head", _head);
-    s_prefs.putUChar("count", _count);
+    s_prefs.putUChar("head", _bufferIndex.head());
+    s_prefs.putUChar("count", _bufferIndex.count());
 
     Serial.printf("[NVS-FALL] Successfully saved offline fall to flash: state=0x%02X, conf=%u%%, ts=%u (Total queued: %u/%u)\n",
-                  stateCode, confidence, timestampSec, _count, MAX_FALLS);
+                  stateCode, confidence, timestampSec, _bufferIndex.count(), MAX_FALLS);
     return true;
 }
 
 bool OfflineFallStorage::hasPendingFalls() const {
-    return _count > 0;
+    return !_bufferIndex.isEmpty();
 }
 
 uint8_t OfflineFallStorage::getPendingCount() const {
-    return _count;
+    return _bufferIndex.count();
 }
 
 uint8_t OfflineFallStorage::flushToBle(HealthKicksBleServer& bleServer) {
-    if (!_initialized || _count == 0 || !bleServer.isConnected()) {
+    if (!_initialized || _bufferIndex.isEmpty() || !bleServer.isConnected()) {
         return 0;
     }
 
-    Serial.printf("[NVS-FALL] Flushing %u buffered offline fall(s) to connected mobile client...\n", _count);
+    uint8_t pendingCount = _bufferIndex.count();
+    Serial.printf("[NVS-FALL] Flushing %u buffered offline fall(s) to connected mobile client...\n", pendingCount);
 
-    uint8_t startIdx = (_count == MAX_FALLS) ? _head : 0;
     uint8_t flushed = 0;
 
-    for (uint8_t i = 0; i < _count; ++i) {
-        uint8_t slot = (startIdx + i) % MAX_FALLS;
+    for (uint8_t i = 0; i < pendingCount; ++i) {
+        uint8_t slot = _bufferIndex.getChronologicalSlot(i);
         char key[16];
         snprintf(key, sizeof(key), "fall_%u", slot);
 
@@ -108,9 +103,7 @@ uint8_t OfflineFallStorage::flushToBle(HealthKicksBleServer& bleServer) {
 void OfflineFallStorage::clear() {
     if (!_initialized) return;
     s_prefs.clear();
-    _count = 0;
-    _head = 0;
+    _bufferIndex.reset();
     s_prefs.putUChar("count", 0);
     s_prefs.putUChar("head", 0);
 }
-

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "invariants.h"
+#include "circular_buffer_index.h"
 
 // Forward declaration of BLE server
 class HealthKicksBleServer;
@@ -66,8 +67,6 @@ public:
     void clear();
 
 private:
-    uint8_t _count;
-    uint8_t _head;
+    CircularBufferIndex _bufferIndex;
     bool _initialized;
 };
-

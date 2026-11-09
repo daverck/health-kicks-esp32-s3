@@ -45,20 +45,25 @@ void PowerManager::init(StepDetector* stepDetector, ImuCalibrator* imuCalibrator
             break;
     }
 
-    // If waking up from sleep, restore persisted counters and orientation
-    if (_wakeupCause == ESP_SLEEP_WAKEUP_EXT0 || _wakeupCause == ESP_SLEEP_WAKEUP_EXT1) {
-        if (stepDetector != nullptr) {
-            stepDetector->restoreState(rtc_total_steps, rtc_walk_steps, rtc_run_steps,
-                                      rtc_stairs_steps, rtc_unclassified_steps);
-            Serial.printf("[POWER] Restored step counters: Total=%u (W:%u, R:%u, S:%u, U:%u)\n",
-                          rtc_total_steps, rtc_walk_steps, rtc_run_steps,
-                          rtc_stairs_steps, rtc_unclassified_steps);
-        }
+    restoreRtcState(stepDetector, imuCalibrator);
+}
 
-        if (imuCalibrator != nullptr && rtc_is_calibrated) {
-            imuCalibrator->restoreFromMatrix(rtc_calibration_matrix);
-            Serial.println("[POWER] Restored IMU alignment matrix from RTC fast memory.");
-        }
+void PowerManager::restoreRtcState(StepDetector* stepDetector, ImuCalibrator* imuCalibrator) {
+    if (_wakeupCause != ESP_SLEEP_WAKEUP_EXT0 && _wakeupCause != ESP_SLEEP_WAKEUP_EXT1) {
+        return;
+    }
+
+    if (stepDetector != nullptr) {
+        stepDetector->restoreState(rtc_total_steps, rtc_walk_steps, rtc_run_steps,
+                                  rtc_stairs_steps, rtc_unclassified_steps);
+        Serial.printf("[POWER] Restored step counters: Total=%u (W:%u, R:%u, S:%u, U:%u)\n",
+                      rtc_total_steps, rtc_walk_steps, rtc_run_steps,
+                      rtc_stairs_steps, rtc_unclassified_steps);
+    }
+
+    if (imuCalibrator != nullptr && rtc_is_calibrated) {
+        imuCalibrator->restoreFromMatrix(rtc_calibration_matrix);
+        Serial.println("[POWER] Restored IMU alignment matrix from RTC fast memory.");
     }
 }
 
@@ -120,23 +125,7 @@ void PowerManager::checkSleepConditions(bool isBleConnected,
     }
 }
 
-void PowerManager::enterDeepSleep(ImuMpu6050& imu,
-                                 HealthKicksBleServer& bleServer,
-                                 HapticDriver& haptic,
-                                 StepDetector& stepDetector,
-                                 ImuCalibrator& imuCalibrator,
-                                 DeepSleepReason reason) {
-    if (reason == SLEEP_REASON_MANUAL_POWER_OFF) {
-        Serial.println("\n[POWER] Manual Power-OFF initiated. Entering Deep Sleep (~10 uA)...");
-    } else if (reason == SLEEP_REASON_BOOT_CONNECTION_TIMEOUT) {
-        Serial.printf("\n[POWER] Boot connection timeout (%u s) reached without mobile connection. Entering Deep Sleep (~10 uA)...\n",
-                      _bootTimeoutSec);
-    } else {
-        Serial.printf("\n[POWER] Inactivity timeout (%u s) reached without connection. Entering Deep Sleep (~10 uA)...\n",
-                      _inactivityTimeoutSec);
-    }
-
-    // 1. Snapshot state to RTC Fast Memory
+void PowerManager::saveRtcState(const StepDetector& stepDetector, const ImuCalibrator& imuCalibrator) {
     rtc_total_steps = stepDetector.getTotalSteps();
     rtc_walk_steps = stepDetector.getWalkSteps();
     rtc_run_steps = stepDetector.getRunSteps();
@@ -148,15 +137,17 @@ void PowerManager::enterDeepSleep(ImuMpu6050& imu,
     Serial.printf("[POWER] State saved to RTC: Total Steps=%u (W:%u, R:%u, S:%u, U:%u), Calibrated=%d\n",
                   rtc_total_steps, rtc_walk_steps, rtc_run_steps,
                   rtc_stairs_steps, rtc_unclassified_steps, rtc_is_calibrated);
+}
 
-    // 2. Stop haptic motor, turn off status LED, and de-initialize BLE stack cleanly
+void PowerManager::shutdownPeripherals(HapticDriver& haptic, HealthKicksBleServer& bleServer) {
     haptic.stop();
     digitalWrite(PIN_LED_BLUE, LOW);
     bleServer.stopAdvertising();
     NimBLEDevice::deinit(true);
     Serial.println("[POWER] BLE stack stopped and de-initialized.");
+}
 
-    // 3. Configure IMU mode and arm wakeup sources based on shutdown reason
+void PowerManager::configureWakeupSources(ImuMpu6050& imu, DeepSleepReason reason) {
     if (reason == SLEEP_REASON_INACTIVITY || reason == SLEEP_REASON_BOOT_CONNECTION_TIMEOUT) {
         // Put MPU-6050 in ultra-low power Wake-On-Motion mode
         imu.enableWakeOnMotion(IMU_WOM_THRESHOLD, IMU_WOM_DURATION);
@@ -175,11 +166,32 @@ void PowerManager::enterDeepSleep(ImuMpu6050& imu,
         esp_sleep_enable_ext1_wakeup(1ULL << PIN_BTN_PAIRING, ESP_EXT1_WAKEUP_ANY_LOW);
         Serial.println("[POWER] Manual Power-OFF: armed ONLY EXT1 (Button). Motion wakeup DISABLED.");
     }
+}
+
+void PowerManager::enterDeepSleep(ImuMpu6050& imu,
+                                 HealthKicksBleServer& bleServer,
+                                 HapticDriver& haptic,
+                                 StepDetector& stepDetector,
+                                 ImuCalibrator& imuCalibrator,
+                                 DeepSleepReason reason) {
+    if (reason == SLEEP_REASON_MANUAL_POWER_OFF) {
+        Serial.println("\n[POWER] Manual Power-OFF initiated. Entering Deep Sleep (~10 uA)...");
+    } else if (reason == SLEEP_REASON_BOOT_CONNECTION_TIMEOUT) {
+        Serial.printf("\n[POWER] Boot connection timeout (%u s) reached without mobile connection. Entering Deep Sleep (~10 uA)...\n",
+                      _bootTimeoutSec);
+    } else {
+        Serial.printf("\n[POWER] Inactivity timeout (%u s) reached without connection. Entering Deep Sleep (~10 uA)...\n",
+                      _inactivityTimeoutSec);
+    }
+
+    saveRtcState(stepDetector, imuCalibrator);
+    shutdownPeripherals(haptic, bleServer);
+    configureWakeupSources(imu, reason);
 
     Serial.println("[POWER] Entering Deep Sleep now. Goodbye!\n");
     Serial.flush();
 
-    // 4. Enter Deep Sleep
+    // Enter Deep Sleep
     esp_deep_sleep_start();
 }
 

@@ -120,6 +120,11 @@ public:
     static uint32_t getBootTimeoutSec();
 
 private:
+    static void saveRtcState(const StepDetector& stepDetector, const ImuCalibrator& imuCalibrator);
+    static void restoreRtcState(StepDetector* stepDetector, ImuCalibrator* imuCalibrator);
+    static void shutdownPeripherals(HapticDriver& haptic, HealthKicksBleServer& bleServer);
+    static void configureWakeupSources(ImuMpu6050& imu, DeepSleepReason reason);
+
     static uint32_t _bootTimeMs;
     static bool _hasConnectedSinceBoot;
     static uint32_t _bootTimeoutSec;

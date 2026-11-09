@@ -1,4 +1,5 @@
 #include "imu_calibrator.h"
+#include "rotation_matrix.h"
 
 ImuCalibrator::ImuCalibrator()
     : _phase(CALIB_WAITING_INITIAL_IDLE),
@@ -19,12 +20,7 @@ ImuCalibrator::ImuCalibrator()
       _gyroBiasY(0.0f),
       _gyroBiasZ(0.0f),
       _onComplete(nullptr) {
-    // Initialize rotation matrix to identity
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            _r[i][j] = (i == j) ? 1.0f : 0.0f;
-        }
-    }
+    RotationMatrix3D::setIdentity(_r);
 }
 
 void ImuCalibrator::begin(uint16_t sampleRateHz, float durationSec) {
@@ -175,41 +171,11 @@ void ImuCalibrator::computeAndApplyAlignment(int step) {
     _gyroBiasY = (float)(_sumGy * invN);
     _gyroBiasZ = (float)(_sumGz * invN);
 
-    double mag = sqrt(vx * vx + vy * vy + vz * vz);
-    if (mag < 1e-4) return;
-
-    // Normalized measured gravity vector
-    float nx = (float)(vx / mag);
-    float ny = (float)(vy / mag);
-    float nz = (float)(vz / mag);
-
-    // Target vertical gravity vector in shoe body frame: v_target = [0, 0, 1.0]
-    // Rotation axis: u = v_meas x v_target = [ny, -nx, 0]
-    // Cosine of angle: c = v_meas . v_target = nz
-    float s = sqrtf(nx * nx + ny * ny);
-
-    if (s < 1e-5f || (1.0f + nz) < 1e-5f) {
-        // Already aligned or antiparallel safety fallback
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                _r[i][j] = (i == j) ? 1.0f : 0.0f;
-            }
-        }
-    } else {
-        // Rodrigues' rotation formula: R = I + [u]_x + [u]_x^2 / (1 + c)
-        float k = 1.0f / (1.0f + nz);
-
-        _r[0][0] = 1.0f - k * nx * nx;
-        _r[0][1] = -k * nx * ny;
-        _r[0][2] = -nx;
-
-        _r[1][0] = -k * nx * ny;
-        _r[1][1] = 1.0f - k * ny * ny;
-        _r[1][2] = -ny;
-
-        _r[2][0] = nx;
-        _r[2][1] = ny;
-        _r[2][2] = nz;
+    float nx = 0.0f;
+    float ny = 0.0f;
+    float nz = 1.0f;
+    if (!RotationMatrix3D::fromGravityVector((float)vx, (float)vy, (float)vz, _r, &nx, &ny, &nz)) {
+        return;
     }
 
     _isCalibrated = true;
@@ -234,20 +200,10 @@ void ImuCalibrator::applyCalibration(float& ax, float& ay, float& az, float& gx,
     gz -= _gyroBiasZ;
 
     // 2. Apply rotation matrix R to linear acceleration vector
-    float rx = _r[0][0] * ax + _r[0][1] * ay + _r[0][2] * az;
-    float ry = _r[1][0] * ax + _r[1][1] * ay + _r[1][2] * az;
-    float rz = _r[2][0] * ax + _r[2][1] * ay + _r[2][2] * az;
-    ax = rx;
-    ay = ry;
-    az = rz;
+    RotationMatrix3D::rotateVector(_r, ax, ay, az);
 
     // 3. Apply the exact same rotation matrix R to angular velocity vector (gyroscope)
-    float rgx = _r[0][0] * gx + _r[0][1] * gy + _r[0][2] * gz;
-    float rgy = _r[1][0] * gx + _r[1][1] * gy + _r[1][2] * gz;
-    float rgz = _r[2][0] * gx + _r[2][1] * gy + _r[2][2] * gz;
-    gx = rgx;
-    gy = rgy;
-    gz = rgz;
+    RotationMatrix3D::rotateVector(_r, gx, gy, gz);
 }
 
 void ImuCalibrator::notifyWalkDetected() {
@@ -311,23 +267,12 @@ void ImuCalibrator::reset() {
 }
 
 void ImuCalibrator::getRotationMatrixFlat(float matrix9[9]) const {
-    if (matrix9 == nullptr) return;
-    int idx = 0;
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            matrix9[idx++] = _r[i][j];
-        }
-    }
+    RotationMatrix3D::flatten(_r, matrix9);
 }
 
 void ImuCalibrator::restoreFromMatrix(const float matrix9[9]) {
     if (matrix9 == nullptr) return;
-    int idx = 0;
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            _r[i][j] = matrix9[idx++];
-        }
-    }
+    RotationMatrix3D::fromFlat(matrix9, _r);
     _isCalibrated = true;
     _isLiveCalibrated = false;
     _phase = CALIB_FIRST_DONE_WAITING_WALK;

@@ -1,5 +1,6 @@
 #include "pipeline/sensor_pipeline.h"
 #include "power_manager.h"
+#include "imu_frame_encoder.h"
 #include <cmath>
 
 SensorPipeline::SensorPipeline(
@@ -85,14 +86,7 @@ void SensorPipeline::process(uint32_t nowMs, bool imuReady) {
 void SensorPipeline::processHitlBuffer(float ax, float ay, float az, float gx, float gy, float gz, uint32_t nowMs) {
     // Store calibrated sample into HITL ring buffer (4.0s history)
     // Encode in standard network byte order (Big-Endian / htons) for consistency with Studio recordings
-    ImuRawFrame hitlFrame;
-    hitlFrame.delta_ms = 0;
-    hitlFrame.ax = htons((int16_t)roundf(ax * 1000.0f));
-    hitlFrame.ay = htons((int16_t)roundf(ay * 1000.0f));
-    hitlFrame.az = htons((int16_t)roundf(az * 1000.0f));
-    hitlFrame.gx = htons((int16_t)roundf(gx * 10.0f));
-    hitlFrame.gy = htons((int16_t)roundf(gy * 10.0f));
-    hitlFrame.gz = htons((int16_t)roundf(gz * 10.0f));
+    ImuRawFrame hitlFrame = encodeImuRawFrame(0, ax, ay, az, gx, gy, gz);
 
     hitlRingBuffer[hitlRingHead] = hitlFrame;
     hitlRingHead = (hitlRingHead + 1) % HITL_BUFFER_CAPACITY;

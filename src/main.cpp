@@ -14,6 +14,7 @@
 #include "power_manager.h"
 #include "offline_fall_storage.h"
 #include "diagnostics/hardware_diagnostics.h"
+#include "pipeline/sensor_pipeline.h"
 #include <esp_idf_version.h>
 #include <esp_task_wdt.h>
 #include <lwip/def.h>
@@ -29,33 +30,24 @@ static ImuCalibrator imuCalibrator;
 static StepDetector stepDetector;
 static InactivityMonitor inactivityMonitor;
 static OfflineFallStorage offlineFallStorage;
+static SensorPipeline sensorPipeline(
+    imu,
+    imuCalibrator,
+    stepDetector,
+    inactivityMonitor,
+    activityDetector,
+    bleServer,
+    haptic,
+    studioManager,
+    offlineFallStorage
+);
 static Preferences configPrefs;
 static const char* CONFIG_NVS_NAMESPACE = "hk_config";
 
 // Timers and scheduling
-static uint32_t lastImuReadMs = 0;
 static uint32_t lastDiagnosticPrintMs = 0;
 static bool imuReady = false;
-static uint8_t lastReportedActivityState = 0xFF;
-static uint8_t currentActivityState = STATE_CODE_IDLE;
-
-// Low-power step notification state
-static const uint32_t STEP_NOTIFY_BATCH_COUNT = 50;
-static const uint32_t STEP_IDLE_CONFIRM_DELAY_MS = 3000;
-static uint32_t lastNotifiedTotalSteps = 0;
-static uint32_t lastStepDetectedMs = 0;
-static bool hasPendingIdleConfirmation = false;
 static bool prevBleConnected = false;
-
-// Human-in-the-Loop (HITL) rolling frame buffer (4.0s @ 19 Hz = 76 samples)
-static const size_t HITL_BUFFER_CAPACITY = 76;
-static const size_t HITL_POST_TRIGGER_SAMPLES = 28; // ~1.5s post-event (28 * 53ms ≈ 1.48s)
-static ImuRawFrame hitlRingBuffer[HITL_BUFFER_CAPACITY];
-static size_t hitlRingHead = 0;
-static size_t hitlBufferCount = 0;
-static bool hitlCapturePending = false;
-static size_t hitlPostSamplesRemaining = 0;
-static uint32_t hitlTriggerEpochSec = 0;
 
 // Anti-Bricking & Rollback Probationary State
 static bool otaPendingVerification = false;
@@ -293,11 +285,7 @@ void loop() {
         PowerManager::onBleConnected();
         // Just connected: notify immediately to sync initial step state and signal LED connection confirmation
         statusLed.setBleConnected();
-        StepCounterPayload payload = stepDetector.getPayload(now);
-        bleServer.notifyStepCounter(payload);
-        lastNotifiedTotalSteps = stepDetector.getTotalSteps();
-        hasPendingIdleConfirmation = false;
-        Serial.printf("[STEP] BLE connected, sent initial step state: Total=%u\n", lastNotifiedTotalSteps);
+        sensorPipeline.onBleConnected(now);
 
         // Flush any offline falls buffered in NVS flash
         if (offlineFallStorage.hasPendingFalls()) {
@@ -331,174 +319,8 @@ void loop() {
     statusLed.setStudioRecording(studioManager.isRecording());
     statusLed.update(now);
 
-    // 2. Nominal IMU acquisition & Edge AI Activity Detection (only if Studio is not recording)
-    if (!studioManager.isRecording() && (now - lastImuReadMs >= IMU_SAMPLE_PERIOD_MS)) {
-        lastImuReadMs = now;
-
-        if (imuReady) {
-            float ax, ay, az, gx, gy, gz;
-            if (imu.readRawMetrics(ax, ay, az, gx, gy, gz)) {
-                // Ingest raw physical readings into dynamic orientation calibrator
-                imuCalibrator.update(ax, ay, az, gx, gy, gz);
-
-                // Apply dynamic alignment rotation matrix (corrects sensor PCB tilt)
-                imuCalibrator.applyCalibration(ax, ay, az, gx, gy, gz);
-
-                // Step detection on calibrated vertical acceleration with activity gating & GCT estimation
-                bool stepDetected = stepDetector.processSample(ax, ay, az, gy, currentActivityState, now);
-                if (stepDetected) {
-                    lastStepDetectedMs = now;
-                    hasPendingIdleConfirmation = true;
-                    PowerManager::recordActivity(now);
-
-                    uint32_t totalSteps = stepDetector.getTotalSteps();
-                    if (bleServer.isConnected() && (totalSteps - lastNotifiedTotalSteps >= STEP_NOTIFY_BATCH_COUNT)) {
-                        StepCounterPayload payload = stepDetector.getPayload(now);
-                        bleServer.notifyStepCounter(payload);
-                        lastNotifiedTotalSteps = totalSteps;
-                        Serial.printf("[STEP] Batched notification (%u steps): Total=%u (W:%u, R:%u, S:%u, U:%u) | Cadence: %u SPM | GCT: %u ms\n",
-                                      STEP_NOTIFY_BATCH_COUNT, totalSteps, stepDetector.getWalkSteps(),
-                                      stepDetector.getRunSteps(), stepDetector.getStairsSteps(),
-                                      stepDetector.getUnclassifiedSteps(), payload.cadence_spm, stepDetector.getAverageGctMs());
-                    }
-                }
-
-                // Inactivity timer is reset only when steps occur in an active locomotion state.
-                inactivityMonitor.processStepActivity(stepDetector.getTotalSteps(), currentActivityState, now);
-
-                // Store calibrated sample into HITL ring buffer (4.0s history)
-                // Encode in standard network byte order (Big-Endian / htons) for consistency with Studio recordings
-                ImuRawFrame hitlFrame;
-                hitlFrame.delta_ms = 0;
-                hitlFrame.ax = htons((int16_t)roundf(ax * 1000.0f));
-                hitlFrame.ay = htons((int16_t)roundf(ay * 1000.0f));
-                hitlFrame.az = htons((int16_t)roundf(az * 1000.0f));
-                hitlFrame.gx = htons((int16_t)roundf(gx * 10.0f));
-                hitlFrame.gy = htons((int16_t)roundf(gy * 10.0f));
-                hitlFrame.gz = htons((int16_t)roundf(gz * 10.0f));
-
-                hitlRingBuffer[hitlRingHead] = hitlFrame;
-                hitlRingHead = (hitlRingHead + 1) % HITL_BUFFER_CAPACITY;
-                if (hitlBufferCount < HITL_BUFFER_CAPACITY) {
-                    hitlBufferCount++;
-                }
-
-                if (hitlCapturePending) {
-                    if (hitlPostSamplesRemaining > 0) {
-                        hitlPostSamplesRemaining--;
-                    }
-                    if (hitlPostSamplesRemaining == 0) {
-                        hitlCapturePending = false;
-                        if (bleServer.isConnected() && bleServer.isHitlEnabled() && !studioManager.isBusy()) {
-                            std::vector<ImuRawFrame> burstFrames;
-                            burstFrames.reserve(hitlBufferCount);
-                            size_t startIdx = (hitlBufferCount == HITL_BUFFER_CAPACITY) ? hitlRingHead : 0;
-                            for (size_t i = 0; i < hitlBufferCount; ++i) {
-                                size_t idx = (startIdx + i) % HITL_BUFFER_CAPACITY;
-                                ImuRawFrame f = hitlRingBuffer[idx];
-                                f.delta_ms = htons((uint16_t)(i * IMU_SAMPLE_PERIOD_MS));
-                                burstFrames.push_back(f);
-                            }
-                            char sessionId[64];
-                            snprintf(sessionId, sizeof(sessionId), "hitl-%u", (unsigned int)hitlTriggerEpochSec);
-                            Serial.printf("[HITL] Dispatching 4.0s burst of %u samples for session %s...\n",
-                                          (unsigned int)burstFrames.size(), sessionId);
-                            studioManager.streamHitlBurst(burstFrames, sessionId);
-                        }
-                    }
-                }
-
-                // Push calibrated sample into sliding buffer
-                activityDetector.pushSample(ax, ay, az, gx, gy, gz);
-
-                // Run real-time edge inference if step interval is due
-                if (activityDetector.isEvaluationDue()) {
-                    ActivityDetectionResult result;
-                    if (activityDetector.detect(result)) {
-                        if (result.confidence >= activityDetector.getConfidenceThreshold()) {
-                            uint32_t epochSec = (uint32_t)(now / 1000);
-                            currentActivityState = result.stateCode;
-
-                            // Notify calibrator if walking activity detected (triggers step 2 refinement on next rest)
-                            if (result.stateCode == STATE_CODE_WALK) {
-                                imuCalibrator.notifyWalkDetected();
-                            }
-
-                            if (result.isFall) {
-                                Serial.printf("[EDGE-AI] *** CRITICAL FALL DETECTED: %s (Confidence: %.1f%%, Impact: %.1f m/s2, Latency: %u us) ***\n",
-                                              result.className, result.confidence * 100.0f, result.peakImpactMs2, result.inferenceTimeUs);
-
-                                // Trigger emergency haptic feedback alert
-                                haptic.play(HAPTIC_PATTERN_ALERT_PULSE, 255, 500);
-
-                                if (bleServer.isConnected()) {
-                                    char diagBuf[64];
-                                    snprintf(diagBuf, sizeof(diagBuf), "AI_FALL:%s %u%% pk=%.1f",
-                                             result.className, (unsigned int)(result.confidence * 100.0f), result.peakImpactMs2);
-                                    bleServer.notifyStudioControl(diagBuf);
-
-                                    // Notify connected mobile client over BLE with critical fall flags
-                                    bleServer.notifyActivity(
-                                        result.stateCode,
-                                        (uint8_t)(result.confidence * 100.0f),
-                                        epochSec,
-                                        DETECTION_FLAG_CRITICAL_FALL | DETECTION_FLAG_LOCAL_HAPTIC
-                                    );
-                                } else {
-                                    // BLE disconnected: persist fall alert to non-volatile flash memory
-                                    offlineFallStorage.saveFall(
-                                        result.stateCode,
-                                        (uint8_t)(result.confidence * 100.0f),
-                                        epochSec
-                                    );
-                                }
-                                lastReportedActivityState = result.stateCode;
-                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
-                                    hitlCapturePending = true;
-                                    hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
-                                    hitlTriggerEpochSec = epochSec;
-                                }
-                            } else if (result.stateCode != lastReportedActivityState) {
-                                Serial.printf("[EDGE-AI] Activity State Changed: %s (Confidence: %.1f%%, Impact: %.1f m/s2, Latency: %u us)\n",
-                                              result.className, result.confidence * 100.0f, result.peakImpactMs2, result.inferenceTimeUs);
-
-                                if (bleServer.isConnected()) {
-                                    char diagBuf[64];
-                                    snprintf(diagBuf, sizeof(diagBuf), "AI:%s %u%% pk=%.1f",
-                                             result.className, (unsigned int)(result.confidence * 100.0f), result.peakImpactMs2);
-                                    bleServer.notifyStudioControl(diagBuf);
-
-                                    bleServer.notifyActivity(
-                                        result.stateCode,
-                                        (uint8_t)(result.confidence * 100.0f),
-                                        epochSec,
-                                        0
-                                    );
-                                }
-                                lastReportedActivityState = result.stateCode;
-                                if (bleServer.isHitlEnabled() && !hitlCapturePending) {
-                                    hitlCapturePending = true;
-                                    hitlPostSamplesRemaining = HITL_POST_TRIGGER_SAMPLES;
-                                    hitlTriggerEpochSec = epochSec;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-    }
-
-    // Rest / Idle confirmation notification check
-    if (bleServer.isConnected() && hasPendingIdleConfirmation && (now - lastStepDetectedMs >= STEP_IDLE_CONFIRM_DELAY_MS)) {
-        hasPendingIdleConfirmation = false;
-        StepCounterPayload payload = stepDetector.getPayload(now);
-        bleServer.notifyStepCounter(payload);
-        lastNotifiedTotalSteps = stepDetector.getTotalSteps();
-        Serial.printf("[STEP] Idle rest confirmation sent: Total=%u | Cadence=%u SPM\n",
-                      lastNotifiedTotalSteps, payload.cadence_spm);
-    }
+    // 2. Nominal IMU acquisition, filtering, step detection & Edge AI Activity Detection
+    sensorPipeline.process(now, imuReady);
 
     // 3. Periodic debug telemetry output (every 3 seconds)
     if (now - lastDiagnosticPrintMs >= 3000) {

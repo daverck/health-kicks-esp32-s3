@@ -145,5 +145,10 @@ private:
     OtaStateChangeCallback _onOtaStateChange;
     bool _hitlEnabled = false;
 
+    void configureSecurity();
+    void setupFootwearService();
+    void setupOtaService();
+    void setupDeviceInformationService();
+
     friend class DeviceControlParser;
 };

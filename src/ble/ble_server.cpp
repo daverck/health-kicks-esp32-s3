@@ -123,19 +123,15 @@ HealthKicksBleServer::HealthKicksBleServer()
       _onFallCooldownConfig(nullptr),
       _onOtaStateChange(nullptr) {}
 
-void HealthKicksBleServer::begin(const char* deviceName) {
-    NimBLEDevice::init(deviceName);
-    NimBLEDevice::setMTU(BLE_PREFERRED_MTU);
-
+void HealthKicksBleServer::configureSecurity() {
     // Configure BLE Security Manager: LE Secure Connections (LESC) + Bonding (Option 1A: Just Works)
     NimBLEDevice::setSecurityAuth(true, false, true); // bonding = true, mitm = false, sc = true
     NimBLEDevice::setSecurityIOCap(BLE_HS_IO_NO_INPUT_OUTPUT);
     NimBLEDevice::setSecurityInitKey(BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID);
     NimBLEDevice::setSecurityRespKey(BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID);
+}
 
-    _pServer = NimBLEDevice::createServer();
-    _pServer->setCallbacks(new ServerCallbacks(this));
-
+void HealthKicksBleServer::setupFootwearService() {
     // Create main Footwear service
     _pService = _pServer->createService(HEALTHKICKS_SERVICE_UUID);
 
@@ -178,7 +174,9 @@ void HealthKicksBleServer::begin(const char* deviceName) {
     // Start primary Footwear service
     _pService->start();
     log_i("NimBLE server configured with Footwear service: %s", HEALTHKICKS_SERVICE_UUID);
+}
 
+void HealthKicksBleServer::setupOtaService() {
     // Create OTA Firmware Update Service (0010)
     _pOtaService = _pServer->createService(HEALTHKICKS_OTA_SERVICE_UUID);
 
@@ -214,7 +212,9 @@ void HealthKicksBleServer::begin(const char* deviceName) {
             _onOtaStateChange(active);
         }
     });
+}
 
+void HealthKicksBleServer::setupDeviceInformationService() {
     // Create standard Bluetooth SIG Device Information Service (0x180A)
     NimBLEService* pDisService = _pServer->createService(NimBLEUUID((uint16_t)0x180A));
     if (pDisService != nullptr) {
@@ -239,6 +239,20 @@ void HealthKicksBleServer::begin(const char* deviceName) {
         pDisService->start();
         log_i("NimBLE server configured with Device Information service: 0x180A");
     }
+}
+
+void HealthKicksBleServer::begin(const char* deviceName) {
+    NimBLEDevice::init(deviceName);
+    NimBLEDevice::setMTU(BLE_PREFERRED_MTU);
+
+    configureSecurity();
+
+    _pServer = NimBLEDevice::createServer();
+    _pServer->setCallbacks(new ServerCallbacks(this));
+
+    setupFootwearService();
+    setupOtaService();
+    setupDeviceInformationService();
 
     _lastActivityTime = millis();
     startAdvertising();

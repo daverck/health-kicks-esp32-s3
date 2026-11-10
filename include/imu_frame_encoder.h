@@ -7,8 +7,8 @@
 
 /**
  * @file imu_frame_encoder.h
- * @brief Standardized quantization and network byte-order (Big-Endian) encoding
- * for 14-byte ImuRawFrame structures.
+ * @brief Standardized quantization, network byte-order (Big-Endian) encoding,
+ * and physical unit decoding for 14-byte ImuRawFrame structures.
  */
 
 /**
@@ -37,4 +37,29 @@ static inline ImuRawFrame encodeImuRawFrame(
     frame.gy = htons((int16_t)roundf(gy_dps * 10.0f));
     frame.gz = htons((int16_t)roundf(gz_dps * 10.0f));
     return frame;
+}
+
+/**
+ * @brief Decodes a packed 14-byte Big-Endian ImuRawFrame back into physical units.
+ *
+ * @param frame Packed ImuRawFrame in network byte order.
+ * @param[out] ax_g Acceleration along X-axis in g.
+ * @param[out] ay_g Acceleration along Y-axis in g.
+ * @param[out] az_g Acceleration along Z-axis in g.
+ * @param[out] gx_dps Angular velocity along X-axis in deg/s.
+ * @param[out] gy_dps Angular velocity along Y-axis in deg/s.
+ * @param[out] gz_dps Angular velocity along Z-axis in deg/s.
+ */
+static inline void decodeImuRawFrame(
+    const ImuRawFrame& frame,
+    float& ax_g, float& ay_g, float& az_g,
+    float& gx_dps, float& gy_dps, float& gz_dps
+) {
+    ax_g = (float)((int16_t)ntohs(frame.ax)) / 1000.0f;
+    ay_g = (float)((int16_t)ntohs(frame.ay)) / 1000.0f;
+    az_g = (float)((int16_t)ntohs(frame.az)) / 1000.0f;
+
+    gx_dps = (float)((int16_t)ntohs(frame.gx)) / 10.0f;
+    gy_dps = (float)((int16_t)ntohs(frame.gy)) / 10.0f;
+    gz_dps = (float)((int16_t)ntohs(frame.gz)) / 10.0f;
 }

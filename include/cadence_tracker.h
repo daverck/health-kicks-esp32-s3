@@ -44,12 +44,23 @@ public:
      */
     void reset();
 
+    /**
+     * @brief Computes cadence in steps per minute (SPM) based on step interval count and duration in ms.
+     * @param intervalCount Number of step intervals between oldest and newest step (count - 1).
+     * @param deltaMs Duration in ms between oldest and newest step timestamp.
+     * @return Cadence in SPM (0 to 255).
+     */
+    static uint8_t computeStepsPerMinute(size_t intervalCount, uint32_t deltaMs);
+
     // Getters for inspection/unit testing
     size_t getTimestampCount() const { return _timestampCount; }
     uint32_t getWindowMs() const { return _windowMs; }
     uint32_t getTimeoutMs() const { return _timeoutMs; }
 
 private:
+    size_t getOldestIndex() const;
+    size_t getNewestIndex() const;
+
     uint32_t _windowMs;
     uint32_t _timeoutMs;
     uint32_t _stepTimestamps[MAX_CADENCE_HISTORY];

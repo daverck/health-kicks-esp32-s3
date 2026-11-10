@@ -1,15 +1,8 @@
 #include "activity_detector.h"
+#include "imu_frame_encoder.h"
 
 // Earth gravity constant for converting acceleration between g and m/s^2
 static const float GRAVITY_MS2 = 9.80665f;
-
-static inline float milliGToG(int16_t milliG) {
-    return (float)milliG / 1000.0f;
-}
-
-static inline float tenthDpsToDps(int16_t tenthDps) {
-    return (float)tenthDps / 10.0f;
-}
 
 static void normalizeClassProbabilities(
     const double scores[MODEL_CLASS_COUNT],
@@ -147,25 +140,8 @@ void ActivityDetector::pushSample(float ax, float ay, float az, float gx, float 
 }
 
 void ActivityDetector::pushFrame(const ImuRawFrame& frame) {
-    // Convert Big-Endian compressed frame:
-    // ax, ay, az: milli-g (x1000) -> float in g
-    // gx, gy, gz: tenths of deg/s (x10) -> float in deg/s
-    int16_t raw_ax = (int16_t)ntohs(frame.ax);
-    int16_t raw_ay = (int16_t)ntohs(frame.ay);
-    int16_t raw_az = (int16_t)ntohs(frame.az);
-
-    int16_t raw_gx = (int16_t)ntohs(frame.gx);
-    int16_t raw_gy = (int16_t)ntohs(frame.gy);
-    int16_t raw_gz = (int16_t)ntohs(frame.gz);
-
-    float ax = milliGToG(raw_ax);
-    float ay = milliGToG(raw_ay);
-    float az = milliGToG(raw_az);
-
-    float gx = tenthDpsToDps(raw_gx);
-    float gy = tenthDpsToDps(raw_gy);
-    float gz = tenthDpsToDps(raw_gz);
-
+    float ax, ay, az, gx, gy, gz;
+    decodeImuRawFrame(frame, ax, ay, az, gx, gy, gz);
     pushSample(ax, ay, az, gx, gy, gz);
 }
 

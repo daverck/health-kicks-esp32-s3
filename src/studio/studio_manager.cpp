@@ -24,7 +24,6 @@ void StudioManager::begin(HealthKicksBleServer* bleServer, HapticDriver* haptic,
     _calibrator = calibrator;
     _state = StudioState::IDLE;
     _finishRequested = false;
-    _frames.reserve(1600); // Reserve for 30s at 50Hz (1500 frames)
 }
 
 void StudioManager::handleCommand(const std::string& command) {
@@ -149,6 +148,12 @@ void StudioManager::startRecording() {
 }
 
 void StudioManager::update() {
+    if (_state != StudioState::IDLE && _bleServer && !_bleServer->isConnected()) {
+        Serial.println("[STUDIO] BLE disconnected during active session -> Aborting studio session.");
+        cancel();
+        return;
+    }
+
     uint32_t now = millis();
 
     switch (_state) {
@@ -234,6 +239,7 @@ void StudioManager::finishRecordingAndStreamBurst() {
 
     _state = StudioState::IDLE;
     _frames.clear();
+    _frames.shrink_to_fit();
 
     // Restore nominal connection parameters (100-125 ms) to preserve battery life
     if (_bleServer) {
@@ -250,9 +256,12 @@ void StudioManager::cancel() {
         _state = StudioState::IDLE;
         _finishRequested = false;
         _frames.clear();
-        _haptic->stop();
-        _bleServer->notifyStudioControl("CANCELLED");
+        _frames.shrink_to_fit();
+        if (_haptic) {
+            _haptic->stop();
+        }
         if (_bleServer) {
+            _bleServer->notifyStudioControl("CANCELLED");
             _bleServer->requestNominalConnectionParams();
         }
         Serial.println("[STUDIO] Session cancelled.");
@@ -274,4 +283,5 @@ void StudioManager::streamHitlBurst(const std::vector<ImuRawFrame>& frames, cons
     _bleServer->notifyStudioControl(finishMsg);
     sendBurstPackets();
     _frames.clear();
+    _frames.shrink_to_fit();
 }

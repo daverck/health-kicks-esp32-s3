@@ -77,8 +77,8 @@ void OtaBleService::handleControlWrite(const uint8_t* data, size_t len) {
         Serial.printf("[OTA] Target update partition: %s (offset: 0x%08X, max size: %u bytes)\n",
                       _updatePartition->label, _updatePartition->address, _updatePartition->size);
 
-        if (_totalSize > _updatePartition->size) {
-            Serial.printf("[OTA] Error: Firmware size %u exceeds partition capacity %u!\n",
+        if (_totalSize < 32 || _totalSize > _updatePartition->size) {
+            Serial.printf("[OTA] Error: Invalid firmware size %u (capacity: %u)!\n",
                           _totalSize, _updatePartition->size);
             notifyError(OTA_ERR_BEGIN_FAILED);
             return;
@@ -214,6 +214,14 @@ void OtaBleService::handleDataWrite(const uint8_t* data, size_t len) {
     }
 
     if (len == 0 || !data) return;
+
+    if (_totalSize > 0 && (_bytesWritten + len) > _totalSize) {
+        Serial.printf("[OTA] Error: Data write overflow (%u + %u > %u)! Aborting.\n",
+                      _bytesWritten, (unsigned int)len, _totalSize);
+        abort();
+        notifyError(OTA_ERR_SIZE_MISMATCH);
+        return;
+    }
 
     if (_bytesWritten == 0 && len > 0) {
         if (data[0] != 0xE9) {

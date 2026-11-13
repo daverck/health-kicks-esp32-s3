@@ -50,6 +50,12 @@ uint16_t BurstPacketTransmitter::sendBurstPackets(HealthKicksBleServer* bleServe
     uint8_t packetBuf[260];
 
     while (offset < totalSamples) {
+        if (!bleServer->isConnected()) {
+            Serial.printf("[BURST] Aborting burst mid-stream at frame %u/%u: BLE client disconnected.\n",
+                          (unsigned int)offset, (unsigned int)totalSamples);
+            return seqNum;
+        }
+
         // 1. Attempt lossless Run-Length Encoding (RLE) if at least 2 samples have identical sensor readings
         int rleCount = 0;
         uint8_t rleStepMs = 20;
@@ -190,6 +196,11 @@ uint16_t BurstPacketTransmitter::sendBurstPackets(HealthKicksBleServer* bleServe
         }
 
         delay(5); // Inter-packet delay to prevent BLE radio buffer overflow
+    }
+
+    if (!bleServer->isConnected()) {
+        Serial.println("[BURST] Aborting END_OF_BURST: BLE client disconnected.");
+        return seqNum;
     }
 
     // Compute CRC32 IEEE 802.3 over all payload bytes transmitted

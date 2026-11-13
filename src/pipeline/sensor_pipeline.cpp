@@ -39,11 +39,19 @@ void SensorPipeline::process(uint32_t nowMs, bool imuReady) {
         if (imuReady) {
             float ax, ay, az, gx, gy, gz;
             if (imu.readRawMetrics(ax, ay, az, gx, gy, gz)) {
+                lastRawAx = ax;
+                lastRawAy = ay;
+                lastRawAz = az;
+
                 // Ingest raw physical readings into dynamic orientation calibrator
                 imuCalibrator.update(ax, ay, az, gx, gy, gz);
 
                 // Apply dynamic alignment rotation matrix (corrects sensor PCB tilt)
                 imuCalibrator.applyCalibration(ax, ay, az, gx, gy, gz);
+
+                lastCalibAx = ax;
+                lastCalibAy = ay;
+                lastCalibAz = az;
 
                 // Step detection on calibrated vertical acceleration with activity gating & GCT estimation
                 bool stepDetected = stepDetector.processSample(ax, ay, az, gy, currentActivityState, nowMs);

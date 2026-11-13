@@ -44,6 +44,19 @@ public:
     /// Returns the latest activity state detected.
     uint8_t getCurrentActivityState() const { return currentActivityState; }
 
+    /// Returns the most recent raw and calibrated accelerometer readings (in g) captured by the 19 Hz pipeline.
+    void getLastAccelSample(
+        float& rawAx, float& rawAy, float& rawAz,
+        float& calibAx, float& calibAy, float& calibAz
+    ) const {
+        rawAx = lastRawAx;
+        rawAy = lastRawAy;
+        rawAz = lastRawAz;
+        calibAx = lastCalibAx;
+        calibAy = lastCalibAy;
+        calibAz = lastCalibAz;
+    }
+
 private:
     ImuMpu6050& imu;
     ImuCalibrator& imuCalibrator;
@@ -58,6 +71,14 @@ private:
     uint32_t lastImuReadMs = 0;
     uint8_t lastReportedActivityState = 0xFF;
     uint8_t currentActivityState = STATE_CODE_IDLE;
+
+    // Latest cached accelerometer sample for zero-jitter diagnostic telemetry
+    float lastRawAx = 0.0f;
+    float lastRawAy = 0.0f;
+    float lastRawAz = 0.0f;
+    float lastCalibAx = 0.0f;
+    float lastCalibAy = 0.0f;
+    float lastCalibAz = 0.0f;
 
     // Step notification batching
     uint32_t lastNotifiedTotalSteps = 0;

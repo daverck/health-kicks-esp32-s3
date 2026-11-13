@@ -322,17 +322,13 @@ void loop() {
     // 2. Nominal IMU acquisition, filtering, step detection & Edge AI Activity Detection
     sensorPipeline.process(now, imuReady);
 
-    // 3. Periodic debug telemetry output (every 3 seconds)
+    // 3. Periodic debug telemetry output (every 3 seconds) using cached 19 Hz pipeline sample
     if (now - lastDiagnosticPrintMs >= 3000) {
         lastDiagnosticPrintMs = now;
 
-        float ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0;
-        if (imuReady) {
-            imu.readRawMetrics(ax, ay, az, gx, gy, gz);
-        }
-
-        float c_ax = ax, c_ay = ay, c_az = az, c_gx = gx, c_gy = gy, c_gz = gz;
-        imuCalibrator.applyCalibration(c_ax, c_ay, c_az, c_gx, c_gy, c_gz);
+        float ax = 0.0f, ay = 0.0f, az = 0.0f;
+        float c_ax = 0.0f, c_ay = 0.0f, c_az = 0.0f;
+        sensorPipeline.getLastAccelSample(ax, ay, az, c_ax, c_ay, c_az);
 
         Serial.printf("[HEARTBEAT] BLE: %s | MTU: %d | Raw: [%.2f, %.2f, %.2f]g | Calib: [%.2f, %.2f, %.2f]g (%s) | Free PSRAM: %u KB\n",
                       bleServer.isConnected() ? "CONNECTED" : "ADVERTISING",

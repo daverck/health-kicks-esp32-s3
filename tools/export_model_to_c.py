@@ -144,6 +144,7 @@ def generate_c_header(
     classes: list[str],
     window_size_sec: float,
     metadata: dict[str, Any],
+    model_version_override: str | None = None,
 ) -> str:
     """Transpiles the classifier and formats the generated C header.
 
@@ -151,6 +152,21 @@ def generate_c_header(
     each individual tree is transpiled into its own function (tree chunking) to prevent
     the Xtensa assembler error: 'l32r: literal target out of range' when the forest is large.
     """
+    import hashlib
+
+    model_version = (
+        model_version_override
+        or metadata.get("model_version")
+        or metadata.get("version")
+        or "v1.0.0"
+    )
+    model_name = str(metadata.get("model_name") or type(estimator).__name__)
+    trained_at = str(metadata.get("trained_at_utc") or metadata.get("trained_at") or "unknown")
+    trained_date = trained_at[:10] if len(trained_at) >= 10 else "unknown"
+    model_hash = hashlib.sha256(
+        f"{model_name}:{model_version}:{len(feature_names)}:{len(classes)}".encode()
+    ).hexdigest()[:12]
+
     is_forest = hasattr(estimator, "estimators_") and len(estimator.estimators_) > 1
 
     if is_forest:
@@ -214,6 +230,10 @@ inline void raw_predict_activity(double *input, double *output) {{
 #include <string.h>
 #include <math.h>
 
+#define MODEL_VERSION           "{model_version}"
+#define MODEL_NAME              "{model_name}"
+#define MODEL_BUILD_HASH        "{model_hash}"
+#define MODEL_TRAINED_DATE      "{trained_date}"
 #define MODEL_FEATURE_COUNT     {feature_count}
 #define MODEL_CLASS_COUNT       {class_count}
 #define MODEL_WINDOW_SIZE_SEC   {window_size_sec:.1f}f
@@ -301,6 +321,12 @@ def main() -> None:
         default=Path("include/activity_model_generated.h"),
         help="Path for generated C header output",
     )
+    parser.add_argument(
+        "--model-version",
+        type=str,
+        default=None,
+        help="Optional explicit semantic model version (e.g. v1.2.0)",
+    )
 
     args = parser.parse_args()
 
@@ -323,7 +349,14 @@ def main() -> None:
     print(f"Classes ({len(classes)}): {classes}")
     print(f"Features ({len(feature_names)}): {feature_names}")
 
-    c_header = generate_c_header(estimator, feature_names, classes, window_size_sec, metadata)
+    c_header = generate_c_header(
+        estimator,
+        feature_names,
+        classes,
+        window_size_sec,
+        metadata,
+        model_version_override=args.model_version,
+    )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(c_header, encoding="utf-8")

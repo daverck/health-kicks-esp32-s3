@@ -9,6 +9,10 @@
 #include <string.h>
 #include <math.h>
 
+#define MODEL_VERSION           "v1.0.0"
+#define MODEL_NAME              "RandomForest_Standard"
+#define MODEL_BUILD_HASH        "a45c829e11bf"
+#define MODEL_TRAINED_DATE      "2026-11-14"
 #define MODEL_FEATURE_COUNT     28
 #define MODEL_CLASS_COUNT       16
 #define MODEL_WINDOW_SIZE_SEC   3.0f

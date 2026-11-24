@@ -6,6 +6,8 @@
 #include "invariants.h"
 #include "ota_ble_service.h"
 
+class ActivityBoutTracker;
+
 typedef std::function<void(uint8_t pattern, uint8_t intensity, uint16_t durationMs)> HapticCallback;
 typedef std::function<void(const std::string& command)> StudioCommandCallback;
 typedef std::function<void()> CalibrationTriggerCallback;
@@ -52,6 +54,19 @@ public:
     void notifyStudioControl(const std::string& message);
     void notifyStudioControl(const String& message);
     void notifyStudioControl(const char* message);
+    void notifyStudioControl(const uint8_t* data, size_t length);
+
+    /**
+     * @brief Sends activity bouts response packet(s) (opcode 0x31) on Characteristic 0004.
+     */
+    void sendActivityBoutsResponse();
+
+    /**
+     * @brief Processes client acknowledgment (opcode 0x32) and frees acknowledged bouts.
+     */
+    void handleActivityBoutAck(uint8_t ackCount);
+
+    void setActivityBoutTracker(ActivityBoutTracker* tracker) { _boutTracker = tracker; }
 
     /**
      * @brief Sends a high-speed binary packet over Studio Data Burst (Characteristic 0005).
@@ -144,6 +159,7 @@ private:
     FallCooldownConfigCallback _onFallCooldownConfig;
     OtaStateChangeCallback _onOtaStateChange;
     bool _hitlEnabled = false;
+    ActivityBoutTracker* _boutTracker = nullptr;
 
     void configureSecurity();
     void setupFootwearService();

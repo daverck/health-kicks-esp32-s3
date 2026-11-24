@@ -32,6 +32,14 @@ void test_inactivity_config_payload_binary_packing(void) {
     TEST_ASSERT_EQUAL_UINT32(6, sizeof(InactivityConfigPayload));
 }
 
+void test_activity_bout_binary_packing_and_opcodes(void) {
+    // Invariant: Activity Bout entry on Characteristic 0004 must be strictly packed to 8 bytes
+    TEST_ASSERT_EQUAL_UINT32(8, sizeof(ActivityBout));
+    TEST_ASSERT_EQUAL_HEX8(0x30, CMD_REQ_ACTIVITY_BOUTS);
+    TEST_ASSERT_EQUAL_HEX8(0x31, RESP_ACTIVITY_BOUTS);
+    TEST_ASSERT_EQUAL_HEX8(0x32, CMD_ACK_ACTIVITY_BOUTS);
+}
+
 void test_activity_state_codes_contract(void) {
     // Invariant: GATT activity state codes contract compliance
     TEST_ASSERT_EQUAL_HEX8(0x00, STATE_CODE_IDLE);
@@ -102,6 +110,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_burst_packet_header_binary_packing);
     RUN_TEST(test_step_counter_payload_binary_packing);
     RUN_TEST(test_inactivity_config_payload_binary_packing);
+    RUN_TEST(test_activity_bout_binary_packing_and_opcodes);
     RUN_TEST(test_activity_state_codes_contract);
     RUN_TEST(test_activity_model_dimensions);
     RUN_TEST(test_activity_model_fall_classes_mask);

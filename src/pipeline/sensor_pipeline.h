@@ -14,6 +14,7 @@
 #include "actuators/haptic_driver.h"
 #include "studio/studio_manager.h"
 #include "offline_fall_storage.h"
+#include "activity_bout_tracker.h"
 
 /// Modular acquisition, calibration, step detection, HITL buffering, and Edge AI evaluation pipeline.
 class SensorPipeline {
@@ -32,7 +33,8 @@ public:
         HealthKicksBleServer& bleServer,
         HapticDriver& haptic,
         StudioManager& studioManager,
-        OfflineFallStorage& offlineFallStorage
+        OfflineFallStorage& offlineFallStorage,
+        ActivityBoutTracker& boutTracker
     );
 
     /// Processes IMU sampling, filtering, step detection, and Edge AI inference if due.
@@ -67,6 +69,7 @@ private:
     HapticDriver& haptic;
     StudioManager& studioManager;
     OfflineFallStorage& offlineFallStorage;
+    ActivityBoutTracker& boutTracker;
 
     uint32_t lastImuReadMs = 0;
     uint8_t lastReportedActivityState = 0xFF;

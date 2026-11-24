@@ -12,7 +12,8 @@ SensorPipeline::SensorPipeline(
     HealthKicksBleServer& bleServer,
     HapticDriver& haptic,
     StudioManager& studioManager,
-    OfflineFallStorage& offlineFallStorage
+    OfflineFallStorage& offlineFallStorage,
+    ActivityBoutTracker& boutTracker
 ) : imu(imu),
     imuCalibrator(imuCalibrator),
     stepDetector(stepDetector),
@@ -21,7 +22,8 @@ SensorPipeline::SensorPipeline(
     bleServer(bleServer),
     haptic(haptic),
     studioManager(studioManager),
-    offlineFallStorage(offlineFallStorage) {}
+    offlineFallStorage(offlineFallStorage),
+    boutTracker(boutTracker) {}
 
 void SensorPipeline::onBleConnected(uint32_t nowMs) {
     StepCounterPayload payload = stepDetector.getPayload(nowMs);
@@ -60,6 +62,9 @@ void SensorPipeline::process(uint32_t nowMs, bool imuReady) {
                     hasPendingIdleConfirmation = true;
                     PowerManager::recordActivity(nowMs);
 
+                    uint8_t cadenceSpm = stepDetector.calculateCadence(nowMs);
+                    boutTracker.onStep(currentActivityState, nowMs, cadenceSpm);
+
                     uint32_t totalSteps = stepDetector.getTotalSteps();
                     if (bleServer.isConnected() && (totalSteps - lastNotifiedTotalSteps >= STEP_NOTIFY_BATCH_COUNT)) {
                         StepCounterPayload payload = stepDetector.getPayload(nowMs);
@@ -89,6 +94,9 @@ void SensorPipeline::process(uint32_t nowMs, bool imuReady) {
 
     // Rest / Idle confirmation notification check
     checkIdleRestConfirmation(nowMs);
+
+    // Activity bout stillness check
+    boutTracker.onTick(nowMs);
 }
 
 void SensorPipeline::processHitlBuffer(float ax, float ay, float az, float gx, float gy, float gz, uint32_t nowMs) {

@@ -96,6 +96,19 @@ bool DeviceControlParser::handleCalibration(HealthKicksBleServer* server, const 
 void DeviceControlParser::parseAndExecute(HealthKicksBleServer* server, const uint8_t* data, size_t length) {
     if (!server || length == 0) return;
 
+    // Check for binary Activity Bout synchronization opcodes
+    if (data[0] == CMD_REQ_ACTIVITY_BOUTS) { // 0x30
+        Serial.println("[BLE] Binary REQ_ACTIVITY_BOUTS (0x30) received");
+        server->sendActivityBoutsResponse();
+        return;
+    }
+    if (data[0] == CMD_ACK_ACTIVITY_BOUTS && length >= 2) { // 0x32
+        uint8_t ackCount = data[1];
+        Serial.printf("[BLE] Binary ACK_ACTIVITY_BOUTS (0x32) received with count=%u\n", ackCount);
+        server->handleActivityBoutAck(ackCount);
+        return;
+    }
+
     // Fixed stack buffer avoiding dynamic heap String allocations and fragmentation
     char cmdBuf[128];
     size_t copyLen = (length < sizeof(cmdBuf) - 1) ? length : (sizeof(cmdBuf) - 1);

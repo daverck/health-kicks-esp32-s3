@@ -1,5 +1,6 @@
 #include "ble_server.h"
 #include "device_control_parser.h"
+#include "activity_bout_tracker.h"
 #include <algorithm>
 
 volatile bool g_need_restart_advertising = false;
@@ -415,6 +416,56 @@ void HealthKicksBleServer::notifyStudioControl(const String& message) {
 void HealthKicksBleServer::notifyStudioControl(const char* message) {
     if (!message) return;
     notifyStudioControl(std::string(message));
+}
+
+void HealthKicksBleServer::notifyStudioControl(const uint8_t* data, size_t length) {
+    if (!_deviceConnected || !_pCharStudioControl || !data || length == 0) return;
+    _pCharStudioControl->setValue(data, length);
+    _pCharStudioControl->notify();
+}
+
+void HealthKicksBleServer::sendActivityBoutsResponse() {
+    if (!_deviceConnected || !_pCharStudioControl) return;
+
+    if (_boutTracker) {
+        _boutTracker->flushActiveBout(millis());
+    }
+
+    std::vector<ActivityBout> bouts;
+    if (_boutTracker) {
+        _boutTracker->getBouts(25, bouts);
+    }
+
+    uint8_t count = (uint8_t)bouts.size();
+    uint32_t sessionUptimeSec = (uint32_t)(millis() / 1000);
+
+    size_t packetLen = 6 + (count * sizeof(ActivityBout));
+    std::vector<uint8_t> packet(packetLen);
+
+    packet[0] = RESP_ACTIVITY_BOUTS;
+    packet[1] = count;
+    packet[2] = (uint8_t)((sessionUptimeSec >> 24) & 0xFF);
+    packet[3] = (uint8_t)((sessionUptimeSec >> 16) & 0xFF);
+    packet[4] = (uint8_t)((sessionUptimeSec >> 8) & 0xFF);
+    packet[5] = (uint8_t)(sessionUptimeSec & 0xFF);
+
+    if (count > 0) {
+        memcpy(&packet[6], bouts.data(), count * sizeof(ActivityBout));
+    }
+
+    notifyStudioControl(packet.data(), packet.size());
+    Serial.printf("[BLE] RESP_ACTIVITY_BOUTS sent: %u bouts, uptime=%u s\n", count, sessionUptimeSec);
+}
+
+void HealthKicksBleServer::handleActivityBoutAck(uint8_t ackCount) {
+    if (!_boutTracker) return;
+    _boutTracker->acknowledgeCount(ackCount);
+    Serial.printf("[BLE] ACK_ACTIVITY_BOUTS received: acked=%u, remaining=%u\n",
+                  ackCount, (unsigned int)_boutTracker->getBoutCount());
+
+    if (_boutTracker->getBoutCount() > 0) {
+        sendActivityBoutsResponse();
+    }
 }
 
 bool HealthKicksBleServer::sendBurstPacket(const uint8_t* data, size_t length) {

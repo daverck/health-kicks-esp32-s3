@@ -13,6 +13,7 @@
 #include "inactivity_monitor.h"
 #include "power_manager.h"
 #include "offline_fall_storage.h"
+#include "activity_bout_tracker.h"
 #include "diagnostics/hardware_diagnostics.h"
 #include "pipeline/sensor_pipeline.h"
 #include <esp_idf_version.h>
@@ -30,6 +31,7 @@ static ImuCalibrator imuCalibrator;
 static StepDetector stepDetector;
 static InactivityMonitor inactivityMonitor;
 static OfflineFallStorage offlineFallStorage;
+static ActivityBoutTracker boutTracker;
 static SensorPipeline sensorPipeline(
     imu,
     imuCalibrator,
@@ -39,7 +41,8 @@ static SensorPipeline sensorPipeline(
     bleServer,
     haptic,
     studioManager,
-    offlineFallStorage
+    offlineFallStorage,
+    boutTracker
 );
 static Preferences configPrefs;
 static const char* CONFIG_NVS_NAMESPACE = "hk_config";
@@ -216,6 +219,10 @@ void setup() {
     // Start NimBLE server
     Serial.printf("[BLE] Starting NimBLE server with name \"%s\"...\n", BLE_DEVICE_NAME);
     bleServer.begin(BLE_DEVICE_NAME);
+
+    // Initialize Activity Bout Tracker & link to BLE server
+    boutTracker.begin();
+    bleServer.setActivityBoutTracker(&boutTracker);
 
     // Initialize resilient offline fall storage in NVS flash
     offlineFallStorage.begin();

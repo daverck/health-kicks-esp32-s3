@@ -132,4 +132,21 @@ struct InactivityConfigPayload {
     uint16_t inactivity_threshold_sec;// Big-Endian
     uint16_t cooldown_duration_sec;   // Big-Endian
 };
+
+// Activity Bout Synchronization Opcodes (Characteristic 0004)
+#define CMD_REQ_ACTIVITY_BOUTS          0x30
+#define RESP_ACTIVITY_BOUTS             0x31
+#define CMD_ACK_ACTIVITY_BOUTS          0x32
+
+/**
+ * @brief Packed 8-byte Activity Bout structure (Big-Endian).
+ * Transmitted over Characteristic 0004 in response to opcode 0x30.
+ */
+struct ActivityBout {
+    uint16_t start_uptime_sec;   // Start time in uptime seconds since boot (Big-Endian)
+    uint16_t duration_sec;       // Duration of the bout in seconds (Big-Endian)
+    uint16_t step_count;         // Total steps validated during this bout (Big-Endian)
+    uint8_t activity_type;       // 0x01: Walk, 0x02: Run, 0x03: Stairs, 0x04: Unclassified
+    uint8_t avg_cadence;         // Average cadence in steps per minute (SPM)
+};
 #pragma pack(pop)

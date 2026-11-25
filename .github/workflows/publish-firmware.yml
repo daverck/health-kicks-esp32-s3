@@ -23,8 +23,8 @@ on:
       - 'platformio.ini'
 
 env:
-  AWS_REGION: eu-north-1
-  S3_BUCKET: healthkicks-firmware-releases
+  AWS_REGION: eu-west-1
+  S3_BUCKET: healthkicks-firmware-releases-eu-west-1
   S3_DESTINATION_KEY: firmware/esp32s3/latest/firmware.bin
 
 jobs:

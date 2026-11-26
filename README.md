@@ -213,7 +213,7 @@ This project uses [PlatformIO](https://platformio.org/).
 
 ### Basic Commands:
 ```bash
-# Firmware compilation
+# Firmware compilation (or via uv: uv tool run --from platformio pio run)
 pio run
 
 # Flash to ESP32-S3
@@ -222,6 +222,9 @@ pio run --target upload
 # Open USB CDC serial monitor (115200 baud)
 pio run --target monitor
 ```
+
+### OTA Firmware Updates
+The firmware supports over-the-air updates with automatic rollback protection as specified in `contracts/ota_ble_protocol.md` (paired with `GET /api/v1/firmware/latest` on the cloud backend).
 
 ---
 
